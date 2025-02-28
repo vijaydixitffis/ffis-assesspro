@@ -76,7 +76,7 @@ export function DashboardNav() {
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
@@ -108,7 +108,7 @@ export function DashboardNav() {
             
             <Button 
               variant="ghost" 
-              className="flex w-full justify-start text-destructive"
+              className="flex w-full justify-start text-destructive cursor-pointer"
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
