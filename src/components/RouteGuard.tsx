@@ -23,11 +23,11 @@ export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) 
 
   // Not logged in
   if (!user) {
-    return <Navigate to="/" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // Check role if required
-  if (requiredRole && user.role !== requiredRole && requiredRole !== 'admin' && requiredRole !== 'client') {
+  if (requiredRole && user.role !== requiredRole) {
     return <Navigate to="/dashboard" state={{ from: location }} replace />;
   }
 

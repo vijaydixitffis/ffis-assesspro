@@ -99,9 +99,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     localStorage.removeItem('ffis_user');
     
-    // Show success message and redirect
+    // Show success message and redirect to login
     toast.success('Logged out successfully');
-    navigate('/');
+    navigate('/login');
   };
 
   return (

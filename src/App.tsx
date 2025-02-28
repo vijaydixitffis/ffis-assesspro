@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute, PublicRoute } from "@/components/RouteGuard";
 import LoginPage from "./pages/LoginPage";
@@ -20,14 +20,20 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
+            {/* Index route redirects to login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            
+            {/* Login route */}
             <Route 
-              path="/" 
+              path="/login" 
               element={
                 <PublicRoute>
                   <LoginPage />
                 </PublicRoute>
               } 
             />
+            
+            {/* Dashboard route (protected) */}
             <Route 
               path="/dashboard" 
               element={
@@ -36,6 +42,8 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Catch-all for 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
