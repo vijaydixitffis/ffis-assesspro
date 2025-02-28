@@ -93,8 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Logout function
   const logout = () => {
+    console.log('Logout function called');
+    
+    // Clear user data
     setUser(null);
     localStorage.removeItem('ffis_user');
+    
+    // Show success message and redirect
     toast.success('Logged out successfully');
     navigate('/');
   };

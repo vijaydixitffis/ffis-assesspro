@@ -35,6 +35,8 @@
 
     --radius: 0.4rem;
 
+    --ffis-teal: #1AB4C5;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 40%;
     --sidebar-primary: 183 72% 45%;
@@ -73,6 +75,8 @@
     --border: 0 0% 25%;
     --input: 0 0% 30%;
     --ring: 183 72% 45%;
+
+    --ffis-teal: #1AB4C5;
 
     --sidebar-background: 0 0% 15%;
     --sidebar-foreground: 0 0% 80%;
@@ -125,7 +129,7 @@
   }
 
   .dashboard-header {
-    @apply flex h-16 items-center border-b bg-background px-6;
+    @apply sticky top-0 z-30 flex h-16 items-center border-b bg-background px-6;
   }
 
   .dashboard-content {
@@ -138,5 +142,24 @@
 
   .nav-item-active {
     @apply bg-accent text-accent-foreground;
+  }
+
+  .bg-ffis-teal {
+    @apply bg-[#1AB4C5] hover:bg-[#17a2b1];
+  }
+
+  .text-ffis-teal {
+    @apply text-[#1AB4C5];
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { LogIn } from 'lucide-react';
 
 // Form validation schema
 const loginSchema = z.object({
@@ -48,6 +49,32 @@ export default function LoginPage() {
     }
   };
 
+  const fillAdminCredentials = () => {
+    const adminForm = document.getElementById('loginForm') as HTMLFormElement;
+    if (adminForm) {
+      const emailInput = adminForm.elements.namedItem('email') as HTMLInputElement;
+      const passwordInput = adminForm.elements.namedItem('password') as HTMLInputElement;
+      
+      if (emailInput && passwordInput) {
+        emailInput.value = 'admin@ffis.com';
+        passwordInput.value = 'admin123';
+      }
+    }
+  };
+
+  const fillClientCredentials = () => {
+    const clientForm = document.getElementById('loginForm') as HTMLFormElement;
+    if (clientForm) {
+      const emailInput = clientForm.elements.namedItem('email') as HTMLInputElement;
+      const passwordInput = clientForm.elements.namedItem('password') as HTMLInputElement;
+      
+      if (emailInput && passwordInput) {
+        emailInput.value = 'client@ffis.com';
+        passwordInput.value = 'client123';
+      }
+    }
+  };
+
   return (
     <div className="auth-container animate-in">
       <div className="w-full max-w-md">
@@ -66,7 +93,7 @@ export default function LoginPage() {
           </CardHeader>
           
           <CardContent className="auth-card-content">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form id="loginForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -104,9 +131,25 @@ export default function LoginPage() {
                     </svg>
                     Logging in...
                   </span>
-                ) : 'Log in'}
+                ) : (
+                  <span className="flex items-center justify-center">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    Log in
+                  </span>
+                )}
               </Button>
             </form>
+
+            {showCredentials && (
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={fillAdminCredentials}>
+                  Admin Demo
+                </Button>
+                <Button variant="outline" size="sm" onClick={fillClientCredentials}>
+                  Client Demo
+                </Button>
+              </div>
+            )}
           </CardContent>
           
           <CardFooter className="auth-card-footer">
