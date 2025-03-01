@@ -126,7 +126,15 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
 
   const updateAnswer = (index: number, field: keyof Answer, value: any) => {
     const newAnswers = [...answers];
-    newAnswers[index] = { ...newAnswers[index], [field]: value };
+    
+    // If updating marks, ensure it's a valid integer between 0-10
+    if (field === 'marks') {
+      // Convert to integer and constrain to 0-10 range
+      const marksValue = Math.min(Math.max(0, parseInt(value) || 0), 10);
+      newAnswers[index] = { ...newAnswers[index], [field]: marksValue };
+    } else {
+      newAnswers[index] = { ...newAnswers[index], [field]: value };
+    }
 
     // If setting this answer as correct, set all others to incorrect
     if (field === 'is_correct' && value === true) {
