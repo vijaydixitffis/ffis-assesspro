@@ -78,9 +78,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userId = session.user.id;
     
     try {
+      // First, get the user email directly from the session
+      const email = session.user.email || '';
+      
+      // Then query the profiles table for additional user information
       const { data, error } = await supabase
         .from('profiles')
-        .select('email, name, role')
+        .select('first_name, last_name, role')
         .eq('id', userId)
         .single();
       
@@ -89,11 +93,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (data) {
+        // Combine the name from first_name and last_name or use default values
+        const name = data.first_name && data.last_name 
+          ? `${data.first_name} ${data.last_name}` 
+          : (data.first_name || 'User');
+        
         setUser({
           id: userId,
-          email: data.email,
-          name: data.name || 'User',
-          role: (data.role as UserRole) || 'client'
+          email: email,
+          name: name,
+          role: (data.role?.toLowerCase() as UserRole) || 'client'
         });
       }
     } catch (error) {
@@ -134,13 +143,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
+      // Split the name into first_name and last_name
+      const nameParts = name.trim().split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            name,
-            role
+            first_name: firstName,
+            last_name: lastName,
+            role: role.toUpperCase()
           }
         }
       });
