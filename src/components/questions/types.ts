@@ -33,4 +33,5 @@ export interface QuestionFormProps {
   topicId: string;
   userId: string;
   onClose: () => void;
+  initialQuestionType?: QuestionType;
 }

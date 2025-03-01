@@ -1,5 +1,13 @@
 
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { QuestionType } from './types';
 
 interface Topic {
   id: string;
@@ -13,7 +21,7 @@ interface TopicHeaderProps {
   isAdding: boolean;
   editingQuestion: any;
   topicId: string | null;
-  onAddQuestion: () => void;
+  onAddQuestion: (questionType: QuestionType) => void;
 }
 
 export default function TopicHeader({ 
@@ -34,7 +42,24 @@ export default function TopicHeader({
         )}
       </div>
       {!isAdding && !editingQuestion && topicId && (
-        <Button onClick={onAddQuestion}>Add New Question</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              Add New Question <ChevronDown className="ml-1 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuItem onClick={() => onAddQuestion("yes_no")}>
+              Yes/No Question
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAddQuestion("multiple_choice")}>
+              Multi-choice Question
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onAddQuestion("free_text")}>
+              Free-text Question
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       )}
     </div>
   );

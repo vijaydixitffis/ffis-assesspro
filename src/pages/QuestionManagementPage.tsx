@@ -8,18 +8,21 @@ import AccessDeniedView from '@/components/questions/AccessDeniedView';
 import TopicHeader from '@/components/questions/TopicHeader';
 import NoTopicSelected from '@/components/questions/NoTopicSelected';
 import QuestionManagement from '@/components/questions/QuestionManagement';
+import { QuestionType } from '@/components/questions/types';
 
 export default function QuestionManagementPage() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const topicId = searchParams.get('topicId');
   const [isAdding, setIsAdding] = useState(false);
+  const [selectedQuestionType, setSelectedQuestionType] = useState<QuestionType>('multiple_choice');
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
   const [refreshQuestions, setRefreshQuestions] = useState(0);
   const { topic, isLoading } = useTopicData(topicId);
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = (questionType: QuestionType) => {
     setIsAdding(true);
+    setSelectedQuestionType(questionType);
     setEditingQuestion(null);
   };
 
@@ -66,6 +69,7 @@ export default function QuestionManagementPage() {
               onFormClose={handleFormClose}
               onEdit={handleEditQuestion}
               refreshQuestions={refreshQuestions}
+              selectedQuestionType={selectedQuestionType}
             />
           )}
         </div>

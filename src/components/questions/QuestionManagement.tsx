@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import QuestionForm from '@/components/questions/QuestionForm';
 import QuestionsList from '@/components/questions/QuestionsList';
+import { QuestionType } from './types';
 
 interface QuestionManagementProps {
   isAdding: boolean;
@@ -12,6 +13,7 @@ interface QuestionManagementProps {
   onFormClose: () => void;
   onEdit: (question: any) => void;
   refreshQuestions: number;
+  selectedQuestionType?: QuestionType;
 }
 
 export default function QuestionManagement({
@@ -21,20 +23,25 @@ export default function QuestionManagement({
   userId,
   onFormClose,
   onEdit,
-  refreshQuestions
+  refreshQuestions,
+  selectedQuestionType = 'multiple_choice'
 }: QuestionManagementProps) {
   return (
     <>
       {isAdding && topicId && (
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="text-lg">Add New Question</CardTitle>
+            <CardTitle className="text-lg">
+              Add New {selectedQuestionType === 'yes_no' ? 'Yes/No' : 
+                      selectedQuestionType === 'multiple_choice' ? 'Multi-choice' : 'Free-text'} Question
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <QuestionForm 
               topicId={topicId} 
               userId={userId} 
-              onClose={onFormClose} 
+              onClose={onFormClose}
+              initialQuestionType={selectedQuestionType} 
             />
           </CardContent>
         </Card>

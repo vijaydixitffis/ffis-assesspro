@@ -20,7 +20,7 @@ import { QuestionFormProps, QuestionFormValues, questionSchema, Answer } from '.
 import AnswerOptions from './AnswerOptions';
 import { validateAnswers, saveQuestion, setDefaultAnswers } from './questionUtils';
 
-export default function QuestionForm({ question, topicId, userId, onClose }: QuestionFormProps) {
+export default function QuestionForm({ question, topicId, userId, onClose, initialQuestionType }: QuestionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const isEditing = !!question;
@@ -28,7 +28,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   // Define default values with required properties
   const defaultValues: QuestionFormValues = {
     question: question?.question || '',
-    type: question?.type || 'multiple_choice',
+    type: question?.type || initialQuestionType || 'multiple_choice',
     is_active: question?.is_active !== undefined ? question.is_active : true
   };
 
@@ -117,40 +117,42 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="type"
-          render={({ field }) => (
-            <FormItem className="space-y-3">
-              <FormLabel>Question Type</FormLabel>
-              <FormControl>
-                <RadioGroup
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  value={field.value}
-                  className="flex flex-col space-y-1"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes_no" id="yes_no" />
-                    <Label htmlFor="yes_no">Yes/No</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="multiple_choice" id="multiple_choice" />
-                    <Label htmlFor="multiple_choice">Multiple Choice</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="free_text" id="free_text" />
-                    <Label htmlFor="free_text">Free Text</Label>
-                  </div>
-                </RadioGroup>
-              </FormControl>
-              <FormDescription>
-                Select the type of question you want to create
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {isEditing && (
+          <FormField
+            control={form.control}
+            name="type"
+            render={({ field }) => (
+              <FormItem className="space-y-3">
+                <FormLabel>Question Type</FormLabel>
+                <FormControl>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    value={field.value}
+                    className="flex flex-col space-y-1"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="yes_no" id="yes_no" />
+                      <Label htmlFor="yes_no">Yes/No</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="multiple_choice" id="multiple_choice" />
+                      <Label htmlFor="multiple_choice">Multiple Choice</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="free_text" id="free_text" />
+                      <Label htmlFor="free_text">Free Text</Label>
+                    </div>
+                  </RadioGroup>
+                </FormControl>
+                <FormDescription>
+                  Select the type of question you want to create
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
 
         <AnswerOptions 
           answers={answers}
