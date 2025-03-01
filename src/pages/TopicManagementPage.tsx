@@ -151,7 +151,8 @@ export default function TopicManagementPage() {
             </Card>
           )}
 
-          {selectedAssessmentId && !isLoading && (
+          {/* Only show TopicsList when not editing a topic */}
+          {selectedAssessmentId && !isLoading && !editingTopic && (
             <>
               <Separator className="my-6" />
               <TopicsList 
