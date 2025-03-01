@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/form';
 import { Trash, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 // Ensure these values exactly match the database constraint
 const QUESTION_TYPES = ['multiple_choice', 'yes_no', 'free_text'] as const;
@@ -41,7 +40,7 @@ type QuestionFormValues = z.infer<typeof questionSchema>;
 interface Answer {
   id?: string;
   text: string;
-  is_correct: boolean | null; // Updated to be nullable
+  is_correct: boolean | null;
   marks?: string | null;
 }
 
@@ -78,7 +77,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   useEffect(() => {
     if (isEditing && question.answers && question.answers.length > 0) {
       console.log('Setting answers from question:', question.answers);
-      setAnswers([...question.answers]);
+      setAnswers(question.answers);
     } else {
       // Initialize with default answers based on question type
       setDefaultAnswers(form.getValues('type'));

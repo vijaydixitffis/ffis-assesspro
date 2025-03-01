@@ -97,6 +97,9 @@ export default function QuestionManagementPage() {
         answers: answerData || []
       };
       
+      // Log for debugging
+      console.log('Editing question with answers:', questionWithAnswers);
+      
       setEditingQuestion(questionWithAnswers);
       setIsAdding(false);
     } catch (error) {
