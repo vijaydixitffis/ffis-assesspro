@@ -27,9 +27,10 @@ interface Topic {
 interface TopicsListProps {
   assessmentId: string;
   onEdit: (topic: Topic) => void;
+  refreshTrigger?: number;
 }
 
-export default function TopicsList({ assessmentId, onEdit }: TopicsListProps) {
+export default function TopicsList({ assessmentId, onEdit, refreshTrigger = 0 }: TopicsListProps) {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,7 +38,7 @@ export default function TopicsList({ assessmentId, onEdit }: TopicsListProps) {
     if (assessmentId) {
       fetchTopics();
     }
-  }, [assessmentId]);
+  }, [assessmentId, refreshTrigger]);
 
   const fetchTopics = async () => {
     try {

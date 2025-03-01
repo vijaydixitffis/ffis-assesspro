@@ -24,6 +24,7 @@ export default function TopicManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [editingTopic, setEditingTopic] = useState<any>(null);
+  const [refreshTopics, setRefreshTopics] = useState(0);
 
   useEffect(() => {
     if (user?.role !== 'admin') {
@@ -75,6 +76,8 @@ export default function TopicManagementPage() {
   const handleFormClose = () => {
     setIsAdding(false);
     setEditingTopic(null);
+    // Trigger refresh of topics list
+    setRefreshTopics(prev => prev + 1);
   };
 
   if (user?.role !== 'admin') {
@@ -154,6 +157,7 @@ export default function TopicManagementPage() {
               <TopicsList 
                 assessmentId={selectedAssessmentId} 
                 onEdit={handleEditTopic} 
+                refreshTrigger={refreshTopics}
               />
             </>
           )}
