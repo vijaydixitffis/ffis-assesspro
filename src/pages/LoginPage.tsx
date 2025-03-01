@@ -20,6 +20,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { login, isLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -30,10 +31,13 @@ export default function LoginPage() {
   });
 
   const onLoginSubmit = async (data: LoginFormValues) => {
+    setIsSubmitting(true);
     try {
       await login(data.email, data.password);
     } catch (error) {
       // Error is already handled in the auth context
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -92,8 +96,8 @@ export default function LoginPage() {
                 )}
               </div>
               
-              <Button type="submit" className="w-full bg-ffis-teal hover:bg-ffis-teal/90" disabled={isLoading}>
-                {isLoading ? (
+              <Button type="submit" className="w-full bg-ffis-teal hover:bg-ffis-teal/90" disabled={isSubmitting}>
+                {isSubmitting ? (
                   <span className="flex items-center justify-center">
                     <svg className="mr-2 h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
