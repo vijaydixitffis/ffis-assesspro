@@ -1,7 +1,7 @@
 
 import { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { Separator } from "@/components/ui/separator";
 import {
   BookOpen,
