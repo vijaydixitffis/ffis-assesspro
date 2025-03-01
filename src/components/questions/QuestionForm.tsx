@@ -24,9 +24,11 @@ import { Trash, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+// Update the schema to match the database constraints
 const questionSchema = z.object({
   question: z.string().min(5, 'Question must be at least 5 characters'),
-  type: z.enum(['yes_no', 'multiple_choice', 'free_text']),
+  // Ensure these values match exactly what's expected in the database
+  type: z.enum(['multiple_choice', 'yes_no', 'free_text']),
   is_active: z.boolean().default(true),
 });
 
@@ -43,7 +45,7 @@ interface QuestionFormProps {
   question?: {
     id: string;
     question: string;
-    type: 'yes_no' | 'multiple_choice' | 'free_text';
+    type: 'multiple_choice' | 'yes_no' | 'free_text';
     is_active: boolean;
     answers?: Answer[];
   };
@@ -156,7 +158,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       return false;
     }
 
-    // Check if marks are between 1-10
+    // Check if marks are between 0-10
     const invalidMarks = answers.some(a => a.marks < 0 || a.marks > 10);
     if (invalidMarks) {
       toast.error('Marks must be between 0 and 10');
@@ -198,6 +200,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         if (deleteError) throw deleteError;
       } else {
         // Create new question
+        console.log('Creating new question with type:', values.type);
         const { data, error } = await supabase
           .from('questions')
           .insert({
@@ -209,7 +212,10 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
           })
           .select('id');
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error details:', error);
+          throw error;
+        }
         
         questionId = data[0].id;
       }
