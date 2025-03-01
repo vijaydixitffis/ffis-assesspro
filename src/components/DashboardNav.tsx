@@ -65,7 +65,7 @@ export function DashboardNav() {
               <img
                 src="/lovable-uploads/74e171ed-dfc9-4ff4-8aae-44113fefa8f9.png"
                 alt="Future Focus IT Solutions Logo"
-                className="h-12 w-auto"
+                className="h-16 w-auto" // Increased from h-12 to h-16
               />
             </div>
           </Link>
