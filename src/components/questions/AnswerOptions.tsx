@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -21,19 +21,29 @@ export default function AnswerOptions({
   questionType 
 }: AnswerOptionsProps) {
   
-  const addAnswer = () => {
-    if (answers.length < 4) {
-      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: null, marks: '0' }]);
-      toast.success("New option added");
-    } else {
-      toast.error('Maximum 4 options allowed');
+  // Initialize with 4 options for multiple choice if not already set
+  useEffect(() => {
+    if (questionType === 'multiple_choice' && answers.length < 4) {
+      const currentLength = answers.length;
+      const newAnswers = [...answers];
+      
+      // Add empty answers until we have 4
+      for (let i = currentLength; i < 4; i++) {
+        newAnswers.push({ text: '', is_correct: false, marks: '0' });
+      }
+      
+      setAnswers(newAnswers);
     }
-  };
-
+  }, [questionType, answers.length, setAnswers]);
+  
   const removeAnswer = (index: number) => {
     setAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers.splice(index, 1);
+      // Add a new empty option to maintain 4 options
+      if (questionType === 'multiple_choice' && newAnswers.length < 4) {
+        newAnswers.push({ text: '', is_correct: false, marks: '0' });
+      }
       return newAnswers;
     });
   };
@@ -51,17 +61,6 @@ export default function AnswerOptions({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Answer Options</h3>
-        {questionType === 'multiple_choice' && answers.length < 4 && (
-          <Button 
-            type="button" 
-            onClick={addAnswer} 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-1"
-          >
-            <Plus className="h-4 w-4" /> Add Option
-          </Button>
-        )}
       </div>
 
       <div className="space-y-3">
@@ -86,15 +85,10 @@ export default function AnswerOptions({
                       <Label>Answer Text</Label>
                     )}
                   </div>
-                  {(questionType === 'multiple_choice' && answers.length > 2) && (
-                    <Button 
-                      type="button" 
-                      onClick={() => removeAnswer(index)} 
-                      variant="ghost" 
-                      size="sm"
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                  {questionType === 'multiple_choice' && (
+                    <div className="text-sm text-muted-foreground">
+                      Option {index + 1} of 4
+                    </div>
                   )}
                 </div>
 
@@ -113,9 +107,10 @@ export default function AnswerOptions({
                     <Label htmlFor={`marks-${index}`}>Marks</Label>
                     <Input
                       id={`marks-${index}`}
-                      value={answer.marks || ''}
+                      value={answer.marks || '0'}
                       onChange={(e) => updateAnswer(index, 'marks', e.target.value)}
-                      placeholder="Optional"
+                      placeholder="Marks"
+                      type="number"
                     />
                   </div>
                 </div>

@@ -19,7 +19,7 @@ export interface Answer {
   id?: string;
   text: string;
   is_correct: boolean | null;
-  marks?: string | null;
+  marks: string | null;
 }
 
 export interface QuestionFormProps {
