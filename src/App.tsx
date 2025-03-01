@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
-import RouteGuard from './components/RouteGuard';
+import { ProtectedRoute } from './components/RouteGuard';
 import IndexPage from './pages/Index';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -19,17 +19,17 @@ function App() {
           <Route 
             path="/dashboard" 
             element={
-              <RouteGuard>
+              <ProtectedRoute>
                 <DashboardPage />
-              </RouteGuard>
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/admin/topics" 
             element={
-              <RouteGuard>
+              <ProtectedRoute requiredRole="admin">
                 <TopicManagementPage />
-              </RouteGuard>
+              </ProtectedRoute>
             } 
           />
           <Route path="*" element={<NotFound />} />
