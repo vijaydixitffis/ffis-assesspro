@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -41,7 +42,7 @@ interface Answer {
   id?: string;
   text: string;
   is_correct: boolean;
-  marks: number;
+  marks?: string | null; // Updated to match the new database type
 }
 
 interface QuestionFormProps {
@@ -96,22 +97,22 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const setDefaultAnswers = (type: QuestionType) => {
     if (type === 'yes_no') {
       setAnswers([
-        { text: 'Yes', is_correct: true, marks: 1 },
-        { text: 'No', is_correct: false, marks: 0 }
+        { text: 'Yes', is_correct: true, marks: '1' },
+        { text: 'No', is_correct: false, marks: '0' }
       ]);
     } else if (type === 'multiple_choice') {
       setAnswers([
-        { text: 'Option 1', is_correct: true, marks: 1 },
-        { text: 'Option 2', is_correct: false, marks: 0 }
+        { text: 'Option 1', is_correct: true, marks: '1' },
+        { text: 'Option 2', is_correct: false, marks: '0' }
       ]);
     } else if (type === 'free_text') {
-      setAnswers([{ text: 'Correct answer', is_correct: true, marks: 1 }]);
+      setAnswers([{ text: 'Correct answer', is_correct: true, marks: '1' }]);
     }
   };
 
   const addAnswer = () => {
     if (answers.length < 4) {
-      setAnswers([...answers, { text: '', is_correct: false, marks: 0 }]);
+      setAnswers([...answers, { text: '', is_correct: false, marks: '0' }]);
     } else {
       toast.error('Maximum 4 options allowed');
     }
@@ -126,14 +127,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const updateAnswer = (index: number, field: keyof Answer, value: any) => {
     const newAnswers = [...answers];
     
-    // If updating marks, ensure it's a valid integer between 0-10
-    if (field === 'marks') {
-      // Convert to integer and constrain to 0-10 range
-      const marksValue = Math.min(Math.max(0, parseInt(value) || 0), 10);
-      newAnswers[index] = { ...newAnswers[index], [field]: marksValue };
-    } else {
-      newAnswers[index] = { ...newAnswers[index], [field]: value };
-    }
+    // No need to validate marks as it's now a text field
+    newAnswers[index] = { ...newAnswers[index], [field]: value };
 
     // If setting this answer as correct, set all others to incorrect
     if (field === 'is_correct' && value === true) {
@@ -170,17 +165,6 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
     const correctAnswers = answers.filter(a => a.is_correct);
     if (correctAnswers.length !== 1) {
       toast.error('There must be exactly one correct answer');
-      return false;
-    }
-
-    // Validate marks are within valid range (0-10) and are integers
-    const invalidMarks = answers.some(a => {
-      const marks = Number(a.marks);
-      return isNaN(marks) || marks < 0 || marks > 10 || !Number.isInteger(marks);
-    });
-    
-    if (invalidMarks) {
-      toast.error('Marks must be integers between 0 and 10');
       return false;
     }
 
@@ -261,12 +245,11 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         return;
       }
       
-      // Process answers to ensure correct data format
+      // Process answers to ensure correct data format - no need to constrain marks anymore
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
         is_correct: answer.is_correct,
-        // Ensure marks is a valid integer between 0-10
-        marks: Math.min(Math.max(0, parseInt(String(answer.marks), 10) || 0), 10),
+        marks: answer.marks, // Just pass the marks value as is (text)
         question_id: questionId
       }));
       
@@ -416,13 +399,9 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
                         <Label htmlFor={`marks-${index}`}>Marks</Label>
                         <Input
                           id={`marks-${index}`}
-                          type="number"
-                          min="0"
-                          max="10"
-                          step="1"
-                          value={answer.marks}
-                          onChange={(e) => updateAnswer(index, 'marks', parseInt(e.target.value, 10) || 0)}
-                          placeholder="0-10"
+                          value={answer.marks || ''}
+                          onChange={(e) => updateAnswer(index, 'marks', e.target.value)}
+                          placeholder="Optional"
                         />
                       </div>
                     </div>
