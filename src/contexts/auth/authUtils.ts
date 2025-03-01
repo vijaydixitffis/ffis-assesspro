@@ -68,10 +68,13 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
     };
   } catch (error) {
     console.error('Error fetching user profile:', error);
+    // Get email from session to ensure it's available in this scope
+    const userEmail = session.user.email || 'Unknown';
+    
     // Return minimal user data instead of null to prevent login failures
     return {
       id: userId,
-      email: email || 'Unknown',
+      email: userEmail, // Use the properly scoped variable
       name: 'User',
       firstName: '',
       lastName: '',
