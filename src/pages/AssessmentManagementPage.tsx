@@ -97,8 +97,13 @@ export default function AssessmentManagementPage() {
             </Card>
           )}
 
-          <Separator className="my-6" />
-          <AssessmentsList key={refreshKey} onEdit={handleEditAssessment} />
+          {/* Only show the Separator and AssessmentsList when not editing or adding */}
+          {!isAdding && !editingAssessment && (
+            <>
+              <Separator className="my-6" />
+              <AssessmentsList key={refreshKey} onEdit={handleEditAssessment} />
+            </>
+          )}
         </div>
       </main>
     </div>
