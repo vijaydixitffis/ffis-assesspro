@@ -37,11 +37,11 @@ export default function DashboardPage() {
   }
   
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen overflow-hidden">
       <DashboardNav />
       
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-7xl p-6 animate-in">
+      <main className="flex-1 overflow-auto p-6">
+        <div className="container mx-auto max-w-7xl animate-in">
           <div className="mb-8">
             <h1 className="text-2xl font-semibold tracking-tight">
               Welcome, {user.firstName || user.lastName ? `${user.firstName} ${user.lastName}` : user.name || 'User'}
