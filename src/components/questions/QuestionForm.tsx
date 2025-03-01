@@ -73,8 +73,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
 
   const questionType = form.watch('type');
 
+  // Initialize answers when component mounts or question changes
   useEffect(() => {
-    // This will run when the component mounts
     if (isEditing && question.answers && question.answers.length > 0) {
       console.log('Setting answers from question:', question.answers);
       setAnswers([...question.answers]);
@@ -110,7 +110,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   };
 
   const addAnswer = () => {
-    // Fixed: Use a proper state update to preserve existing answers
+    // Use a proper state update to preserve existing answers
     if (answers.length < 4) {
       setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: false, marks: '0' }]);
       toast.success("New option added");
@@ -120,7 +120,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   };
 
   const removeAnswer = (index: number) => {
-    // Fixed: Use a proper state update
+    // Use a proper state update
     setAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers.splice(index, 1);
@@ -129,7 +129,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   };
 
   const updateAnswer = (index: number, field: keyof Answer, value: any) => {
-    // Fixed: Use a proper state update
+    // Use a proper state update
     setAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
@@ -250,7 +250,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         return;
       }
       
-      // Process answers to ensure correct data format - no need to constrain marks anymore
+      // Process answers to ensure correct data format
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
         is_correct: answer.is_correct,
