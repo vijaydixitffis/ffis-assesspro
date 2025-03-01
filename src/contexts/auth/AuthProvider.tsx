@@ -17,6 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check for existing session on mount
   useEffect(() => {
     const checkSession = async () => {
+      console.log('AuthProvider: Checking for existing session');
       setIsLoading(true);
       
       try {
@@ -29,10 +30,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         
         if (session) {
-          console.log('Active session found');
-          const userProfile = await fetchUserProfile(session);
-          setUser(userProfile);
-          console.log('User profile loaded:', userProfile);
+          console.log('Active session found, fetching user profile');
+          try {
+            const userProfile = await fetchUserProfile(session);
+            console.log('User profile loaded:', userProfile);
+            
+            if (userProfile) {
+              setUser(userProfile);
+            } else {
+              console.warn('No user profile could be loaded, logging out');
+              await supabase.auth.signOut();
+              setUser(null);
+            }
+          } catch (profileError) {
+            console.error('Error loading user profile:', profileError);
+            toast.error('Failed to load your profile');
+            // Don't sign out - just leave as loading and let the user retry
+          }
         } else {
           console.log('No active session found');
           setUser(null);
@@ -41,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error('Error checking session:', error);
         setUser(null);
       } finally {
+        console.log('Session check complete, setting isLoading to false');
         setIsLoading(false);
       }
     };
@@ -51,22 +66,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
         
         if (session) {
+          setIsLoading(true); // Set loading state while fetching profile
           try {
             const userProfile = await fetchUserProfile(session);
             console.log('User profile from auth change:', userProfile);
-            setUser(userProfile);
             
-            // Ensure redirection to dashboard when user profile is set
-            if (window.location.pathname === '/login') {
-              console.log('Redirecting to dashboard');
-              navigate('/dashboard');
+            if (userProfile) {
+              setUser(userProfile);
+              
+              // Only redirect if event is a sign-in or token-refreshed event
+              if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && 
+                  window.location.pathname === '/login') {
+                console.log('Redirecting to dashboard after authentication');
+                navigate('/dashboard');
+              }
+            } else {
+              console.warn('No user profile could be loaded on auth change');
+              setUser(null);
             }
           } catch (error) {
             console.error('Error fetching user profile on auth change:', error);
+            toast.error('Error loading your profile');
             setUser(null);
+          } finally {
+            setIsLoading(false);
           }
         } else {
+          console.log('No session in auth change event, clearing user');
           setUser(null);
+          setIsLoading(false);
         }
       }
     );
@@ -89,11 +117,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (data.session) {
         console.log('Login successful, fetching user profile');
-        const userProfile = await fetchUserProfile(data.session);
-        setUser(userProfile);
-        toast.success('Login successful');
-        console.log('Navigating to dashboard after login');
-        navigate('/dashboard');
+        try {
+          const userProfile = await fetchUserProfile(data.session);
+          
+          if (userProfile) {
+            console.log('User profile loaded after login:', userProfile);
+            setUser(userProfile);
+            toast.success('Login successful');
+            
+            // Short delay before navigation to ensure state is updated
+            setTimeout(() => {
+              console.log('Navigating to dashboard after login');
+              navigate('/dashboard');
+            }, 100);
+          } else {
+            throw new Error('Failed to load user profile');
+          }
+        } catch (profileError) {
+          console.error('Error loading profile after login:', profileError);
+          toast.error('Login successful but failed to load profile');
+          // Still redirect to dashboard, will try to load profile again there
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';

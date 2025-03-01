@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/auth';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
@@ -11,24 +12,33 @@ export default function DashboardPage() {
   useEffect(() => {
     console.log('DashboardPage mounted, auth state:', { user, isLoading });
     
-    // Add a small delay to ensure auth state is fully loaded
     const timer = setTimeout(() => {
       console.log('Dashboard page ready, auth state:', { user, isLoading });
       setIsPageLoading(false);
-    }, 500);
+      
+      // If authentication is complete but no user data is available, show error
+      if (!isLoading && !user) {
+        toast.error('Authentication error - please try logging in again');
+      }
+    }, 1000); // Longer delay to ensure auth state is fully resolved
     
     return () => clearTimeout(timer);
   }, [user, isLoading]);
   
+  // Show loading state when either auth is loading or page is still initializing
   if (isLoading || isPageLoading) {
     console.log('Dashboard showing loading state');
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+        </div>
       </div>
     );
   }
   
+  // Show error state if no user data is available
   if (!user) {
     console.log('Dashboard has no user data, showing error');
     return (
@@ -36,6 +46,12 @@ export default function DashboardPage() {
         <div className="text-center">
           <h2 className="text-xl font-semibold">Authentication Error</h2>
           <p className="text-muted-foreground">Please log in to access the dashboard</p>
+          <button 
+            onClick={() => window.location.href = '/login'} 
+            className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground"
+          >
+            Go to Login
+          </button>
         </div>
       </div>
     );

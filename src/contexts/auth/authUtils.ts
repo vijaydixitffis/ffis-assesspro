@@ -24,6 +24,7 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
     
     if (error) {
       console.error('Error fetching profile data:', error);
+      toast.error('Failed to load user profile data');
       throw error;
     }
     
@@ -38,11 +39,12 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
         ? `${firstName} ${lastName}` 
         : (firstName || lastName || 'User');
       
+      // Ensure role is properly handled - default to 'client' if not available
       const userRole = (
         data.role?.toLowerCase() === 'admin' ? 'admin' : 'client'
       ) as UserRole;
       
-      console.log('Constructed user role:', userRole);
+      console.log('Constructed user data:', { name, firstName, lastName, userRole });
       
       return {
         id: userId,
@@ -54,11 +56,27 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
       };
     }
     
-    console.log('No profile data found for user');
-    return null;
+    console.log('No profile data found for user, creating minimal profile');
+    // If no profile data, create a minimal user object with data from the session
+    return {
+      id: userId,
+      email: email,
+      name: 'User',
+      firstName: '',
+      lastName: '',
+      role: 'client' // Default role
+    };
   } catch (error) {
     console.error('Error fetching user profile:', error);
-    return null;
+    // Return minimal user data instead of null to prevent login failures
+    return {
+      id: userId,
+      email: email || 'Unknown',
+      name: 'User',
+      firstName: '',
+      lastName: '',
+      role: 'client' // Default role
+    };
   }
 };
 
