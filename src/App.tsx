@@ -1,8 +1,8 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider } from '@/contexts/auth';
 import { Toaster } from '@/components/ui/sonner';
-import { ProtectedRoute as RouteGuard } from '@/components/RouteGuard';
+import { ProtectedRoute } from '@/components/RouteGuard';
 
 // Pages
 import Index from '@/pages/Index';
@@ -22,27 +22,27 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           
           <Route path="/dashboard" element={
-            <RouteGuard>
+            <ProtectedRoute>
               <DashboardPage />
-            </RouteGuard>
+            </ProtectedRoute>
           } />
           
           <Route path="/admin/assessments" element={
-            <RouteGuard requiredRole="admin">
+            <ProtectedRoute requiredRole="admin">
               <AssessmentManagementPage />
-            </RouteGuard>
+            </ProtectedRoute>
           } />
           
           <Route path="/admin/topics" element={
-            <RouteGuard requiredRole="admin">
+            <ProtectedRoute requiredRole="admin">
               <TopicManagementPage />
-            </RouteGuard>
+            </ProtectedRoute>
           } />
           
           <Route path="/admin/questions" element={
-            <RouteGuard requiredRole="admin">
+            <ProtectedRoute requiredRole="admin">
               <QuestionManagementPage />
-            </RouteGuard>
+            </ProtectedRoute>
           } />
           
           <Route path="*" element={<NotFound />} />
