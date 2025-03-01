@@ -77,7 +77,13 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   useEffect(() => {
     if (isEditing && question.answers && question.answers.length > 0) {
       console.log('Setting answers from question:', question.answers);
-      setAnswers(question.answers);
+      // Ensure all answers have is_correct as a boolean and proper marks value
+      const formattedAnswers = question.answers.map(answer => ({
+        ...answer,
+        is_correct: answer.is_correct === null ? false : answer.is_correct,
+        marks: answer.marks || '0'
+      }));
+      setAnswers(formattedAnswers);
     } else {
       // Initialize with default answers based on question type
       setDefaultAnswers(form.getValues('type'));

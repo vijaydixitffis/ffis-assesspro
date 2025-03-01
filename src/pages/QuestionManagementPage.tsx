@@ -83,13 +83,21 @@ export default function QuestionManagementPage() {
 
   const handleEditQuestion = async (question: any) => {
     try {
+      console.log('Fetching answers for question:', question.id);
+      
       // Fetch the answers for this question
       const { data: answerData, error: answerError } = await supabase
         .from('answers')
-        .select('*')
+        .select('id, text, is_correct, marks')
         .eq('question_id', question.id);
         
-      if (answerError) throw answerError;
+      if (answerError) {
+        console.error('Error fetching answers:', answerError);
+        throw answerError;
+      }
+      
+      // Log for debugging
+      console.log('Fetched answers:', answerData);
       
       // Add the answers to the question object
       const questionWithAnswers = {
@@ -136,7 +144,7 @@ export default function QuestionManagementPage() {
         <div className="container mx-auto max-w-7xl p-6">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-semibold">Question Mgmt.</h1>
+              <h1 className="text-2xl font-semibold">Question Management</h1>
               {topic && (
                 <div className="text-sm text-muted-foreground">
                   Topic: {topic.title} {topic.assessment_title && `(Assessment: ${topic.assessment_title})`}
