@@ -9,7 +9,6 @@ import {
   BarChart2,
   CircleUser,
   HelpCircle,
-  List,
   Home,
   LogOut
 } from "lucide-react";
@@ -38,13 +37,6 @@ export function DashboardNav() {
       icon: BookOpen,
       href: "/admin/topics",
       active: location.pathname === "/admin/topics",
-      adminOnly: true,
-    },
-    {
-      label: "Question Mgmt.",
-      icon: List,
-      href: "/admin/questions",
-      active: location.pathname === "/admin/questions",
       adminOnly: true,
     },
     {
