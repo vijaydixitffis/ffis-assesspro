@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from '@/components/ui/sonner';
-import RouteGuard from '@/components/RouteGuard';
+import { ProtectedRoute as RouteGuard } from '@/components/RouteGuard';
 
 // Pages
 import Index from '@/pages/Index';
@@ -28,19 +28,19 @@ function App() {
           } />
           
           <Route path="/admin/assessments" element={
-            <RouteGuard adminOnly>
+            <RouteGuard requiredRole="admin">
               <AssessmentManagementPage />
             </RouteGuard>
           } />
           
           <Route path="/admin/topics" element={
-            <RouteGuard adminOnly>
+            <RouteGuard requiredRole="admin">
               <TopicManagementPage />
             </RouteGuard>
           } />
           
           <Route path="/admin/questions" element={
-            <RouteGuard adminOnly>
+            <RouteGuard requiredRole="admin">
               <QuestionManagementPage />
             </RouteGuard>
           } />
