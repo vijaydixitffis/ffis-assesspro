@@ -1,3 +1,4 @@
+
 import { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -25,14 +26,14 @@ export function DashboardNav() {
       active: location.pathname === "/dashboard",
     },
     {
-      label: "Assessment Mgmt.",
+      label: "Assessments",
       icon: ClipboardList,
       href: "/admin/assessments",
       active: location.pathname === "/admin/assessments",
       adminOnly: true,
     },
     {
-      label: "Topic Mgmt.",
+      label: "Topics",
       icon: BookOpen,
       href: "/admin/topics",
       active: location.pathname === "/admin/topics",

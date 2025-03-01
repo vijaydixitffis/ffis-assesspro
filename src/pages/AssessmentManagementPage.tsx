@@ -62,7 +62,7 @@ export default function AssessmentManagementPage() {
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto max-w-7xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold">Assessment Mgmt.</h1>
+            <h1 className="text-2xl font-semibold">Assessments</h1>
             {!isAdding && !editingAssessment && (
               <Button onClick={handleAddAssessment}>Add New Assessment</Button>
             )}
