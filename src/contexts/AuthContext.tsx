@@ -2,6 +2,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 // Define user types
 export type UserRole = 'admin' | 'client';
@@ -13,29 +15,12 @@ export interface User {
   role: UserRole;
 }
 
-// Mock user data - in a real app, this would come from an API
-const MOCK_USERS = [
-  {
-    id: '1',
-    email: 'admin@ffis.com',
-    password: 'admin123',
-    name: 'Admin User',
-    role: 'admin' as UserRole
-  },
-  {
-    id: '2',
-    email: 'client@ffis.com',
-    password: 'client123',
-    name: 'Client User',
-    role: 'client' as UserRole
-  }
-];
-
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
+  signUp: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -47,35 +32,94 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for existing session on mount
   useEffect(() => {
-    // Clear any existing session on app initialization
-    localStorage.removeItem('ffis_user');
-    setUser(null);
-    setIsLoading(false);
-  }, []);
+    const checkSession = async () => {
+      setIsLoading(true);
+      
+      try {
+        // Check for an active session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          throw error;
+        }
+        
+        if (session) {
+          await fetchUserProfile(session);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (session) {
+          await fetchUserProfile(session);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+    
+    checkSession();
+    
+    // Cleanup the subscription on unmount
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  // Function to fetch user profile
+  const fetchUserProfile = async (session: Session) => {
+    const userId = session.user.id;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email, name, role')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        setUser({
+          id: userId,
+          email: data.email,
+          name: data.name || 'User',
+          role: (data.role as UserRole) || 'client'
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      setUser(null);
+    }
+  };
 
   // Login function
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 800));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
       
-      const matchedUser = MOCK_USERS.find(u => u.email === email && u.password === password);
-      
-      if (!matchedUser) {
-        throw new Error('Invalid email or password');
+      if (error) {
+        throw new Error(error.message);
       }
       
-      // Create user object (without password)
-      const { password: _, ...userWithoutPassword } = matchedUser;
-      
-      // Store user in state and localStorage
-      setUser(userWithoutPassword);
-      localStorage.setItem('ffis_user', JSON.stringify(userWithoutPassword));
-      
-      toast.success('Login successful');
-      navigate('/dashboard');
+      if (data.session) {
+        toast.success('Login successful');
+        navigate('/dashboard');
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       toast.error(message);
@@ -85,21 +129,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Signup function
+  const signUp = async (email: string, password: string, name: string, role: UserRole) => {
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role
+          }
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      toast.success('Registration successful! Check your email to confirm your account.');
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Registration failed';
+      toast.error(message);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Logout function
-  const logout = () => {
-    console.log('Logout function called');
-    
-    // Clear user data
-    setUser(null);
-    localStorage.removeItem('ffis_user');
-    
-    // Show success message and redirect to login
-    toast.success('Logged out successfully');
-    navigate('/login');
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Clear user data
+      setUser(null);
+      
+      // Show success message and redirect to login
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Logout failed';
+      toast.error(message);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, signUp }}>
       {children}
     </AuthContext.Provider>
   );
