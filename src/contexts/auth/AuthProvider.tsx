@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
     
-    // Listen for auth state changes
+    // Listen for auth state changes with improved error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
@@ -78,7 +78,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && 
                   window.location.pathname === '/login') {
                 console.log('Redirecting to dashboard after authentication');
-                navigate('/dashboard');
+                // Add a small delay to ensure state is updated before navigation
+                setTimeout(() => {
+                  navigate('/dashboard');
+                }, 200);
               }
             } else {
               console.warn('No user profile could be loaded on auth change');
@@ -99,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
     
+    // Initialize by checking session
     checkSession();
     
     // Cleanup the subscription on unmount
@@ -107,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, [navigate]);
 
-  // Login function
+  // Login function with improved error handling
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
@@ -125,11 +129,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(userProfile);
             toast.success('Login successful');
             
-            // Short delay before navigation to ensure state is updated
+            // Longer delay before navigation to ensure state is updated
             setTimeout(() => {
               console.log('Navigating to dashboard after login');
               navigate('/dashboard');
-            }, 100);
+            }, 300);
           } else {
             throw new Error('Failed to load user profile');
           }
@@ -137,16 +141,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Error loading profile after login:', profileError);
           toast.error('Login successful but failed to load profile');
           // Still redirect to dashboard, will try to load profile again there
-          navigate('/dashboard');
+          setTimeout(() => {
+            navigate('/dashboard');
+          }, 300);
         }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       toast.error(message);
       console.error('Login error:', error);
-      throw error;
-    } finally {
       setIsLoading(false);
+      throw error;
     }
   };
 

@@ -25,7 +25,16 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
     if (error) {
       console.error('Error fetching profile data:', error);
       toast.error('Failed to load user profile data');
-      throw error;
+      
+      // Return minimal user data instead of throwing error
+      return {
+        id: userId,
+        email: email,
+        name: 'User',
+        firstName: '',
+        lastName: '',
+        role: 'client' // Default role
+      };
     }
     
     if (data) {

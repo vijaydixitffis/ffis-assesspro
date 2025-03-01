@@ -4,13 +4,23 @@ import { DashboardNav } from '@/components/DashboardNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const navigate = useNavigate();
   
   useEffect(() => {
     console.log('DashboardPage mounted, auth state:', { user, isLoading });
+    
+    // If not loading and no user, redirect to login
+    if (!isLoading && !user) {
+      console.log('No authenticated user found, redirecting to login');
+      toast.error('Please log in to access the dashboard');
+      navigate('/login');
+      return;
+    }
     
     const timer = setTimeout(() => {
       console.log('Dashboard page ready, auth state:', { user, isLoading });
@@ -20,10 +30,10 @@ export default function DashboardPage() {
       if (!isLoading && !user) {
         toast.error('Authentication error - please try logging in again');
       }
-    }, 1000); // Longer delay to ensure auth state is fully resolved
+    }, 1200); // Longer delay to ensure auth state is fully resolved
     
     return () => clearTimeout(timer);
-  }, [user, isLoading]);
+  }, [user, isLoading, navigate]);
   
   // Show loading state when either auth is loading or page is still initializing
   if (isLoading || isPageLoading) {
@@ -47,7 +57,7 @@ export default function DashboardPage() {
           <h2 className="text-xl font-semibold">Authentication Error</h2>
           <p className="text-muted-foreground">Please log in to access the dashboard</p>
           <button 
-            onClick={() => window.location.href = '/login'} 
+            onClick={() => navigate('/login')} 
             className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground"
           >
             Go to Login
