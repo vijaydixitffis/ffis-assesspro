@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardNav } from '@/components/DashboardNav';
@@ -76,7 +75,6 @@ export default function TopicManagementPage() {
   const handleFormClose = () => {
     setIsAdding(false);
     setEditingTopic(null);
-    // Trigger refresh of topics list
     setRefreshTopics(prev => prev + 1);
   };
 
@@ -100,7 +98,7 @@ export default function TopicManagementPage() {
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto max-w-7xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold">Topic Mgmt.</h1>
+            <h1 className="text-2xl font-semibold">Manage Topics</h1>
             {!isAdding && !editingTopic && selectedAssessmentId && (
               <Button onClick={handleAddTopic}>Add New Topic</Button>
             )}
@@ -151,7 +149,6 @@ export default function TopicManagementPage() {
             </Card>
           )}
 
-          {/* Only show TopicsList when not editing a topic */}
           {selectedAssessmentId && !isLoading && !editingTopic && (
             <>
               <Separator className="my-6" />
