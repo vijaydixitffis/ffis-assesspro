@@ -104,6 +104,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: name,
           role: (data.role?.toLowerCase() as UserRole) || 'client'
         });
+        
+        // Ensure redirection to dashboard when user profile is set
+        if (window.location.pathname === '/login') {
+          navigate('/dashboard');
+        }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -126,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (data.session) {
+        await fetchUserProfile(data.session);
         toast.success('Login successful');
         navigate('/dashboard');
       }

@@ -2,7 +2,7 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/RouteGuard';
+import { ProtectedRoute, PublicRoute } from './components/RouteGuard';
 import IndexPage from './pages/Index';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -16,7 +16,14 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<IndexPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } 
+          />
           <Route 
             path="/dashboard" 
             element={

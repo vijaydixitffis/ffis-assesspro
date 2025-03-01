@@ -19,7 +19,7 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const loginForm = useForm<LoginFormValues>({
@@ -34,8 +34,10 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(data.email, data.password);
+      // The navigation to dashboard is now handled in the AuthContext
     } catch (error) {
       // Error is already handled in the auth context
+      console.error('Login error:', error);
     } finally {
       setIsSubmitting(false);
     }
