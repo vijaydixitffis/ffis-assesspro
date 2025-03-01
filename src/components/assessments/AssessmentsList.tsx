@@ -10,19 +10,9 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash } from 'lucide-react';
+import { Edit } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface Assessment {
   id: string;
@@ -39,7 +29,6 @@ interface AssessmentsListProps {
 export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchAssessments();
@@ -87,42 +76,6 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deleteId) return;
-    
-    try {
-      // First check if the assessment has topics
-      const { data: topics, error: topicsError } = await supabase
-        .from('topics')
-        .select('id')
-        .eq('assessment_id', deleteId);
-      
-      if (topicsError) throw topicsError;
-      
-      if (topics && topics.length > 0) {
-        toast.error('Cannot delete assessment that has topics. Deactivate it instead.');
-        setDeleteId(null);
-        return;
-      }
-      
-      // If no topics, proceed with deletion
-      const { error } = await supabase
-        .from('assessments')
-        .delete()
-        .eq('id', deleteId);
-      
-      if (error) throw error;
-      
-      setAssessments(assessments.filter(assessment => assessment.id !== deleteId));
-      toast.success('Assessment deleted successfully');
-    } catch (error) {
-      console.error('Error deleting assessment:', error);
-      toast.error('Failed to delete assessment');
-    } finally {
-      setDeleteId(null);
-    }
-  };
-
   if (isLoading) {
     return <div>Loading assessments...</div>;
   }
@@ -164,18 +117,11 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button 
-                    variant="outline" 
-                    size="icon"
+                    variant={assessment.is_active ? "outline" : "default"}
+                    size="sm"
                     onClick={() => toggleAssessmentStatus(assessment.id, assessment.is_active)}
                   >
                     {assessment.is_active ? 'Deactivate' : 'Activate'}
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="icon"
-                    onClick={() => setDeleteId(assessment.id)}
-                  >
-                    <Trash className="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>
@@ -183,24 +129,6 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
           ))}
         </TableBody>
       </Table>
-      
-      <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the assessment.
-              If the assessment has topics, you cannot delete it and should deactivate it instead.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
