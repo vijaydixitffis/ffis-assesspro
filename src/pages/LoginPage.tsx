@@ -41,14 +41,6 @@ export default function LoginPage() {
     }
   };
 
-  const fillDemoAccount = (type: 'admin' | 'client') => {
-    const email = type === 'admin' ? 'admin@ffis.com' : 'client@ffis.com';
-    const password = type === 'admin' ? 'admin123' : 'client123';
-    
-    loginForm.setValue('email', email);
-    loginForm.setValue('password', password);
-  };
-
   return (
     <div className="auth-container animate-in">
       <div className="w-full max-w-md">
@@ -112,15 +104,6 @@ export default function LoginPage() {
                   </span>
                 )}
               </Button>
-              
-              <div className="mt-4 grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={() => fillDemoAccount('admin')}>
-                  Admin Demo
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => fillDemoAccount('client')}>
-                  Client Demo
-                </Button>
-              </div>
             </form>
           </CardContent>
           
