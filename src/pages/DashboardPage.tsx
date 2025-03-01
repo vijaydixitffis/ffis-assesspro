@@ -9,15 +9,19 @@ export default function DashboardPage() {
   const [isPageLoading, setIsPageLoading] = useState(true);
   
   useEffect(() => {
+    console.log('DashboardPage mounted, auth state:', { user, isLoading });
+    
     // Add a small delay to ensure auth state is fully loaded
     const timer = setTimeout(() => {
+      console.log('Dashboard page ready, auth state:', { user, isLoading });
       setIsPageLoading(false);
-    }, 300);
+    }, 500);
     
     return () => clearTimeout(timer);
-  }, [user]);
+  }, [user, isLoading]);
   
   if (isLoading || isPageLoading) {
+    console.log('Dashboard showing loading state');
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
@@ -26,6 +30,7 @@ export default function DashboardPage() {
   }
   
   if (!user) {
+    console.log('Dashboard has no user data, showing error');
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="text-center">
@@ -35,6 +40,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+  
+  console.log('Dashboard rendering with user:', user);
   
   return (
     <div className="flex h-screen overflow-hidden">

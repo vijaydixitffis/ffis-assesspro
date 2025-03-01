@@ -11,6 +11,7 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
   const userId = session.user.id;
   
   try {
+    console.log('Fetching profile for user ID:', userId);
     // First, get the user email directly from the session
     const email = session.user.email || '';
     
@@ -22,10 +23,12 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
       .single();
     
     if (error) {
+      console.error('Error fetching profile data:', error);
       throw error;
     }
     
     if (data) {
+      console.log('Profile data retrieved:', data);
       // Store first_name and last_name directly
       const firstName = data.first_name || '';
       const lastName = data.last_name || '';
@@ -35,16 +38,23 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
         ? `${firstName} ${lastName}` 
         : (firstName || lastName || 'User');
       
+      const userRole = (
+        data.role?.toLowerCase() === 'admin' ? 'admin' : 'client'
+      ) as UserRole;
+      
+      console.log('Constructed user role:', userRole);
+      
       return {
         id: userId,
         email: email,
         name: name,
         firstName: firstName,
         lastName: lastName,
-        role: (data.role?.toLowerCase() as UserRole) || 'client'
+        role: userRole
       };
     }
     
+    console.log('No profile data found for user');
     return null;
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -62,6 +72,7 @@ export const loginUser = async (email: string, password: string) => {
   });
   
   if (error) {
+    console.error('Login error:', error);
     throw new Error(error.message);
   }
   

@@ -24,12 +24,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
+          console.error('Session check error:', error);
           throw error;
         }
         
         if (session) {
+          console.log('Active session found');
           const userProfile = await fetchUserProfile(session);
           setUser(userProfile);
+          console.log('User profile loaded:', userProfile);
+        } else {
+          console.log('No active session found');
+          setUser(null);
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -42,13 +48,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+        
         if (session) {
-          const userProfile = await fetchUserProfile(session);
-          setUser(userProfile);
-          
-          // Ensure redirection to dashboard when user profile is set
-          if (window.location.pathname === '/login') {
-            navigate('/dashboard');
+          try {
+            const userProfile = await fetchUserProfile(session);
+            console.log('User profile from auth change:', userProfile);
+            setUser(userProfile);
+            
+            // Ensure redirection to dashboard when user profile is set
+            if (window.location.pathname === '/login') {
+              console.log('Redirecting to dashboard');
+              navigate('/dashboard');
+            }
+          } catch (error) {
+            console.error('Error fetching user profile on auth change:', error);
+            setUser(null);
           }
         } else {
           setUser(null);
@@ -69,17 +84,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     try {
+      console.log('Attempting login for:', email);
       const data = await loginUser(email, password);
       
       if (data.session) {
+        console.log('Login successful, fetching user profile');
         const userProfile = await fetchUserProfile(data.session);
         setUser(userProfile);
         toast.success('Login successful');
+        console.log('Navigating to dashboard after login');
         navigate('/dashboard');
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       toast.error(message);
+      console.error('Login error:', error);
       throw error;
     } finally {
       setIsLoading(false);
