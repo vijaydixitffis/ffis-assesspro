@@ -2,9 +2,39 @@
 import { useAuth } from '@/contexts/auth';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
 
 export default function DashboardPage() {
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  
+  useEffect(() => {
+    // Add a small delay to ensure auth state is fully loaded
+    const timer = setTimeout(() => {
+      setIsPageLoading(false);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, [user]);
+  
+  if (isLoading || isPageLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold">Authentication Error</h2>
+          <p className="text-muted-foreground">Please log in to access the dashboard</p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="flex h-screen">
@@ -13,14 +43,16 @@ export default function DashboardPage() {
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto max-w-7xl p-6 animate-in">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight">Welcome, {user?.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Welcome, {user.firstName || user.lastName ? `${user.firstName} ${user.lastName}` : user.name || 'User'}
+            </h1>
             <p className="text-muted-foreground">
-              Here's what's happening in your {user?.role === 'admin' ? 'admin' : 'client'} dashboard
+              Here's what's happening in your {user.role === 'admin' ? 'admin' : 'client'} dashboard
             </p>
           </div>
           
-          {user?.role === 'admin' && <AdminDashboard />}
-          {user?.role === 'client' && <ClientDashboard />}
+          {user.role === 'admin' && <AdminDashboard />}
+          {user.role === 'client' && <ClientDashboard />}
         </div>
       </main>
     </div>
