@@ -100,7 +100,7 @@ export default function TopicManagementPage() {
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto max-w-7xl p-6">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold">Topic Management</h1>
+            <h1 className="text-2xl font-semibold">Topic Mgmt.</h1>
             {!isAdding && !editingTopic && selectedAssessmentId && (
               <Button onClick={handleAddTopic}>Add New Topic</Button>
             )}
