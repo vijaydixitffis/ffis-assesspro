@@ -162,10 +162,14 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       return false;
     }
 
-    // Check if marks are between 0-10
-    const invalidMarks = answers.some(a => a.marks < 0 || a.marks > 10);
+    // Validate marks are within valid range (0-10) and are integers
+    const invalidMarks = answers.some(a => {
+      const marks = Number(a.marks);
+      return isNaN(marks) || marks < 0 || marks > 10 || !Number.isInteger(marks);
+    });
+    
     if (invalidMarks) {
-      toast.error('Marks must be between 0 and 10');
+      toast.error('Marks must be integers between 0 and 10');
       return false;
     }
 
@@ -195,7 +199,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         
         if (error) {
           console.error('Error updating question:', error);
-          throw error;
+          toast.error(`Failed to update question: ${error.message}`);
+          return;
         }
         
         // Delete existing answers
@@ -206,7 +211,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         
         if (deleteError) {
           console.error('Error deleting answers:', deleteError);
-          throw deleteError;
+          toast.error(`Error removing old answers: ${deleteError.message}`);
+          return;
         }
       } else {
         // Create new question
@@ -223,28 +229,49 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
           .select('id');
         
         if (error) {
-          console.error('Error details:', error);
-          throw error;
+          console.error('Error creating question:', error);
+          toast.error(`Failed to create question: ${error.message}`);
+          return;
+        }
+        
+        if (!data || data.length === 0) {
+          console.error('No question ID returned after insert');
+          toast.error('Failed to get question ID');
+          return;
         }
         
         questionId = data[0].id;
       }
       
-      // Insert answers
+      // Ensure we have a question ID before inserting answers
+      if (!questionId) {
+        console.error('Missing question ID');
+        toast.error('Error saving question: No question ID available');
+        return;
+      }
+      
+      // Process answers to ensure correct data format
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
         is_correct: answer.is_correct,
-        marks: answer.marks,
+        marks: Math.min(Math.max(0, parseInt(String(answer.marks), 10) || 0), 10), // Ensure marks is an integer between 0-10
         question_id: questionId
       }));
       
+      // Insert answers
       const { error: answersError } = await supabase
         .from('answers')
         .insert(answersToInsert);
       
       if (answersError) {
         console.error('Error inserting answers:', answersError);
-        throw answersError;
+        toast.error(`Failed to save answers: ${answersError.message}`);
+        
+        // If this is a new question and answers failed, we should delete the question to avoid orphaned data
+        if (!isEditing) {
+          await supabase.from('questions').delete().eq('id', questionId);
+        }
+        return;
       }
       
       toast.success(isEditing ? 'Question updated successfully' : 'Question created successfully');
@@ -254,8 +281,9 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       onClose();
       
     } catch (error) {
-      console.error('Error saving question:', error);
-      toast.error('Failed to save question');
+      const err = error as Error;
+      console.error('Error saving question:', err);
+      toast.error(`Unexpected error: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -378,6 +406,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
                           type="number"
                           min="0"
                           max="10"
+                          step="1"
                           value={answer.marks}
                           onChange={(e) => updateAnswer(index, 'marks', parseInt(e.target.value, 10) || 0)}
                           placeholder="0-10"
