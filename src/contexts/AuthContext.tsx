@@ -138,11 +138,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Signup function
+  // Signup function - Available only for admin users to create new accounts
   const signUp = async (email: string, password: string, name: string, role: UserRole) => {
     setIsLoading(true);
     
     try {
+      // First check if the current user is an admin
+      if (!user || user.role !== 'admin') {
+        throw new Error('Only administrators can create new user accounts');
+      }
+      
       // Split the name into first_name and last_name
       const nameParts = name.trim().split(' ');
       const firstName = nameParts[0] || '';
@@ -164,10 +169,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(error.message);
       }
       
-      toast.success('Registration successful! Check your email to confirm your account.');
+      toast.success('User account created successfully!');
       return;
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Registration failed';
+      const message = error instanceof Error ? error.message : 'User creation failed';
       toast.error(message);
       throw error;
     } finally {
