@@ -47,15 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for existing session on mount
   useEffect(() => {
-    const storedUser = localStorage.getItem('ffis_user');
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error('Failed to parse stored user data', error);
-        localStorage.removeItem('ffis_user');
-      }
-    }
+    // Clear any existing session on app initialization
+    localStorage.removeItem('ffis_user');
+    setUser(null);
     setIsLoading(false);
   }, []);
 
