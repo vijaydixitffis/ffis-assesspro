@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,13 +25,16 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const [answers, setAnswers] = useState<Answer[]>([]);
   const isEditing = !!question;
 
+  // Define default values for the form with proper types
+  const defaultValues: QuestionFormValues = {
+    question: question?.question || '',
+    type: question?.type || 'multiple_choice',
+    is_active: question?.is_active ?? true
+  };
+
   const form = useForm<QuestionFormValues>({
     resolver: zodResolver(questionSchema),
-    defaultValues: {
-      question: question?.question || '',
-      type: question?.type || 'multiple_choice',
-      is_active: question?.is_active ?? true
-    }
+    defaultValues
   });
 
   const questionType = form.watch('type');
