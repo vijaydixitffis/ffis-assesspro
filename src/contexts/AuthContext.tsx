@@ -12,6 +12,8 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  firstName: string;  // Add firstName property
+  lastName: string;   // Add lastName property
   role: UserRole;
 }
 
@@ -93,15 +95,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       
       if (data) {
-        // Combine the name from first_name and last_name or use default values
-        const name = data.first_name && data.last_name 
-          ? `${data.first_name} ${data.last_name}` 
-          : (data.first_name || 'User');
+        // Store first_name and last_name directly
+        const firstName = data.first_name || '';
+        const lastName = data.last_name || '';
+        
+        // Also construct the full name for backward compatibility
+        const name = firstName && lastName 
+          ? `${firstName} ${lastName}` 
+          : (firstName || lastName || 'User');
         
         setUser({
           id: userId,
           email: email,
           name: name,
+          firstName: firstName,  // Store firstName
+          lastName: lastName,    // Store lastName
           role: (data.role?.toLowerCase() as UserRole) || 'client'
         });
         

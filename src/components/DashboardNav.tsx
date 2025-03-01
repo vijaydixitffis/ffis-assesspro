@@ -105,7 +105,7 @@ export function DashboardNav() {
           <div className="px-3 py-2">
             <div className="mb-2 flex items-center rounded-md px-3 py-2">
               <CircleUser className="mr-2 h-4 w-4" />
-              <span className="text-sm">{user.name}</span>
+              <span className="text-sm">{user.firstName} {user.lastName}</span>
             </div>
             <button
               onClick={logout}
