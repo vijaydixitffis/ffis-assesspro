@@ -75,20 +75,24 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const questionType = form.watch('type');
 
   useEffect(() => {
-    if (question?.answers) {
-      setAnswers(question.answers);
+    // This will run when the component mounts
+    if (isEditing && question.answers && question.answers.length > 0) {
+      console.log('Setting answers from question:', question.answers);
+      setAnswers([...question.answers]);
     } else {
       // Initialize with default answers based on question type
-      setDefaultAnswers(questionType);
+      setDefaultAnswers(form.getValues('type'));
     }
-  }, [question]);
+  }, [isEditing, question]);
 
+  // Add another useEffect to handle type changes
   useEffect(() => {
-    // Reset answers when question type changes
-    if (!isEditing) {
+    // Only reset answers when question type changes and we're not in editing mode
+    // or if we are in editing mode but answers haven't been loaded yet
+    if (!isEditing || (isEditing && answers.length === 0)) {
       setDefaultAnswers(questionType);
     }
-  }, [questionType, isEditing]);
+  }, [questionType, isEditing, answers.length]);
 
   const setDefaultAnswers = (type: QuestionType) => {
     if (type === 'yes_no') {
@@ -323,6 +327,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
                 <RadioGroup
                   onValueChange={field.onChange}
                   defaultValue={field.value}
+                  value={field.value}
                   className="flex flex-col space-y-1"
                 >
                   <div className="flex items-center space-x-2">

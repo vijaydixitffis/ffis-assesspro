@@ -81,9 +81,28 @@ export default function QuestionManagementPage() {
     setEditingQuestion(null);
   };
 
-  const handleEditQuestion = (question: any) => {
-    setEditingQuestion(question);
-    setIsAdding(false);
+  const handleEditQuestion = async (question: any) => {
+    try {
+      // Fetch the answers for this question
+      const { data: answerData, error: answerError } = await supabase
+        .from('answers')
+        .select('*')
+        .eq('question_id', question.id);
+        
+      if (answerError) throw answerError;
+      
+      // Add the answers to the question object
+      const questionWithAnswers = {
+        ...question,
+        answers: answerData || []
+      };
+      
+      setEditingQuestion(questionWithAnswers);
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error fetching answers:', error);
+      toast.error('Failed to load question answers');
+    }
   };
 
   const handleFormClose = () => {
