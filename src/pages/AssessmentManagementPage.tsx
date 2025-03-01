@@ -20,6 +20,8 @@ export default function AssessmentManagementPage() {
     if (user?.role !== 'admin') {
       toast.error('You need admin privileges to access this page');
     }
+    // Set loading to false after checking user role
+    setIsLoading(false);
   }, [user]);
 
   const handleAddAssessment = () => {
@@ -92,12 +94,8 @@ export default function AssessmentManagementPage() {
             </Card>
           )}
 
-          {!isLoading && (
-            <>
-              <Separator className="my-6" />
-              <AssessmentsList onEdit={handleEditAssessment} />
-            </>
-          )}
+          <Separator className="my-6" />
+          <AssessmentsList onEdit={handleEditAssessment} />
         </div>
       </main>
     </div>
