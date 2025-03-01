@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -266,7 +265,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
         is_correct: answer.is_correct,
-        marks: Math.min(Math.max(0, parseInt(String(answer.marks), 10) || 0), 10), // Ensure marks is an integer between 0-10
+        // Ensure marks is a valid integer between 0-10
+        marks: Math.min(Math.max(0, parseInt(String(answer.marks), 10) || 0), 10),
         question_id: questionId
       }));
       
