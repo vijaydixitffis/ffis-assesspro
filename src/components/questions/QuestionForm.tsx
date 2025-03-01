@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -77,10 +76,9 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   useEffect(() => {
     if (isEditing && question.answers && question.answers.length > 0) {
       console.log('Setting answers from question:', question.answers);
-      // Ensure all answers have is_correct as a boolean and proper marks value
+      // Keep the original values for is_correct (including null)
       const formattedAnswers = question.answers.map(answer => ({
         ...answer,
-        is_correct: answer.is_correct === null ? false : answer.is_correct,
         marks: answer.marks || '0'
       }));
       setAnswers(formattedAnswers);
@@ -111,14 +109,14 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         { text: 'Option 2', is_correct: false, marks: '0' }
       ]);
     } else if (type === 'free_text') {
-      setAnswers([{ text: 'Correct answer', is_correct: true, marks: '1' }]);
+      setAnswers([{ text: 'Correct answer', is_correct: null, marks: '1' }]);
     }
   };
 
   const addAnswer = () => {
     // Use a proper state update to preserve existing answers
     if (answers.length < 4) {
-      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: false, marks: '0' }]);
+      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: null, marks: '0' }]);
       toast.success("New option added");
     } else {
       toast.error('Maximum 4 options allowed');
@@ -163,7 +161,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       return false;
     }
 
-    // For multiple choice, check if at least one answer is marked as correct
+    // For multiple choice, make sure at least one answer is marked as correct
+    // But only if it's not free text (where is_correct can be null)
     if (questionType === 'multiple_choice') {
       const hasCorrectAnswer = answers.some(a => a.is_correct === true);
       if (!hasCorrectAnswer) {
@@ -252,12 +251,12 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         return;
       }
       
-      // Process answers to ensure correct data format
+      // Process answers to insert with proper is_correct values (can now be null)
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
-        // Ensure is_correct is a boolean, not null
-        is_correct: answer.is_correct === null ? false : answer.is_correct,
-        marks: answer.marks || '0', // Default to '0' if marks is null
+        // Keep the is_correct value as is (including null)
+        is_correct: answer.is_correct,
+        marks: answer.marks || '0',
         question_id: questionId
       }));
       
@@ -376,13 +375,20 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
                   <div className="flex flex-col space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
-                        <Switch
-                          checked={answer.is_correct === true}
-                          onCheckedChange={(checked) => updateAnswer(index, 'is_correct', checked)}
-                        />
-                        <Label>
-                          {answer.is_correct === true ? 'Correct answer' : 'Incorrect answer'}
-                        </Label>
+                        {questionType !== 'free_text' && (
+                          <>
+                            <Switch
+                              checked={answer.is_correct === true}
+                              onCheckedChange={(checked) => updateAnswer(index, 'is_correct', checked)}
+                            />
+                            <Label>
+                              {answer.is_correct === true ? 'Correct answer' : 'Incorrect answer'}
+                            </Label>
+                          </>
+                        )}
+                        {questionType === 'free_text' && (
+                          <Label>Answer Text</Label>
+                        )}
                       </div>
                       {(questionType === 'multiple_choice' && answers.length > 2) && (
                         <Button 
