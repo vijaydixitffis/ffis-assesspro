@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,7 +25,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const [answers, setAnswers] = useState<Answer[]>([]);
   const isEditing = !!question;
 
-  // Define default values with non-optional properties
+  // Define default values with required properties
   const defaultValues: QuestionFormValues = {
     question: question?.question || '',
     type: question?.type || 'multiple_choice',
@@ -52,7 +53,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       // Initialize with default answers based on question type
       setAnswers(setDefaultAnswers(questionType));
     }
-  }, [isEditing, question, question?.id]);
+  }, [isEditing, question, question?.id, questionType]);
 
   // Add another useEffect to handle type changes
   useEffect(() => {
