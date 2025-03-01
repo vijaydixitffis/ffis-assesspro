@@ -18,37 +18,39 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen flex flex-col">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<LoginPage />} />
-            
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/admin/assessments" element={
-              <ProtectedRoute requiredRole="admin">
-                <AssessmentManagementPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/admin/topics" element={
-              <ProtectedRoute requiredRole="admin">
-                <TopicManagementPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/admin/questions" element={
-              <ProtectedRoute requiredRole="admin">
-                <QuestionManagementPage />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex-1 flex flex-col">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<LoginPage />} />
+              
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/admin/assessments" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AssessmentManagementPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/admin/topics" element={
+                <ProtectedRoute requiredRole="admin">
+                  <TopicManagementPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/admin/questions" element={
+                <ProtectedRoute requiredRole="admin">
+                  <QuestionManagementPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
           <Footer />
           <Toaster />
         </div>

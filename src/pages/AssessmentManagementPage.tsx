@@ -44,67 +44,63 @@ export default function AssessmentManagementPage() {
 
   if (user?.role !== 'admin') {
     return (
-      <div className="dashboard-layout">
-        <div className="dashboard-content">
-          <DashboardNav />
-          <main className="flex-1 overflow-auto">
-            <div className="container mx-auto max-w-7xl p-6">
-              <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
-              <p>You need admin privileges to access this page.</p>
-            </div>
-          </main>
-        </div>
+      <div className="flex h-screen">
+        <DashboardNav />
+        <main className="flex-1 p-6">
+          <div className="container mx-auto max-w-7xl">
+            <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
+            <p>You need admin privileges to access this page.</p>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-layout">
-      <div className="dashboard-content">
-        <DashboardNav />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto max-w-7xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-semibold">Assessment Mgmt.</h1>
-              {!isAdding && !editingAssessment && (
-                <Button onClick={handleAddAssessment}>Add New Assessment</Button>
-              )}
-            </div>
-
-            {isAdding && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Add New Assessment</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <AssessmentForm 
-                    userId={user?.id || ''} 
-                    onClose={handleFormClose} 
-                  />
-                </CardContent>
-              </Card>
+    <div className="flex h-screen">
+      <DashboardNav />
+      <main className="flex-1 p-6 overflow-auto">
+        <div className="container mx-auto max-w-7xl">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-2xl font-semibold">Assessment Mgmt.</h1>
+            {!isAdding && !editingAssessment && (
+              <Button onClick={handleAddAssessment}>Add New Assessment</Button>
             )}
-
-            {editingAssessment && (
-              <Card className="mb-6">
-                <CardHeader>
-                  <CardTitle className="text-lg">Edit Assessment</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <AssessmentForm 
-                    assessment={editingAssessment} 
-                    userId={user?.id || ''} 
-                    onClose={handleFormClose} 
-                  />
-                </CardContent>
-              </Card>
-            )}
-
-            <Separator className="my-6" />
-            <AssessmentsList key={refreshKey} onEdit={handleEditAssessment} />
           </div>
-        </main>
-      </div>
+
+          {isAdding && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Add New Assessment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AssessmentForm 
+                  userId={user?.id || ''} 
+                  onClose={handleFormClose} 
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {editingAssessment && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Edit Assessment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AssessmentForm 
+                  assessment={editingAssessment} 
+                  userId={user?.id || ''} 
+                  onClose={handleFormClose} 
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          <Separator className="my-6" />
+          <AssessmentsList key={refreshKey} onEdit={handleEditAssessment} />
+        </div>
+      </main>
     </div>
   );
 }
