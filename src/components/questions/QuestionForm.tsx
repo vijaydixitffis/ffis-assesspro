@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -40,8 +41,8 @@ type QuestionFormValues = z.infer<typeof questionSchema>;
 interface Answer {
   id?: string;
   text: string;
-  is_correct: boolean;
-  marks?: string | null; // Updated to match the new database type
+  is_correct: boolean | null; // Updated to be nullable
+  marks?: string | null;
 }
 
 interface QuestionFormProps {
@@ -112,7 +113,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const addAnswer = () => {
     // Use a proper state update to preserve existing answers
     if (answers.length < 4) {
-      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: false, marks: '0' }]);
+      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: null, marks: '0' }]);
       toast.success("New option added");
     } else {
       toast.error('Maximum 4 options allowed');
@@ -134,15 +135,9 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
 
-      // If setting this answer as correct, set all others to incorrect
-      if (field === 'is_correct' && value === true) {
-        newAnswers.forEach((answer, i) => {
-          if (i !== index) {
-            newAnswers[i] = { ...newAnswers[i], is_correct: false };
-          }
-        });
-      }
-
+      // If setting this answer as correct, we no longer need to set all others to incorrect
+      // since we're making is_correct optional
+      
       return newAnswers;
     });
   };
@@ -150,7 +145,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const validateAnswers = () => {
     // Check if we have at least 1 answer for free_text or 2 for other types
     if (questionType === 'free_text' && answers.length < 1) {
-      toast.error('Free text questions must have at least 1 correct answer');
+      toast.error('Free text questions must have at least 1 answer');
       return false;
     }
     
@@ -166,12 +161,8 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       return false;
     }
 
-    // Check if there's exactly one correct answer
-    const correctAnswers = answers.filter(a => a.is_correct);
-    if (correctAnswers.length !== 1) {
-      toast.error('There must be exactly one correct answer');
-      return false;
-    }
+    // No longer check for exactly one correct answer
+    // The is_correct field is now optional
 
     return true;
   };
@@ -253,7 +244,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       // Process answers to ensure correct data format
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
-        is_correct: answer.is_correct,
+        is_correct: answer.is_correct, // Can now be null
         marks: answer.marks, // Just pass the marks value as is (text)
         question_id: questionId
       }));
@@ -372,10 +363,14 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <Switch
-                          checked={answer.is_correct}
-                          onCheckedChange={(checked) => updateAnswer(index, 'is_correct', checked)}
+                          checked={answer.is_correct === true}
+                          onCheckedChange={(checked) => updateAnswer(index, 'is_correct', checked ? true : null)}
                         />
-                        <Label>{answer.is_correct ? 'Correct answer' : 'Incorrect answer'}</Label>
+                        <Label>
+                          {answer.is_correct === true ? 'Correct answer' : 
+                           answer.is_correct === false ? 'Incorrect answer' : 
+                           'Optional (neither correct nor incorrect)'}
+                        </Label>
                       </div>
                       {(questionType === 'multiple_choice' && answers.length > 2) && (
                         <Button 
