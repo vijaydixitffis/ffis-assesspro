@@ -15,6 +15,7 @@ export default function AssessmentManagementPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0); // Add a refresh key to trigger re-renders
 
   useEffect(() => {
     if (user?.role !== 'admin') {
@@ -37,6 +38,8 @@ export default function AssessmentManagementPage() {
   const handleFormClose = () => {
     setIsAdding(false);
     setEditingAssessment(null);
+    // Trigger re-render of the assessment list
+    setRefreshKey(prev => prev + 1);
   };
 
   if (user?.role !== 'admin') {
@@ -95,7 +98,7 @@ export default function AssessmentManagementPage() {
           )}
 
           <Separator className="my-6" />
-          <AssessmentsList onEdit={handleEditAssessment} />
+          <AssessmentsList key={refreshKey} onEdit={handleEditAssessment} />
         </div>
       </main>
     </div>
