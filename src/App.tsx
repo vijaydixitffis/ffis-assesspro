@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import NotFound from './pages/NotFound';
 import TopicManagementPage from './pages/TopicManagementPage';
+import AssessmentManagementPage from './pages/AssessmentManagementPage';
 
 function App() {
   return (
@@ -29,6 +30,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="admin">
                 <TopicManagementPage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/assessments" 
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AssessmentManagementPage />
               </ProtectedRoute>
             } 
           />
