@@ -82,88 +82,92 @@ export default function TopicManagementPage() {
 
   if (user?.role !== 'admin') {
     return (
-      <div className="flex h-screen">
-        <DashboardNav />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto max-w-7xl p-6">
-            <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
-            <p>You need admin privileges to access this page.</p>
-          </div>
-        </main>
+      <div className="dashboard-layout">
+        <div className="dashboard-content">
+          <DashboardNav />
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto max-w-7xl p-6">
+              <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
+              <p>You need admin privileges to access this page.</p>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <DashboardNav />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-7xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold">Topic Mgmt.</h1>
-            {!isAdding && !editingTopic && selectedAssessmentId && (
-              <Button onClick={handleAddTopic}>Add New Topic</Button>
+    <div className="dashboard-layout">
+      <div className="dashboard-content">
+        <DashboardNav />
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto max-w-7xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-2xl font-semibold">Topic Mgmt.</h1>
+              {!isAdding && !editingTopic && selectedAssessmentId && (
+                <Button onClick={handleAddTopic}>Add New Topic</Button>
+              )}
+            </div>
+
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-lg">Select Assessment</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AssessmentSelector 
+                  assessments={assessments} 
+                  selectedId={selectedAssessmentId} 
+                  onChange={handleAssessmentChange} 
+                  isLoading={isLoading}
+                />
+              </CardContent>
+            </Card>
+
+            {isAdding && selectedAssessmentId && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Add New Topic</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TopicForm 
+                    assessmentId={selectedAssessmentId} 
+                    userId={user?.id || ''} 
+                    onClose={handleFormClose} 
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {editingTopic && (
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-lg">Edit Topic</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TopicForm 
+                    topic={editingTopic} 
+                    assessmentId={selectedAssessmentId || ''} 
+                    userId={user?.id || ''} 
+                    onClose={handleFormClose} 
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Only show TopicsList when not editing a topic */}
+            {selectedAssessmentId && !isLoading && !editingTopic && (
+              <>
+                <Separator className="my-6" />
+                <TopicsList 
+                  assessmentId={selectedAssessmentId} 
+                  onEdit={handleEditTopic} 
+                  refreshTrigger={refreshTopics}
+                />
+              </>
             )}
           </div>
-
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Select Assessment</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AssessmentSelector 
-                assessments={assessments} 
-                selectedId={selectedAssessmentId} 
-                onChange={handleAssessmentChange} 
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-
-          {isAdding && selectedAssessmentId && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Add New Topic</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TopicForm 
-                  assessmentId={selectedAssessmentId} 
-                  userId={user?.id || ''} 
-                  onClose={handleFormClose} 
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {editingTopic && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Edit Topic</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TopicForm 
-                  topic={editingTopic} 
-                  assessmentId={selectedAssessmentId || ''} 
-                  userId={user?.id || ''} 
-                  onClose={handleFormClose} 
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Only show TopicsList when not editing a topic */}
-          {selectedAssessmentId && !isLoading && !editingTopic && (
-            <>
-              <Separator className="my-6" />
-              <TopicsList 
-                assessmentId={selectedAssessmentId} 
-                onEdit={handleEditTopic} 
-                refreshTrigger={refreshTopics}
-              />
-            </>
-          )}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

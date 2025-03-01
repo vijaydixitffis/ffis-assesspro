@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/auth';
 import { Toaster } from '@/components/ui/sonner';
 import { ProtectedRoute } from '@/components/RouteGuard';
+import { Footer } from '@/components/Footer';
 
 // Pages
 import Index from '@/pages/Index';
@@ -17,37 +18,40 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<LoginPage />} />
-          
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/admin/assessments" element={
-            <ProtectedRoute requiredRole="admin">
-              <AssessmentManagementPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/admin/topics" element={
-            <ProtectedRoute requiredRole="admin">
-              <TopicManagementPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="/admin/questions" element={
-            <ProtectedRoute requiredRole="admin">
-              <QuestionManagementPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
+        <div className="min-h-screen flex flex-col">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<LoginPage />} />
+            
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/assessments" element={
+              <ProtectedRoute requiredRole="admin">
+                <AssessmentManagementPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/topics" element={
+              <ProtectedRoute requiredRole="admin">
+                <TopicManagementPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/admin/questions" element={
+              <ProtectedRoute requiredRole="admin">
+                <QuestionManagementPage />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Footer />
+          <Toaster />
+        </div>
       </AuthProvider>
     </Router>
   );

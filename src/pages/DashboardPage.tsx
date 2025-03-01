@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/auth';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,24 +36,26 @@ export default function DashboardPage() {
   }
   
   return (
-    <div className="flex h-screen">
-      <DashboardNav />
-      
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-7xl p-6 animate-in">
-          <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              Welcome, {user.firstName || user.lastName ? `${user.firstName} ${user.lastName}` : user.name || 'User'}
-            </h1>
-            <p className="text-muted-foreground">
-              Here's what's happening in your {user.role === 'admin' ? 'admin' : 'client'} dashboard
-            </p>
+    <div className="dashboard-layout">
+      <div className="dashboard-content">
+        <DashboardNav />
+        
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto max-w-7xl p-6 animate-in">
+            <div className="mb-8">
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Welcome, {user.firstName || user.lastName ? `${user.firstName} ${user.lastName}` : user.name || 'User'}
+              </h1>
+              <p className="text-muted-foreground">
+                Here's what's happening in your {user.role === 'admin' ? 'admin' : 'client'} dashboard
+              </p>
+            </div>
+            
+            {user.role === 'admin' && <AdminDashboard />}
+            {user.role === 'client' && <ClientDashboard />}
           </div>
-          
-          {user.role === 'admin' && <AdminDashboard />}
-          {user.role === 'client' && <ClientDashboard />}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

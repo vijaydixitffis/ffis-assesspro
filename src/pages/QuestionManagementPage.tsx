@@ -114,96 +114,100 @@ export default function QuestionManagementPage() {
 
   if (user?.role !== 'admin') {
     return (
-      <div className="flex h-screen">
-        <DashboardNav />
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto max-w-7xl p-6">
-            <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
-            <p>You need admin privileges to access this page.</p>
-          </div>
-        </main>
+      <div className="dashboard-layout">
+        <div className="dashboard-content">
+          <DashboardNav />
+          <main className="flex-1 overflow-auto">
+            <div className="container mx-auto max-w-7xl p-6">
+              <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
+              <p>You need admin privileges to access this page.</p>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen">
-      <DashboardNav />
-      <main className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-7xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-semibold">Question Mgmt.</h1>
-              {topic && (
-                <div className="text-sm text-muted-foreground">
-                  Topic: {topic.title} {topic.assessment_title && `(Assessment: ${topic.assessment_title})`}
-                </div>
+    <div className="dashboard-layout">
+      <div className="dashboard-content">
+        <DashboardNav />
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto max-w-7xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h1 className="text-2xl font-semibold">Question Mgmt.</h1>
+                {topic && (
+                  <div className="text-sm text-muted-foreground">
+                    Topic: {topic.title} {topic.assessment_title && `(Assessment: ${topic.assessment_title})`}
+                  </div>
+                )}
+              </div>
+              {!isAdding && !editingQuestion && topicId && (
+                <Button onClick={handleAddQuestion}>Add New Question</Button>
               )}
             </div>
-            {!isAdding && !editingQuestion && topicId && (
-              <Button onClick={handleAddQuestion}>Add New Question</Button>
+
+            {isLoading ? (
+              <div className="text-center py-8">Loading...</div>
+            ) : !topicId ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center py-8">
+                    <p className="text-lg mb-2">No topic selected</p>
+                    <p className="text-muted-foreground">Please select a topic from the Topics Management page.</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {isAdding && topicId && (
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Add New Question</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <QuestionForm 
+                        topicId={topicId} 
+                        userId={user?.id || ''} 
+                        onClose={handleFormClose} 
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {editingQuestion && (
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Edit Question</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <QuestionForm 
+                        question={editingQuestion} 
+                        topicId={topicId} 
+                        userId={user?.id || ''} 
+                        onClose={handleFormClose} 
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Only show QuestionsList when not editing a question */}
+                {topicId && !isLoading && !editingQuestion && (
+                  <>
+                    <Separator className="my-6" />
+                    <QuestionsList 
+                      topicId={topicId} 
+                      onEdit={handleEditQuestion} 
+                      refreshTrigger={refreshQuestions}
+                    />
+                  </>
+                )}
+              </>
             )}
           </div>
-
-          {isLoading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : !topicId ? (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8">
-                  <p className="text-lg mb-2">No topic selected</p>
-                  <p className="text-muted-foreground">Please select a topic from the Topics Management page.</p>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <>
-              {isAdding && topicId && (
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Add New Question</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <QuestionForm 
-                      topicId={topicId} 
-                      userId={user?.id || ''} 
-                      onClose={handleFormClose} 
-                    />
-                  </CardContent>
-                </Card>
-              )}
-
-              {editingQuestion && (
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Edit Question</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <QuestionForm 
-                      question={editingQuestion} 
-                      topicId={topicId} 
-                      userId={user?.id || ''} 
-                      onClose={handleFormClose} 
-                    />
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Only show QuestionsList when not editing a question */}
-              {topicId && !isLoading && !editingQuestion && (
-                <>
-                  <Separator className="my-6" />
-                  <QuestionsList 
-                    topicId={topicId} 
-                    onEdit={handleEditQuestion} 
-                    refreshTrigger={refreshQuestions}
-                  />
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
