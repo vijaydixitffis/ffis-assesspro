@@ -82,10 +82,10 @@ export default function TopicManagementPage() {
 
   if (user?.role !== 'admin') {
     return (
-      <div className="dashboard-container">
+      <div className="flex h-screen">
         <DashboardNav />
-        <main className="dashboard-content">
-          <div className="container mx-auto max-w-7xl py-6">
+        <main className="flex-1 overflow-auto">
+          <div className="container mx-auto max-w-7xl p-6">
             <h1 className="text-2xl font-semibold mb-4">Access Denied</h1>
             <p>You need admin privileges to access this page.</p>
           </div>
@@ -95,10 +95,10 @@ export default function TopicManagementPage() {
   }
 
   return (
-    <div className="dashboard-container">
+    <div className="flex h-screen">
       <DashboardNav />
-      <main className="dashboard-content">
-        <div className="container mx-auto max-w-7xl py-6">
+      <main className="flex-1 overflow-auto">
+        <div className="container mx-auto max-w-7xl p-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-semibold">Topic Management</h1>
             {!isAdding && !editingTopic && selectedAssessmentId && (

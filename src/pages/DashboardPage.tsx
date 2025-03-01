@@ -7,11 +7,11 @@ export default function DashboardPage() {
   const { user } = useAuth();
   
   return (
-    <div className="dashboard-container">
+    <div className="flex h-screen">
       <DashboardNav />
       
-      <main className="dashboard-content">
-        <div className="container mx-auto max-w-7xl animate-in">
+      <main className="flex-1 overflow-auto">
+        <div className="container mx-auto max-w-7xl p-6 animate-in">
           <div className="mb-8">
             <h1 className="text-2xl font-semibold tracking-tight">Welcome, {user?.name}</h1>
             <p className="text-muted-foreground">
