@@ -6,7 +6,7 @@ export default function Footer() {
   const location = useLocation();
   const currentYear = new Date().getFullYear();
   
-  // Don't show footer on login page
+  // Don't show footer on login page as specified in the original component
   if (location.pathname === '/login') {
     return null;
   }
