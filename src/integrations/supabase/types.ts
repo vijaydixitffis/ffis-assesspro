@@ -13,7 +13,7 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
-          is_correct: boolean
+          is_correct: boolean | null
           marks: string | null
           question_id: string
           text: string
@@ -22,7 +22,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           id?: string
-          is_correct?: boolean
+          is_correct?: boolean | null
           marks?: string | null
           question_id: string
           text: string
@@ -31,7 +31,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           id?: string
-          is_correct?: boolean
+          is_correct?: boolean | null
           marks?: string | null
           question_id?: string
           text?: string
