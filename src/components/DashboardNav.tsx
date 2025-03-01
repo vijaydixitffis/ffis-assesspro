@@ -1,79 +1,121 @@
 
+import { Fragment } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Separator } from "@/components/ui/separator";
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
-} from "@/components/ui/navigation-menu";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+  BookOpen,
+  ClipboardList,
+  BarChart2,
+  CircleUser,
+  HelpCircle,
+  List,
+  Home,
+  LogOut
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function DashboardNav() {
-  const { user } = useAuth();
-  const [collapsed, setCollapsed] = useState(false);
+  const { user, logout } = useAuth();
+  const location = useLocation();
 
-  const toggleSidebar = () => {
-    setCollapsed(!collapsed);
-  };
+  const routes = [
+    {
+      label: "Dashboard",
+      icon: Home,
+      href: "/dashboard",
+      active: location.pathname === "/dashboard",
+    },
+    {
+      label: "Assessment Mgmt.",
+      icon: ClipboardList,
+      href: "/admin/assessments",
+      active: location.pathname === "/admin/assessments",
+      adminOnly: true,
+    },
+    {
+      label: "Topic Mgmt.",
+      icon: BookOpen,
+      href: "/admin/topics",
+      active: location.pathname === "/admin/topics",
+      adminOnly: true,
+    },
+    {
+      label: "Question Mgmt.",
+      icon: List,
+      href: "/admin/questions",
+      active: location.pathname === "/admin/questions",
+      adminOnly: true,
+    },
+    {
+      label: "Reports",
+      icon: BarChart2,
+      href: "/reports",
+      active: location.pathname === "/reports",
+    },
+    {
+      label: "Help",
+      icon: HelpCircle,
+      href: "/help",
+      active: location.pathname === "/help",
+    },
+  ];
 
   return (
-    <div className={`h-screen bg-sidebar-background border-r flex flex-col transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
-      <div className="p-4 border-b flex justify-between items-center">
-        {!collapsed && <h2 className="font-semibold">AssessPro</h2>}
-        <button 
-          onClick={toggleSidebar} 
-          className="p-1 rounded-md hover:bg-accent"
-        >
-          {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
-      </div>
-      
-      <div className="py-4 flex-1">
-        <NavigationMenu className="w-full" orientation="vertical">
-          <NavigationMenuList className="flex flex-col space-y-1 w-full p-2">
-            <NavigationMenuItem className="w-full">
-              <Link to="/dashboard" className="w-full">
-                <NavigationMenuLink className={`flex items-center p-2 rounded-md hover:bg-accent hover:text-accent-foreground ${collapsed ? 'justify-center' : ''}`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                  </svg>
-                  {!collapsed && <span className="ml-2">Dashboard</span>}
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-
-            {user?.role === "admin" && (
-              <>
-                <NavigationMenuItem className="w-full">
-                  <Link to="/admin/topics" className="w-full">
-                    <NavigationMenuLink className={`flex items-center p-2 rounded-md hover:bg-accent hover:text-accent-foreground ${collapsed ? 'justify-center' : ''}`}>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                      </svg>
-                      {!collapsed && <span className="ml-2">Topic Mgmt.</span>}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-                
-                <NavigationMenuItem className="w-full">
-                  <Link to="/admin/assessments" className="w-full">
-                    <NavigationMenuLink className={`flex items-center p-2 rounded-md hover:bg-accent hover:text-accent-foreground ${collapsed ? 'justify-center' : ''}`}>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      {!collapsed && <span className="ml-2">Assessment Mgmt.</span>}
-                    </NavigationMenuLink>
-                  </Link>
-                </NavigationMenuItem>
-              </>
+    <div className="h-full flex-col bg-muted/40 md:flex md:w-64 md:border-r">
+      <div className="space-y-4 py-4">
+        <div className="px-3 py-2">
+          <Link
+            to="/dashboard"
+            className="mb-6 flex h-16 items-center rounded-md px-4 text-primary"
+          >
+            <div className="flex items-center gap-2 font-semibold">
+              <img
+                src="/lovable-uploads/74e171ed-dfc9-4ff4-8aae-44113fefa8f9.png"
+                alt="Logo"
+                className="h-8 w-8"
+              />
+              <span className="text-xl">Skill Assess</span>
+            </div>
+          </Link>
+          
+          <div className="space-y-1">
+            {routes.map((route) =>
+              // If the route is admin only and user is not admin, don't show it
+              route.adminOnly && user?.role !== "admin" ? null : (
+                <Link
+                  to={route.href}
+                  key={route.label}
+                  className={cn(
+                    "flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground",
+                    route.active
+                      ? "bg-accent text-accent-foreground"
+                      : "transparent"
+                  )}
+                >
+                  <route.icon className="mr-2 h-4 w-4" />
+                  {route.label}
+                </Link>
+              )
             )}
-          </NavigationMenuList>
-        </NavigationMenu>
+          </div>
+        </div>
+        <Separator />
+        {user && (
+          <div className="px-3 py-2">
+            <div className="mb-2 flex items-center rounded-md px-3 py-2">
+              <CircleUser className="mr-2 h-4 w-4" />
+              <span className="text-sm">{user.first_name} {user.last_name}</span>
+            </div>
+            <button
+              onClick={logout}
+              className="flex w-full items-center rounded-md px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

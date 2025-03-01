@@ -1,37 +1,22 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from '@/components/ui/table';
-import { Pencil } from 'lucide-react';
-
-interface Topic {
-  id: string;
-  title: string;
-  description: string;
-  is_active: boolean;
-  created_at: string;
-}
+import { Edit, Trash, List } from 'lucide-react';
+import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface TopicsListProps {
   assessmentId: string;
-  onEdit: (topic: Topic) => void;
-  refreshTrigger?: number;
+  onEdit: (topic: any) => void;
+  refreshTrigger: number;
 }
 
-export default function TopicsList({ assessmentId, onEdit, refreshTrigger = 0 }: TopicsListProps) {
-  const [topics, setTopics] = useState<Topic[]>([]);
+export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: TopicsListProps) {
+  const navigate = useNavigate();
+  const [topics, setTopics] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -43,12 +28,11 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger = 0 }:
   const fetchTopics = async () => {
     try {
       setIsLoading(true);
-      
       const { data, error } = await supabase
         .from('topics')
-        .select('*')
+        .select('id, title, description, is_active, created_at')
         .eq('assessment_id', assessmentId)
-        .order('title');
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       
@@ -61,84 +45,108 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger = 0 }:
     }
   };
 
-  const handleToggleActive = async (topic: Topic) => {
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this topic? This will also delete all associated questions.')) {
+      return;
+    }
+
     try {
+      // Check if there are any questions
+      const { data: questionsData, error: questionsCheckError } = await supabase
+        .from('questions')
+        .select('id')
+        .eq('topic_id', id);
+      
+      if (questionsCheckError) throw questionsCheckError;
+      
+      // If there are questions, delete their answers first
+      if (questionsData && questionsData.length > 0) {
+        const questionIds = questionsData.map(q => q.id);
+        
+        const { error: answersError } = await supabase
+          .from('answers')
+          .delete()
+          .in('question_id', questionIds);
+        
+        if (answersError) throw answersError;
+        
+        // Then delete the questions
+        const { error: questionsError } = await supabase
+          .from('questions')
+          .delete()
+          .eq('topic_id', id);
+        
+        if (questionsError) throw questionsError;
+      }
+      
+      // Finally delete the topic
       const { error } = await supabase
         .from('topics')
-        .update({ is_active: !topic.is_active })
-        .eq('id', topic.id);
+        .delete()
+        .eq('id', id);
       
       if (error) throw error;
       
-      // Update the local state
-      setTopics(topics.map(t => 
-        t.id === topic.id ? { ...t, is_active: !t.is_active } : t
-      ));
-      
-      toast.success(`Topic ${topic.is_active ? 'deactivated' : 'activated'} successfully`);
+      toast.success('Topic deleted successfully');
+      fetchTopics();
     } catch (error) {
-      console.error('Error updating topic:', error);
-      toast.error('Failed to update topic status');
+      console.error('Error deleting topic:', error);
+      toast.error('Failed to delete topic');
     }
   };
 
+  const handleManageQuestions = (topicId: string) => {
+    navigate(`/admin/questions?topicId=${topicId}`);
+  };
+
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-32 w-full" />
-      </div>
-    );
+    return <div className="text-center py-4">Loading topics...</div>;
   }
 
   if (topics.length === 0) {
-    return (
-      <Card className="p-6 text-center">
-        <p className="text-muted-foreground mb-4">No topics found for this assessment</p>
-      </Card>
-    );
+    return <div className="text-center py-4">No topics found for this assessment. Add your first topic!</div>;
   }
 
   return (
     <div>
-      <h2 className="text-xl font-semibold mb-4">Topics</h2>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="w-24 text-center">Active</TableHead>
-              <TableHead className="w-24 text-center">Actions</TableHead>
+      <h2 className="text-xl font-semibold mb-4">Topics ({topics.length})</h2>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Title</TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="w-[180px]">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {topics.map((topic) => (
+            <TableRow key={topic.id}>
+              <TableCell className="font-medium">{topic.title}</TableCell>
+              <TableCell>{topic.description.substring(0, 100)}{topic.description.length > 100 ? '...' : ''}</TableCell>
+              <TableCell>
+                {topic.is_active ? (
+                  <Badge variant="success" className="bg-green-100 text-green-800">Active</Badge>
+                ) : (
+                  <Badge variant="secondary" className="bg-gray-100 text-gray-800">Inactive</Badge>
+                )}
+              </TableCell>
+              <TableCell className="space-x-2">
+                <Button variant="ghost" size="sm" onClick={() => onEdit(topic)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => handleDelete(topic.id)}>
+                  <Trash className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => handleManageQuestions(topic.id)}>
+                  <List className="h-4 w-4 mr-2" />
+                  Questions
+                </Button>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {topics.map((topic) => (
-              <TableRow key={topic.id}>
-                <TableCell className="font-medium">{topic.title}</TableCell>
-                <TableCell>{topic.description}</TableCell>
-                <TableCell className="text-center">
-                  <div className="flex items-center justify-center">
-                    <Switch 
-                      checked={topic.is_active} 
-                      onCheckedChange={() => handleToggleActive(topic)} 
-                    />
-                  </div>
-                </TableCell>
-                <TableCell className="text-center">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onEdit(topic)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 }
