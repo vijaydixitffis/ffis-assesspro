@@ -22,7 +22,7 @@ export default function Header() {
             <img 
               src="/lovable-uploads/74e171ed-dfc9-4ff4-8aae-44113fefa8f9.png" 
               alt="FFIS AssessPro Logo" 
-              className="h-8 w-auto" 
+              className="h-10 w-auto" 
             />
             <span className="text-lg font-semibold">AssessPro</span>
           </Link>

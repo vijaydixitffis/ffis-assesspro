@@ -16,7 +16,7 @@ export default function Footer() {
       <div className="container py-4">
         <div className="flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="text-sm text-muted-foreground">
-            &copy; {currentYear} FFIS Assessment Pro. All rights reserved.
+            &copy; {currentYear} Future Focus IT Solutions Assessment Pro. All rights reserved.
           </div>
           <div className="flex items-center gap-4">
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
