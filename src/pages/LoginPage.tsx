@@ -110,7 +110,7 @@ export default function LoginPage() {
           </CardContent>
           
           <CardFooter className="auth-card-footer flex justify-center text-xs text-muted-foreground">
-            <p>AssessPro — Secure authentication powered by Supabase</p>
+            <p>AssessPro — Secure authentication</p>
           </CardFooter>
         </Card>
       </div>
