@@ -24,11 +24,15 @@ import { Trash, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+// Ensure these values exactly match the database constraint
+const QUESTION_TYPES = ['multiple_choice', 'yes_no', 'free_text'] as const;
+type QuestionType = typeof QUESTION_TYPES[number];
+
 // Update the schema to match the database constraints
 const questionSchema = z.object({
   question: z.string().min(5, 'Question must be at least 5 characters'),
-  // Ensure these values match exactly what's expected in the database
-  type: z.enum(['multiple_choice', 'yes_no', 'free_text']),
+  // Use the strict type that matches the database constraint
+  type: z.enum(QUESTION_TYPES),
   is_active: z.boolean().default(true),
 });
 
@@ -45,7 +49,7 @@ interface QuestionFormProps {
   question?: {
     id: string;
     question: string;
-    type: 'multiple_choice' | 'yes_no' | 'free_text';
+    type: QuestionType;
     is_active: boolean;
     answers?: Answer[];
   };
@@ -86,7 +90,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
     }
   }, [questionType, isEditing]);
 
-  const setDefaultAnswers = (type: string) => {
+  const setDefaultAnswers = (type: QuestionType) => {
     if (type === 'yes_no') {
       setAnswers([
         { text: 'Yes', is_correct: true, marks: 1 },
@@ -189,7 +193,10 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
           })
           .eq('id', question.id);
         
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating question:', error);
+          throw error;
+        }
         
         // Delete existing answers
         const { error: deleteError } = await supabase
@@ -197,7 +204,10 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
           .delete()
           .eq('question_id', question.id);
         
-        if (deleteError) throw deleteError;
+        if (deleteError) {
+          console.error('Error deleting answers:', deleteError);
+          throw deleteError;
+        }
       } else {
         // Create new question
         console.log('Creating new question with type:', values.type);
@@ -232,7 +242,10 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
         .from('answers')
         .insert(answersToInsert);
       
-      if (answersError) throw answersError;
+      if (answersError) {
+        console.error('Error inserting answers:', answersError);
+        throw answersError;
+      }
       
       toast.success(isEditing ? 'Question updated successfully' : 'Question created successfully');
       
