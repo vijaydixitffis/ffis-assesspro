@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -111,35 +110,41 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   };
 
   const addAnswer = () => {
+    // Fixed: Use a proper state update to preserve existing answers
     if (answers.length < 4) {
-      setAnswers([...answers, { text: '', is_correct: false, marks: '0' }]);
+      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: false, marks: '0' }]);
+      toast.success("New option added");
     } else {
       toast.error('Maximum 4 options allowed');
     }
   };
 
   const removeAnswer = (index: number) => {
-    const newAnswers = [...answers];
-    newAnswers.splice(index, 1);
-    setAnswers(newAnswers);
+    // Fixed: Use a proper state update
+    setAnswers(prevAnswers => {
+      const newAnswers = [...prevAnswers];
+      newAnswers.splice(index, 1);
+      return newAnswers;
+    });
   };
 
   const updateAnswer = (index: number, field: keyof Answer, value: any) => {
-    const newAnswers = [...answers];
-    
-    // No need to validate marks as it's now a text field
-    newAnswers[index] = { ...newAnswers[index], [field]: value };
+    // Fixed: Use a proper state update
+    setAnswers(prevAnswers => {
+      const newAnswers = [...prevAnswers];
+      newAnswers[index] = { ...newAnswers[index], [field]: value };
 
-    // If setting this answer as correct, set all others to incorrect
-    if (field === 'is_correct' && value === true) {
-      newAnswers.forEach((answer, i) => {
-        if (i !== index) {
-          newAnswers[i] = { ...newAnswers[i], is_correct: false };
-        }
-      });
-    }
+      // If setting this answer as correct, set all others to incorrect
+      if (field === 'is_correct' && value === true) {
+        newAnswers.forEach((answer, i) => {
+          if (i !== index) {
+            newAnswers[i] = { ...newAnswers[i], is_correct: false };
+          }
+        });
+      }
 
-    setAnswers(newAnswers);
+      return newAnswers;
+    });
   };
 
   const validateAnswers = () => {
