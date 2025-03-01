@@ -81,39 +81,10 @@ export default function QuestionManagementPage() {
     setEditingQuestion(null);
   };
 
-  const handleEditQuestion = async (question: any) => {
-    try {
-      console.log('Fetching answers for question:', question.id);
-      
-      // Fetch the answers for this question
-      const { data: answerData, error: answerError } = await supabase
-        .from('answers')
-        .select('id, text, is_correct, marks')
-        .eq('question_id', question.id);
-        
-      if (answerError) {
-        console.error('Error fetching answers:', answerError);
-        throw answerError;
-      }
-      
-      // Log for debugging
-      console.log('Fetched answers:', answerData);
-      
-      // Add the answers to the question object
-      const questionWithAnswers = {
-        ...question,
-        answers: answerData || []
-      };
-      
-      // Log for debugging
-      console.log('Editing question with answers:', questionWithAnswers);
-      
-      setEditingQuestion(questionWithAnswers);
-      setIsAdding(false);
-    } catch (error) {
-      console.error('Error fetching answers:', error);
-      toast.error('Failed to load question answers');
-    }
+  const handleEditQuestion = (question: any) => {
+    console.log('Editing question with answers:', question.answers);
+    setEditingQuestion(question);
+    setIsAdding(false);
   };
 
   const handleFormClose = () => {
@@ -201,7 +172,7 @@ export default function QuestionManagementPage() {
               )}
 
               {/* Only show QuestionsList when not editing a question */}
-              {topicId && !isLoading && !editingQuestion && (
+              {topicId && !isLoading && (
                 <>
                   <Separator className="my-6" />
                   <QuestionsList 

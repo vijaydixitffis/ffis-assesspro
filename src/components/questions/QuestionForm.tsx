@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -51,14 +50,13 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       setAnswers(formattedAnswers);
     } else {
       // Initialize with default answers based on question type
-      setAnswers(setDefaultAnswers(form.getValues('type')));
+      setAnswers(setDefaultAnswers(questionType));
     }
-  }, [isEditing, question]);
+  }, [isEditing, question, question?.id]);
 
   // Add another useEffect to handle type changes
   useEffect(() => {
     // Only reset answers when question type changes and we're not in editing mode
-    // or if we are in editing mode but answers haven't been loaded yet
     if (!isEditing || (isEditing && answers.length === 0)) {
       setAnswers(setDefaultAnswers(questionType));
     }
