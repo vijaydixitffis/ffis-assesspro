@@ -113,7 +113,7 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const addAnswer = () => {
     // Use a proper state update to preserve existing answers
     if (answers.length < 4) {
-      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: null, marks: '0' }]);
+      setAnswers(prevAnswers => [...prevAnswers, { text: '', is_correct: false, marks: '0' }]);
       toast.success("New option added");
     } else {
       toast.error('Maximum 4 options allowed');
@@ -134,9 +134,6 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
     setAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
-
-      // If setting this answer as correct, we no longer need to set all others to incorrect
-      // since we're making is_correct optional
       
       return newAnswers;
     });
@@ -161,8 +158,14 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       return false;
     }
 
-    // No longer check for exactly one correct answer
-    // The is_correct field is now optional
+    // For multiple choice, check if at least one answer is marked as correct
+    if (questionType === 'multiple_choice') {
+      const hasCorrectAnswer = answers.some(a => a.is_correct === true);
+      if (!hasCorrectAnswer) {
+        toast.error('At least one answer must be marked as correct');
+        return false;
+      }
+    }
 
     return true;
   };
@@ -174,6 +177,9 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
 
     try {
       setIsSubmitting(true);
+      
+      // Log the answers to help debug
+      console.log('Submitting with answers:', answers);
       
       let questionId = question?.id;
       
@@ -244,10 +250,13 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
       // Process answers to ensure correct data format
       const answersToInsert = answers.map(answer => ({
         text: answer.text,
-        is_correct: answer.is_correct, // Can now be null
-        marks: answer.marks, // Just pass the marks value as is (text)
+        // Ensure is_correct is a boolean, not null
+        is_correct: answer.is_correct === null ? false : answer.is_correct,
+        marks: answer.marks || '0', // Default to '0' if marks is null
         question_id: questionId
       }));
+      
+      console.log('Inserting answers:', answersToInsert);
       
       // Insert answers
       const { error: answersError } = await supabase
@@ -364,12 +373,10 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
                       <div className="flex items-center space-x-2">
                         <Switch
                           checked={answer.is_correct === true}
-                          onCheckedChange={(checked) => updateAnswer(index, 'is_correct', checked ? true : null)}
+                          onCheckedChange={(checked) => updateAnswer(index, 'is_correct', checked)}
                         />
                         <Label>
-                          {answer.is_correct === true ? 'Correct answer' : 
-                           answer.is_correct === false ? 'Incorrect answer' : 
-                           'Optional (neither correct nor incorrect)'}
+                          {answer.is_correct === true ? 'Correct answer' : 'Incorrect answer'}
                         </Label>
                       </div>
                       {(questionType === 'multiple_choice' && answers.length > 2) && (
