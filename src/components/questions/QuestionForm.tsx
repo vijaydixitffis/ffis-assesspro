@@ -25,7 +25,7 @@ export default function QuestionForm({ question, topicId, userId, onClose, initi
   const [answers, setAnswers] = useState<Answer[]>([]);
   const isEditing = !!question;
 
-  // Define default values with non-optional properties
+  // Define default values with non-optional properties to match schema requirements
   const defaultValues: QuestionFormValues = {
     question: question?.question || '',
     type: question?.type || initialQuestionType || 'multiple_choice',
