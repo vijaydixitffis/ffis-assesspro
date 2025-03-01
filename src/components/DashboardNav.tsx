@@ -1,4 +1,3 @@
-
 import { Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -61,19 +60,17 @@ export function DashboardNav() {
             to="/dashboard"
             className="mb-6 flex h-16 items-center rounded-md px-4 text-primary"
           >
-            <div className="flex items-center gap-2 font-semibold">
+            <div className="flex items-center">
               <img
                 src="/lovable-uploads/74e171ed-dfc9-4ff4-8aae-44113fefa8f9.png"
-                alt="Logo"
-                className="h-8 w-8"
+                alt="Future Focus IT Solutions Logo"
+                className="h-12 w-auto"
               />
-              <span className="text-xl">Skill Assess</span>
             </div>
           </Link>
           
           <div className="space-y-1">
             {routes.map((route) =>
-              // If the route is admin only and user is not admin, don't show it
               route.adminOnly && user?.role !== "admin" ? null : (
                 <Link
                   to={route.href}
