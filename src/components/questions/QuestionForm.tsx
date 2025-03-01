@@ -25,11 +25,11 @@ export default function QuestionForm({ question, topicId, userId, onClose }: Que
   const [answers, setAnswers] = useState<Answer[]>([]);
   const isEditing = !!question;
 
-  // Define default values for the form with proper types
+  // Define default values with non-optional properties
   const defaultValues: QuestionFormValues = {
     question: question?.question || '',
     type: question?.type || 'multiple_choice',
-    is_active: question?.is_active ?? true
+    is_active: question?.is_active !== undefined ? question.is_active : true
   };
 
   const form = useForm<QuestionFormValues>({
