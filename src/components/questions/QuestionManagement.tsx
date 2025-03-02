@@ -129,6 +129,7 @@ export default function QuestionManagement() {
           initialSequenceNumber={nextSequence}
           onSubmit={onSubmit}
           onCancel={handleCloseQuestionForm}
+          isEditing={false}
         />
       );
     });
@@ -169,6 +170,7 @@ export default function QuestionManagement() {
         initialSequenceNumber={question.sequence_number}
         onSubmit={onSubmit}
         onCancel={handleCloseQuestionForm}
+        isEditing={true}
       />
     );
   };

@@ -19,6 +19,7 @@ interface QuestionFormProps {
   initialIsActive?: boolean;
   initialSequenceNumber?: number;
   onCancel: () => void;
+  isEditing?: boolean;
 }
 
 const QuestionForm: React.FC<QuestionFormProps> = ({ 
@@ -27,7 +28,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   initialType = 'multiple_choice', 
   initialIsActive = true,
   initialSequenceNumber,
-  onCancel 
+  onCancel,
+  isEditing = false
 }) => {
   const [question, setQuestion] = useState(initialQuestion);
   const [questionType, setQuestionType] = useState<"multiple_choice" | "yes_no" | "free_text">(initialType);
@@ -87,19 +89,31 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         />
       </div>
 
-      <div>
-        <Label>Question Type</Label>
-        <Select value={questionType} onValueChange={(value) => setQuestionType(value as "multiple_choice" | "yes_no" | "free_text")}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-            <SelectItem value="yes_no">Yes/No</SelectItem>
-            <SelectItem value="free_text">Free Text</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+      {!isEditing && (
+        <div>
+          <Label>Question Type</Label>
+          <Select value={questionType} onValueChange={(value) => setQuestionType(value as "multiple_choice" | "yes_no" | "free_text")}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+              <SelectItem value="yes_no">Yes/No</SelectItem>
+              <SelectItem value="free_text">Free Text</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {isEditing && (
+        <div>
+          <Label>Question Type</Label>
+          <div className="text-sm text-muted-foreground mt-1">
+            {questionType === 'multiple_choice' ? 'Multiple Choice' : 
+             questionType === 'yes_no' ? 'Yes/No' : 'Free Text'}
+          </div>
+        </div>
+      )}
 
       <div className="flex items-center space-x-2">
         <Label htmlFor="active">Active</Label>
