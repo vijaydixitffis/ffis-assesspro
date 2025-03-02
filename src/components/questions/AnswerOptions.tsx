@@ -21,7 +21,7 @@ export default function AnswerOptions({
   questionType 
 }: AnswerOptionsProps) {
   
-  // Initialize with 4 options for multiple choice if not already set
+  // Ensure we always have the right number of options for multiple choice
   useEffect(() => {
     if (questionType === 'multiple_choice' && answers.length < 4) {
       const currentLength = answers.length;

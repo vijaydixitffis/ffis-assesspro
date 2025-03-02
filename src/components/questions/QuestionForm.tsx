@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,25 +34,25 @@ export default function QuestionForm({ question, topicId, userId, onClose, initi
   useEffect(() => {
     if (isEditing && question.answers && question.answers.length > 0) {
       console.log('Setting answers from question:', question.answers);
-      // Keep the original values for is_correct (including null)
-      const formattedAnswers = question.answers.map(answer => ({
+      setAnswers(question.answers.map(answer => ({
         ...answer,
+        id: answer.id,
+        text: answer.text,
+        is_correct: answer.is_correct,
         marks: answer.marks || '0'
-      }));
-      setAnswers(formattedAnswers);
+      })));
     } else {
       // Initialize with default answers based on question type
       setAnswers(setDefaultAnswers(questionType));
     }
-  }, [isEditing, question, question?.id, questionType]);
+  }, [isEditing, question, questionType]);
 
-  // Add another useEffect to handle type changes
+  // Update answers when question type changes (only if not editing)
   useEffect(() => {
-    // Only reset answers when question type changes and we're not in editing mode
-    if (!isEditing || (isEditing && answers.length === 0)) {
+    if (!isEditing) {
       setAnswers(setDefaultAnswers(questionType));
     }
-  }, [questionType, isEditing, answers.length]);
+  }, [questionType, isEditing]);
 
   const onSubmit = async (values: QuestionFormValues) => {
     if (!validateAnswers(answers, questionType)) {
