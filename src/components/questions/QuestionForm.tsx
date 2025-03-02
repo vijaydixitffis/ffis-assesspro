@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -7,17 +8,31 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface QuestionFormProps {
-  onSubmit: (questionData: { question: string; type: "multiple_choice" | "yes_no" | "free_text"; is_active: boolean }) => Promise<void>;
+  onSubmit: (questionData: { 
+    question: string; 
+    type: "multiple_choice" | "yes_no" | "free_text"; 
+    is_active: boolean;
+    sequence_number?: number;
+  }) => Promise<void>;
   initialQuestion?: string;
   initialType?: "multiple_choice" | "yes_no" | "free_text";
   initialIsActive?: boolean;
+  initialSequenceNumber?: number;
   onCancel: () => void;
 }
 
-const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, initialQuestion = '', initialType = 'multiple_choice', initialIsActive = true, onCancel }) => {
+const QuestionForm: React.FC<QuestionFormProps> = ({ 
+  onSubmit, 
+  initialQuestion = '', 
+  initialType = 'multiple_choice', 
+  initialIsActive = true,
+  initialSequenceNumber,
+  onCancel 
+}) => {
   const [question, setQuestion] = useState(initialQuestion);
   const [questionType, setQuestionType] = useState<"multiple_choice" | "yes_no" | "free_text">(initialType);
   const [isActive, setIsActive] = useState(initialIsActive);
+  const [sequenceNumber, setSequenceNumber] = useState<number | undefined>(initialSequenceNumber);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -29,8 +44,14 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, initialQuestion =
       const questionData = {
         question: question,
         type: questionType,
-        is_active: isActive
-      } as { question: string; type: "multiple_choice" | "yes_no" | "free_text"; is_active: boolean };
+        is_active: isActive,
+        sequence_number: sequenceNumber
+      } as { 
+        question: string; 
+        type: "multiple_choice" | "yes_no" | "free_text"; 
+        is_active: boolean;
+        sequence_number?: number;
+      };
       
       await onSubmit(questionData);
       toast.success('Question saved successfully!');
@@ -52,6 +73,17 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, initialQuestion =
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           placeholder="Enter question text"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="sequenceNumber">Sequence Number</Label>
+        <Input
+          id="sequenceNumber"
+          type="number"
+          value={sequenceNumber || ''}
+          onChange={(e) => setSequenceNumber(e.target.value ? parseInt(e.target.value) : undefined)}
+          placeholder="Enter sequence number (optional)"
         />
       </div>
 
