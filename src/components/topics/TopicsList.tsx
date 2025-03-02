@@ -66,7 +66,7 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="w-[140px]">Actions</TableHead>
+            <TableHead className="w-[200px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -81,14 +81,16 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
                   <Badge variant="secondary" className="bg-gray-100 text-gray-800">Inactive</Badge>
                 )}
               </TableCell>
-              <TableCell className="space-x-2">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(topic)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => handleManageQuestions(topic.id)}>
-                  <List className="h-4 w-4 mr-2" />
-                  Questions
-                </Button>
+              <TableCell>
+                <div className="flex items-center space-x-2">
+                  <Button variant="ghost" size="sm" onClick={() => onEdit(topic)}>
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => handleManageQuestions(topic.id)}>
+                    <List className="h-4 w-4 mr-2" />
+                    Questions
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
