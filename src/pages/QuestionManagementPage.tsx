@@ -14,30 +14,7 @@ export default function QuestionManagementPage() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const topicId = searchParams.get('topicId');
-  const [isAdding, setIsAdding] = useState(false);
-  const [selectedQuestionType, setSelectedQuestionType] = useState<QuestionType>('multiple_choice');
-  const [editingQuestion, setEditingQuestion] = useState<any>(null);
-  const [refreshQuestions, setRefreshQuestions] = useState(0);
   const { topic, isLoading } = useTopicData(topicId);
-
-  const handleAddQuestion = (questionType: QuestionType) => {
-    setIsAdding(true);
-    setSelectedQuestionType(questionType);
-    setEditingQuestion(null);
-  };
-
-  const handleEditQuestion = (question: any) => {
-    console.log('Editing question with answers:', question.answers);
-    setEditingQuestion(question);
-    setIsAdding(false);
-  };
-
-  const handleFormClose = () => {
-    setIsAdding(false);
-    setEditingQuestion(null);
-    // Trigger refresh of questions list
-    setRefreshQuestions(prev => prev + 1);
-  };
 
   if (user?.role !== 'admin') {
     return <AccessDeniedView />;
@@ -48,29 +25,12 @@ export default function QuestionManagementPage() {
       <DashboardNav />
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto max-w-7xl p-6">
-          <TopicHeader 
-            topic={topic}
-            isAdding={isAdding}
-            editingQuestion={editingQuestion}
-            topicId={topicId}
-            onAddQuestion={handleAddQuestion}
-          />
-
           {isLoading ? (
             <div className="text-center py-8">Loading...</div>
           ) : !topicId ? (
             <NoTopicSelected />
           ) : (
-            <QuestionManagement
-              isAdding={isAdding}
-              editingQuestion={editingQuestion}
-              topicId={topicId}
-              userId={user?.id || ''}
-              onFormClose={handleFormClose}
-              onEdit={handleEditQuestion}
-              refreshQuestions={refreshQuestions}
-              selectedQuestionType={selectedQuestionType}
-            />
+            <QuestionManagement />
           )}
         </div>
       </main>

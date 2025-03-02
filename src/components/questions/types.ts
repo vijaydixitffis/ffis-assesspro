@@ -30,8 +30,8 @@ export interface QuestionFormProps {
     is_active: boolean;
     answers?: Answer[];
   };
+  initialQuestionType?: QuestionType;
   topicId: string;
   userId: string;
   onClose: () => void;
-  initialQuestionType?: QuestionType;
 }

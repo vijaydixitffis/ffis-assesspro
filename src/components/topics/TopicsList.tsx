@@ -30,9 +30,9 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
       setIsLoading(true);
       const { data, error } = await supabase
         .from('topics')
-        .select('id, title, description, is_active, created_at')
+        .select('id, title, description, is_active, created_at, sequence_number')
         .eq('assessment_id', assessmentId)
-        .order('created_at', { ascending: false });
+        .order('sequence_number', { ascending: true });
       
       if (error) throw error;
       
@@ -63,6 +63,7 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-20">Sequence</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
@@ -72,6 +73,7 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
         <TableBody>
           {topics.map((topic) => (
             <TableRow key={topic.id}>
+              <TableCell>{topic.sequence_number}</TableCell>
               <TableCell className="font-medium">{topic.title}</TableCell>
               <TableCell>{topic.description.substring(0, 100)}{topic.description.length > 100 ? '...' : ''}</TableCell>
               <TableCell>

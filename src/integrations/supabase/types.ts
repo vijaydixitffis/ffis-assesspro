@@ -325,6 +325,7 @@ export type Database = {
           description: string
           id: string
           is_active: boolean
+          sequence_number: number | null
           title: string
           updated_at: string | null
         }
@@ -335,6 +336,7 @@ export type Database = {
           description: string
           id?: string
           is_active?: boolean
+          sequence_number?: number | null
           title: string
           updated_at?: string | null
         }
@@ -345,6 +347,7 @@ export type Database = {
           description?: string
           id?: string
           is_active?: boolean
+          sequence_number?: number | null
           title?: string
           updated_at?: string | null
         }

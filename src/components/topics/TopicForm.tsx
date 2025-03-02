@@ -22,7 +22,8 @@ import {
 const topicSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters').max(100),
   description: z.string().min(5, 'Description must be at least 5 characters'),
-  is_active: z.boolean().default(true)
+  is_active: z.boolean().default(true),
+  sequence_number: z.coerce.number().int().min(0, 'Sequence must be a positive number').default(0)
 });
 
 type TopicFormValues = z.infer<typeof topicSchema>;
@@ -33,6 +34,7 @@ interface TopicFormProps {
     title: string;
     description: string;
     is_active: boolean;
+    sequence_number?: number;
   };
   assessmentId: string;
   userId: string;
@@ -48,7 +50,8 @@ export default function TopicForm({ topic, assessmentId, userId, onClose }: Topi
     defaultValues: {
       title: topic?.title || '',
       description: topic?.description || '',
-      is_active: topic?.is_active ?? true
+      is_active: topic?.is_active ?? true,
+      sequence_number: topic?.sequence_number || 0
     }
   });
 
@@ -63,7 +66,8 @@ export default function TopicForm({ topic, assessmentId, userId, onClose }: Topi
           .update({
             title: values.title,
             description: values.description,
-            is_active: values.is_active
+            is_active: values.is_active,
+            sequence_number: values.sequence_number
           })
           .eq('id', topic.id);
         
@@ -78,6 +82,7 @@ export default function TopicForm({ topic, assessmentId, userId, onClose }: Topi
             title: values.title,
             description: values.description,
             is_active: values.is_active,
+            sequence_number: values.sequence_number,
             assessment_id: assessmentId,
             created_by: userId
           });
@@ -134,6 +139,28 @@ export default function TopicForm({ topic, assessmentId, userId, onClose }: Topi
               </FormControl>
               <FormDescription>
                 Provide a detailed description of what this topic covers
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="sequence_number"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Sequence Number</FormLabel>
+              <FormControl>
+                <Input 
+                  type="number" 
+                  min="0" 
+                  placeholder="Enter sequence number" 
+                  {...field} 
+                />
+              </FormControl>
+              <FormDescription>
+                Order in which this topic will appear (lower numbers first)
               </FormDescription>
               <FormMessage />
             </FormItem>

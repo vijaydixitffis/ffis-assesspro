@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +15,7 @@ interface Topic {
   title: string;
   description: string;
   assessment_title?: string;
+  sequence_number?: number;
 }
 
 export default function QuestionManagement() {
@@ -41,7 +43,7 @@ export default function QuestionManagement() {
     try {
       const { data, error } = await supabase
         .from('topics')
-        .select('id, title, description, assessments(title)')
+        .select('id, title, description, sequence_number, assessments(title)')
         .eq('id', topicId)
         .single();
 
@@ -52,6 +54,7 @@ export default function QuestionManagement() {
           id: data.id,
           title: data.title,
           description: data.description,
+          sequence_number: data.sequence_number,
           assessment_title: data.assessments?.title || undefined,
         });
       } else {
