@@ -62,8 +62,15 @@ export default function QuestionForm({ question, topicId, userId, onClose, initi
     try {
       setIsSubmitting(true);
       
+      // Ensure all required fields are present for saveQuestion
+      const questionData: QuestionFormValues = {
+        question: values.question,
+        type: values.type,
+        is_active: values.is_active
+      };
+      
       const result = await saveQuestion(
-        values,
+        questionData,
         answers,
         isEditing,
         question?.id,

@@ -18,9 +18,10 @@ interface QuestionTypeSelectorProps {
 }
 
 export function QuestionTypeSelector({ form, isEditing }: QuestionTypeSelectorProps) {
-  // If editing, display the question type as read-only text
-  if (isEditing) {
-    const questionType = form.watch('type');
+  const questionType = form.watch('type');
+  
+  // If editing or adding a multiple choice question, display the question type as read-only text
+  if (isEditing || questionType === 'multiple_choice') {
     const displayType = 
       questionType === 'yes_no' ? 'Yes/No' :
       questionType === 'multiple_choice' ? 'Multiple Choice' : 'Free Text';
@@ -30,16 +31,18 @@ export function QuestionTypeSelector({ form, isEditing }: QuestionTypeSelectorPr
         <FormLabel>Question Type</FormLabel>
         <div className="flex items-center">
           <span className="text-sm font-medium text-gray-700">{displayType}</span>
-          <span className="ml-2 text-xs text-muted-foreground">(Cannot be changed when editing)</span>
+          {isEditing && (
+            <span className="ml-2 text-xs text-muted-foreground">(Cannot be changed when editing)</span>
+          )}
         </div>
         <FormDescription>
-          Question type cannot be modified after creation
+          {isEditing ? "Question type cannot be modified after creation" : "Multiple choice question type is selected"}
         </FormDescription>
       </FormItem>
     );
   }
   
-  // For new questions, allow selection
+  // For new questions that aren't multiple choice, allow selection
   return (
     <FormField
       control={form.control}
