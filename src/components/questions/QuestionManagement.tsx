@@ -63,8 +63,8 @@ export default function QuestionManagement({
         </Card>
       )}
 
-      {/* Only show the questions list when not adding a new question */}
-      {topicId && !isAdding && (
+      {/* Only show the questions list when not adding or editing a question */}
+      {topicId && !isAdding && !editingQuestion && (
         <>
           <Separator className="my-6" />
           <QuestionsList 
