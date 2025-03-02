@@ -34,6 +34,7 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
           type, 
           is_active, 
           created_at,
+          sequence_number,
           answers (
             id,
             text,
@@ -42,6 +43,7 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
           )
         `)
         .eq('topic_id', topicId)
+        .order('sequence_number', { ascending: true })
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -112,6 +114,7 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[80px]">Seq #</TableHead>
             <TableHead>Question</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
@@ -122,6 +125,7 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
         <TableBody>
           {questions.map((question) => (
             <TableRow key={question.id}>
+              <TableCell>{question.sequence_number || '-'}</TableCell>
               <TableCell className="font-medium">{question.question}</TableCell>
               <TableCell>
                 <Badge variant="outline">{getQuestionTypeLabel(question.type)}</Badge>
