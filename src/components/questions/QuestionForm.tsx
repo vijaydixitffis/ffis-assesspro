@@ -1,24 +1,14 @@
-
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { 
-  Form, 
-  FormControl, 
-  FormDescription, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { QuestionFormProps, QuestionFormValues, questionSchema, Answer } from './types';
 import AnswerOptions from './AnswerOptions';
 import { validateAnswers, saveQuestion, setDefaultAnswers } from './questionUtils';
+import { QuestionInput } from './form/QuestionInput';
+import { QuestionTypeSelector } from './form/QuestionTypeSelector';
+import { ActiveToggle } from './form/ActiveToggle';
+import { FormActions } from './form/FormActions';
 
 export default function QuestionForm({ question, topicId, userId, onClose, initialQuestionType }: QuestionFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,104 +86,19 @@ export default function QuestionForm({ question, topicId, userId, onClose, initi
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormField
-          control={form.control}
-          name="question"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Question Text</FormLabel>
-              <FormControl>
-                <Textarea 
-                  placeholder="Enter your question" 
-                  className="min-h-24" 
-                  {...field} 
-                />
-              </FormControl>
-              <FormDescription>
-                Write a clear, concise question
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {isEditing && (
-          <FormField
-            control={form.control}
-            name="type"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel>Question Type</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                    className="flex flex-col space-y-1"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="yes_no" id="yes_no" />
-                      <Label htmlFor="yes_no">Yes/No</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="multiple_choice" id="multiple_choice" />
-                      <Label htmlFor="multiple_choice">Multiple Choice</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="free_text" id="free_text" />
-                      <Label htmlFor="free_text">Free Text</Label>
-                    </div>
-                  </RadioGroup>
-                </FormControl>
-                <FormDescription>
-                  Select the type of question you want to create
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-
+        <QuestionInput form={form} />
+        <QuestionTypeSelector form={form} isEditing={isEditing} />
         <AnswerOptions 
           answers={answers}
           setAnswers={setAnswers}
           questionType={questionType}
         />
-
-        <FormField
-          control={form.control}
-          name="is_active"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <FormLabel className="text-base">Active</FormLabel>
-                <FormDescription>
-                  Make this question available in assessments
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
+        <ActiveToggle form={form} />
+        <FormActions 
+          onClose={onClose} 
+          isSubmitting={isSubmitting} 
+          isEditing={isEditing} 
         />
-
-        <div className="flex justify-end space-x-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={onClose} 
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : isEditing ? 'Update Question' : 'Create Question'}
-          </Button>
-        </div>
       </form>
     </Form>
   );
