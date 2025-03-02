@@ -21,16 +21,6 @@ export const validateAnswers = (answers: Answer[], questionType: QuestionType) =
     return false;
   }
 
-  // For multiple choice, make sure at least one answer is marked as correct
-  // But only if it's not free text (where is_correct can be null)
-  if (questionType === 'multiple_choice') {
-    const hasCorrectAnswer = answers.some(a => a.is_correct === true);
-    if (!hasCorrectAnswer) {
-      toast.error('At least one answer must be marked as correct');
-      return false;
-    }
-  }
-
   return true;
 };
 
