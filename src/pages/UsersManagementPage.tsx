@@ -14,6 +14,7 @@ export default function UsersManagementPage() {
   const { user } = useAuth();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Only admins can manage users
   if (user?.role !== "admin") {
@@ -43,6 +44,8 @@ export default function UsersManagementPage() {
   const handleCloseForm = () => {
     setIsFormOpen(false);
     setSelectedUser(null);
+    // Trigger a refresh of the users list
+    setRefreshTrigger(prev => prev + 1);
   };
 
   return (
@@ -92,7 +95,7 @@ export default function UsersManagementPage() {
               </CardHeader>
               <Separator />
               <CardContent className="pt-6">
-                <UsersList onEdit={handleEditUser} />
+                <UsersList onEdit={handleEditUser} key={refreshTrigger} />
               </CardContent>
             </Card>
           </div>
