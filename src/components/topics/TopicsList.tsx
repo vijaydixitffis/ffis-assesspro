@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash, List } from 'lucide-react';
+import { Edit, List } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
@@ -45,56 +45,6 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this topic? This will also delete all associated questions.')) {
-      return;
-    }
-
-    try {
-      // Check if there are any questions
-      const { data: questionsData, error: questionsCheckError } = await supabase
-        .from('questions')
-        .select('id')
-        .eq('topic_id', id);
-      
-      if (questionsCheckError) throw questionsCheckError;
-      
-      // If there are questions, delete their answers first
-      if (questionsData && questionsData.length > 0) {
-        const questionIds = questionsData.map(q => q.id);
-        
-        const { error: answersError } = await supabase
-          .from('answers')
-          .delete()
-          .in('question_id', questionIds);
-        
-        if (answersError) throw answersError;
-        
-        // Then delete the questions
-        const { error: questionsError } = await supabase
-          .from('questions')
-          .delete()
-          .eq('topic_id', id);
-        
-        if (questionsError) throw questionsError;
-      }
-      
-      // Finally delete the topic
-      const { error } = await supabase
-        .from('topics')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
-      
-      toast.success('Topic deleted successfully');
-      fetchTopics();
-    } catch (error) {
-      console.error('Error deleting topic:', error);
-      toast.error('Failed to delete topic');
-    }
-  };
-
   const handleManageQuestions = (topicId: string) => {
     navigate(`/admin/questions?topicId=${topicId}`);
   };
@@ -116,7 +66,7 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead className="w-[180px]">Actions</TableHead>
+            <TableHead className="w-[140px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -134,9 +84,6 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
               <TableCell className="space-x-2">
                 <Button variant="ghost" size="sm" onClick={() => onEdit(topic)}>
                   <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => handleDelete(topic.id)}>
-                  <Trash className="h-4 w-4" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={() => handleManageQuestions(topic.id)}>
                   <List className="h-4 w-4 mr-2" />
