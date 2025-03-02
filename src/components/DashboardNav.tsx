@@ -10,7 +10,8 @@ import {
   CircleUser,
   HelpCircle,
   Home,
-  LogOut
+  LogOut,
+  Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +38,13 @@ export function DashboardNav() {
       icon: BookOpen,
       href: "/admin/topics",
       active: location.pathname === "/admin/topics",
+      adminOnly: true,
+    },
+    {
+      label: "Users",
+      icon: Users,
+      href: "/admin/users",
+      active: location.pathname === "/admin/users",
       adminOnly: true,
     },
     {

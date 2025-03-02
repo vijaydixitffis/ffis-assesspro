@@ -18,7 +18,7 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
     // Then query the profiles table for additional user information
     const { data, error } = await supabase
       .from('profiles')
-      .select('first_name, last_name, role')
+      .select('first_name, last_name, role, is_active')
       .eq('id', userId)
       .single();
     
@@ -33,7 +33,8 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
         name: 'User',
         firstName: '',
         lastName: '',
-        role: 'client' // Default role
+        role: 'client', // Default role
+        isActive: true
       };
     }
     
@@ -61,7 +62,8 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
         name: name,
         firstName: firstName,
         lastName: lastName,
-        role: userRole
+        role: userRole,
+        isActive: data.is_active
       };
     }
     
@@ -73,7 +75,8 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
       name: 'User',
       firstName: '',
       lastName: '',
-      role: 'client' // Default role
+      role: 'client', // Default role
+      isActive: true
     };
   } catch (error) {
     console.error('Error fetching user profile:', error);
@@ -87,7 +90,8 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
       name: 'User',
       firstName: '',
       lastName: '',
-      role: 'client' // Default role
+      role: 'client', // Default role
+      isActive: true
     };
   }
 };

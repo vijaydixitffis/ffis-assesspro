@@ -12,6 +12,7 @@ import DashboardPage from '@/pages/DashboardPage';
 import AssessmentManagementPage from '@/pages/AssessmentManagementPage';
 import TopicManagementPage from '@/pages/TopicManagementPage';
 import QuestionManagementPage from '@/pages/QuestionManagementPage';
+import UsersManagementPage from '@/pages/UsersManagementPage';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -45,6 +46,12 @@ function App() {
               <Route path="/admin/questions" element={
                 <ProtectedRoute requiredRole="admin">
                   <QuestionManagementPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/admin/users" element={
+                <ProtectedRoute requiredRole="admin">
+                  <UsersManagementPage />
                 </ProtectedRoute>
               } />
               
