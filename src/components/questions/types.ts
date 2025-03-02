@@ -11,7 +11,6 @@ export const questionSchema = z.object({
   // Use the strict type that matches the database constraint
   type: z.enum(QUESTION_TYPES),
   is_active: z.boolean().default(true),
-  sequence_number: z.number().optional(),
 });
 
 export type QuestionFormValues = z.infer<typeof questionSchema>;
@@ -29,7 +28,6 @@ export interface QuestionFormProps {
     question: string;
     type: QuestionType;
     is_active: boolean;
-    sequence_number?: number;
     answers?: Answer[];
   };
   initialQuestionType?: QuestionType;

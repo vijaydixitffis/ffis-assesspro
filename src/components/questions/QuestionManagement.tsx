@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +8,7 @@ import QuestionForm from '@/components/questions/QuestionForm';
 import QuestionsList from '@/components/questions/QuestionsList';
 import { useAuth } from '@/contexts/AuthContext';
 import TopicHeader from './TopicHeader';
-import { QuestionType, Answer } from './types';
+import { QuestionType } from './types';
 
 interface Topic {
   id: string;
@@ -70,86 +71,14 @@ export default function QuestionManagement() {
     setEditingQuestion(null);
     setQuestionForm(null); // Clear existing form
 
-    const getNextSequenceNumber = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('questions')
-          .select('sequence_number')
-          .eq('topic_id', selectedTopicId)
-          .order('sequence_number', { ascending: false })
-          .limit(1);
-          
-        if (error) throw error;
-        
-        const nextSequence = data && data.length > 0 && data[0].sequence_number
-          ? data[0].sequence_number + 1
-          : 1;
-          
-        return nextSequence;
-      } catch (error) {
-        console.error('Error getting next sequence number:', error);
-        return 1; // Default to 1 if we can't determine
-      }
-    };
-
-    getNextSequenceNumber().then(nextSequence => {
-      const onSubmit = async (questionData: any) => {
-        try {
-          const { data, error } = await supabase
-            .from('questions')
-            .insert([
-              {
-                question: questionData.question,
-                type: questionData.type,
-                is_active: questionData.is_active,
-                sequence_number: questionData.sequence_number || nextSequence,
-                topic_id: selectedTopicId,
-                created_by: user?.id,
-              },
-            ])
-            .select('id')
-            .single();
-
-          if (error) throw error;
-          
-          if (data && questionData.answers && questionData.answers.length > 0) {
-            const answersToInsert = questionData.answers
-              .filter((answer: Answer) => answer.text.trim() !== '' || questionData.type === 'yes_no')
-              .map((answer: Answer) => ({
-                question_id: data.id,
-                text: answer.text,
-                is_correct: answer.is_correct,
-                marks: answer.marks,
-              }));
-            
-            if (answersToInsert.length > 0) {
-              const { error: answersError } = await supabase
-                .from('answers')
-                .insert(answersToInsert);
-              
-              if (answersError) throw answersError;
-            }
-          }
-
-          handleCloseQuestionForm();
-        } catch (error) {
-          console.error('Error creating question:', error);
-          throw new Error('Failed to create question');
-        }
-      };
-
-      setQuestionForm(
-        <QuestionForm
-          initialQuestion=""
-          initialType={questionType}
-          initialIsActive={true}
-          initialSequenceNumber={nextSequence}
-          onSubmit={onSubmit}
-          onCancel={handleCloseQuestionForm}
-          isEditing={false}
-        />
-      );
-    });
+    setQuestionForm(
+      <QuestionForm
+        initialQuestionType={questionType}
+        topicId={selectedTopicId || ''}
+        userId={user?.id || ''}
+        onClose={handleCloseQuestionForm}
+      />
+    );
   };
 
   const handleEditQuestion = (question: any) => {
@@ -157,84 +86,14 @@ export default function QuestionManagement() {
     setEditingQuestion(question);
     setQuestionForm(null); // Clear existing form
 
-    const fetchAnswers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('answers')
-          .select('*')
-          .eq('question_id', question.id)
-          .order('id');
-        
-        if (error) throw error;
-        
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching answers:', error);
-        return [];
-      }
-    };
-
-    fetchAnswers().then(answers => {
-      const onSubmit = async (questionData: any) => {
-        try {
-          const { error } = await supabase
-            .from('questions')
-            .update({
-              question: questionData.question,
-              is_active: questionData.is_active,
-              sequence_number: questionData.sequence_number,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', question.id);
-
-          if (error) throw error;
-
-          if (questionData.answers && questionData.answers.length > 0) {
-            const { error: deleteError } = await supabase
-              .from('answers')
-              .delete()
-              .eq('question_id', question.id);
-            
-            if (deleteError) throw deleteError;
-            
-            const answersToInsert = questionData.answers
-              .filter((answer: Answer) => answer.text.trim() !== '' || question.type === 'yes_no')
-              .map((answer: Answer) => ({
-                question_id: question.id,
-                text: answer.text,
-                is_correct: answer.is_correct,
-                marks: answer.marks,
-              }));
-            
-            if (answersToInsert.length > 0) {
-              const { error: insertError } = await supabase
-                .from('answers')
-                .insert(answersToInsert);
-              
-              if (insertError) throw insertError;
-            }
-          }
-
-          handleCloseQuestionForm();
-        } catch (error) {
-          console.error('Error updating question:', error);
-          throw new Error('Failed to update question');
-        }
-      };
-
-      setQuestionForm(
-        <QuestionForm
-          initialQuestion={question.question}
-          initialType={question.type}
-          initialIsActive={question.is_active}
-          initialSequenceNumber={question.sequence_number}
-          initialAnswers={answers}
-          onSubmit={onSubmit}
-          onCancel={handleCloseQuestionForm}
-          isEditing={true}
-        />
-      );
-    });
+    setQuestionForm(
+      <QuestionForm
+        question={question}
+        topicId={selectedTopicId || ''}
+        userId={user?.id || ''}
+        onClose={handleCloseQuestionForm}
+      />
+    );
   };
 
   const handleCloseQuestionForm = () => {

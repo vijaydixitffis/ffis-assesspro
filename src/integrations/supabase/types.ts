@@ -218,7 +218,6 @@ export type Database = {
           id: string
           is_active: boolean
           question: string
-          sequence_number: number | null
           topic_id: string
           type: string
           updated_at: string | null
@@ -229,7 +228,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           question: string
-          sequence_number?: number | null
           topic_id: string
           type: string
           updated_at?: string | null
@@ -240,7 +238,6 @@ export type Database = {
           id?: string
           is_active?: boolean
           question?: string
-          sequence_number?: number | null
           topic_id?: string
           type?: string
           updated_at?: string | null
