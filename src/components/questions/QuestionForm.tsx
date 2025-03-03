@@ -5,11 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { QuestionFormProps, QuestionType, QUESTION_TYPES, Answer } from './types';
+import { QuestionFormProps, QuestionType, Answer } from './types';
 import { supabase } from '@/integrations/supabase/client';
-import { Trash2 } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import MultipleChoiceAnswers from './form/MultipleChoiceAnswers';
+import YesNoAnswers from './form/YesNoAnswers';
+import FreeTextAnswer from './form/FreeTextAnswer';
+import QuestionTypeDisplay from './form/QuestionTypeDisplay';
+import { validateQuestionForm } from './utils/questionFormUtils';
 
 const QuestionForm: React.FC<QuestionFormProps> = ({ 
   question, 
@@ -134,41 +136,19 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   };
 
   const validateForm = () => {
-    if (questionText.trim().length < 5) {
-      setError('Question must be at least 5 characters');
+    const validation = validateQuestionForm(
+      questionText,
+      questionType,
+      multipleChoiceAnswers,
+      yesNoAnswers,
+      freeTextMarks
+    );
+    
+    if (!validation.isValid) {
+      setError(validation.error);
       return false;
     }
-
-    if (questionType === 'multiple_choice') {
-      const filledAnswers = multipleChoiceAnswers.filter(a => a.text.trim() !== '');
-      if (filledAnswers.length < 2) {
-        setError('At least two answer options are required');
-        return false;
-      }
-      
-      const filledMarks = filledAnswers.filter(a => a.marks && a.marks.trim() !== '');
-      if (filledMarks.length > 0 && filledMarks.length < filledAnswers.length) {
-        setError('Either provide marks for all answers or leave all blank');
-        return false;
-      }
-    } else if (questionType === 'yes_no') {
-      if (yesNoAnswers[0].text.trim() === '' || yesNoAnswers[1].text.trim() === '') {
-        setError('Both Yes and No answers must be provided');
-        return false;
-      }
-      
-      const filledMarks = yesNoAnswers.filter(a => a.marks && a.marks.trim() !== '');
-      if (filledMarks.length > 0 && filledMarks.length < yesNoAnswers.length) {
-        setError('Either provide marks for all answers or leave all blank');
-        return false;
-      }
-    } else if (questionType === 'free_text') {
-      if (!freeTextMarks) {
-        setError('Please provide marks for the free text answer');
-        return false;
-      }
-    }
-
+    
     setError('');
     return true;
   };
@@ -332,30 +312,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
       <div className="flex gap-6">
         <div className="w-1/2">
-          <Label>Question Type</Label>
-          {question?.id ? (
-            <Input
-              value={questionType === 'multiple_choice' ? 'Multiple Choice' : 
-                    questionType === 'yes_no' ? 'Yes/No' : 'Free Text'}
-              disabled
-              className="w-full bg-muted"
-            />
-          ) : (
-            <Select 
-              value={questionType} 
-              onValueChange={(value) => setQuestionType(value as QuestionType)}
-              disabled={!!question?.id}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-                <SelectItem value="yes_no">Yes/No</SelectItem>
-                <SelectItem value="free_text">Free Text</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
+          <QuestionTypeDisplay
+            questionType={questionType}
+            onQuestionTypeChange={setQuestionType}
+            isEditing={!!question?.id}
+          />
         </div>
         
         <div className="w-1/2">
@@ -372,126 +333,26 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       </div>
 
       {questionType === 'multiple_choice' && (
-        <div className="space-y-4">
-          <Label>Answer Options (Exactly 4)</Label>
-          {multipleChoiceAnswers.map((answer, index) => (
-            <div key={index} className="flex items-start gap-2 p-3 border rounded-md">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor={`option-${index}`}>Option {index + 1}</Label>
-                <Input
-                  id={`option-${index}`}
-                  placeholder={`Option ${index + 1}`}
-                  value={answer.text}
-                  onChange={(e) => handleMultipleChoiceAnswerChange(index, 'text', e.target.value)}
-                />
-                <Label htmlFor={`comment-${index}`}>Comment (Optional)</Label>
-                <Textarea
-                  id={`comment-${index}`}
-                  placeholder="Optional comment"
-                  className="h-20"
-                  value={answer.comment || ''}
-                  onChange={(e) => handleMultipleChoiceAnswerChange(index, 'comment', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`marks-${index}`}>Marks</Label>
-                <Input
-                  id={`marks-${index}`}
-                  className="w-20"
-                  placeholder="Marks"
-                  value={answer.marks || ''}
-                  onChange={(e) => handleMultipleChoiceAnswerChange(index, 'marks', e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col items-center mt-7 ml-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id={`correct-${index}`}
-                    checked={answer.is_correct === true}
-                    onCheckedChange={(checked) => handleMultipleChoiceAnswerChange(index, 'is_correct', checked)}
-                  />
-                  <Label htmlFor={`correct-${index}`}>Correct</Label>
-                </div>
-              </div>
-            </div>
-          ))}
-          <p className="text-sm text-muted-foreground">Note: Marking a correct answer is optional</p>
-        </div>
+        <MultipleChoiceAnswers 
+          answers={multipleChoiceAnswers} 
+          onChange={handleMultipleChoiceAnswerChange} 
+        />
       )}
 
       {questionType === 'yes_no' && (
-        <div className="space-y-4">
-          <Label>Yes/No Options</Label>
-          {yesNoAnswers.map((answer, index) => (
-            <div key={index} className="flex items-start gap-2 p-3 border rounded-md">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor={`yesno-option-${index}`}>
-                  {index === 0 ? 'Yes Option Text' : 'No Option Text'}
-                </Label>
-                <Input
-                  id={`yesno-option-${index}`}
-                  placeholder={index === 0 ? 'Yes text' : 'No text'}
-                  value={answer.text}
-                  onChange={(e) => handleYesNoAnswerChange(index, 'text', e.target.value)}
-                />
-                <Label htmlFor={`yesno-comment-${index}`}>Comment (Optional)</Label>
-                <Textarea
-                  id={`yesno-comment-${index}`}
-                  placeholder="Optional comment"
-                  className="h-20"
-                  value={answer.comment || ''}
-                  onChange={(e) => handleYesNoAnswerChange(index, 'comment', e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor={`yesno-marks-${index}`}>Marks</Label>
-                <Input
-                  id={`yesno-marks-${index}`}
-                  className="w-20"
-                  placeholder="Marks"
-                  value={answer.marks || ''}
-                  onChange={(e) => handleYesNoAnswerChange(index, 'marks', e.target.value)}
-                />
-              </div>
-              <div className="flex flex-col items-center mt-7 ml-2">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id={`yesno-correct-${index}`}
-                    checked={answer.is_correct === true}
-                    onCheckedChange={(checked) => handleYesNoAnswerChange(index, 'is_correct', checked)}
-                  />
-                  <Label htmlFor={`yesno-correct-${index}`}>Correct</Label>
-                </div>
-              </div>
-            </div>
-          ))}
-          <p className="text-sm text-muted-foreground">Note: Marking a correct answer is optional</p>
-        </div>
+        <YesNoAnswers 
+          answers={yesNoAnswers} 
+          onChange={handleYesNoAnswerChange} 
+        />
       )}
 
       {questionType === 'free_text' && (
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="freeTextMarks">Marks</Label>
-            <Input
-              id="freeTextMarks"
-              placeholder="Enter marks for correct answer"
-              value={freeTextMarks}
-              onChange={(e) => setFreeTextMarks(e.target.value)}
-              className="w-32"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="freeTextComment">Comment (Optional)</Label>
-            <Textarea
-              id="freeTextComment"
-              placeholder="Optional comment"
-              className="h-20"
-              value={freeTextComment || ''}
-              onChange={(e) => setFreeTextComment(e.target.value)}
-            />
-          </div>
-        </div>
+        <FreeTextAnswer
+          marks={freeTextMarks}
+          comment={freeTextComment}
+          onMarksChange={setFreeTextMarks}
+          onCommentChange={setFreeTextComment}
+        />
       )}
 
       <div className="flex items-center space-x-2">
