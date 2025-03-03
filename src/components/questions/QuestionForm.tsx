@@ -65,16 +65,32 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           
           // Update with existing data
           existingAnswers.forEach((answer, index) => {
-            newAnswers[index] = answer;
+            newAnswers[index] = {
+              id: answer.id,
+              text: answer.text,
+              is_correct: answer.is_correct || false,
+              marks: answer.marks || ''
+            };
           });
           
           setMultipleChoiceAnswers(newAnswers);
         } else if (questionType === 'yes_no') {
-          // Find Yes and No answers
-          const yesAnswer = data.find(a => a.text.toLowerCase() === 'yes') || { text: 'Yes', is_correct: false, marks: '' };
-          const noAnswer = data.find(a => a.text.toLowerCase() === 'no') || { text: 'No', is_correct: false, marks: '' };
+          // For yes/no, we need to map the answers correctly
+          // We need to preserve the actual text values that were saved
+          const updatedYesNoAnswers = [...yesNoAnswers];
           
-          setYesNoAnswers([yesAnswer, noAnswer]);
+          // Find the answers in the data (we expect exactly 2)
+          if (data.length >= 2) {
+            data.slice(0, 2).forEach((answer, index) => {
+              updatedYesNoAnswers[index] = {
+                id: answer.id,
+                text: answer.text,
+                is_correct: answer.is_correct || false,
+                marks: answer.marks || ''
+              };
+            });
+            setYesNoAnswers(updatedYesNoAnswers);
+          }
         } else if (questionType === 'free_text') {
           setFreeTextMarks(data[0]?.marks || '');
         }
