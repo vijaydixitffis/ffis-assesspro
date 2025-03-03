@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -22,22 +23,24 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     initialQuestionType || question?.type || 'multiple_choice'
   );
   const [isActive, setIsActive] = useState(question?.is_active ?? true);
+  const [sequenceNumber, setSequenceNumber] = useState<number>(question?.sequence_number || 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   
   const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<Answer[]>([
-    { text: '', is_correct: false, marks: '' },
-    { text: '', is_correct: false, marks: '' },
-    { text: '', is_correct: false, marks: '' },
-    { text: '', is_correct: false, marks: '' }
+    { text: '', is_correct: false, marks: '', comment: '' },
+    { text: '', is_correct: false, marks: '', comment: '' },
+    { text: '', is_correct: false, marks: '', comment: '' },
+    { text: '', is_correct: false, marks: '', comment: '' }
   ]);
   
   const [yesNoAnswers, setYesNoAnswers] = useState<Answer[]>([
-    { text: 'Yes', is_correct: false, marks: '' },
-    { text: 'No', is_correct: false, marks: '' }
+    { text: 'Yes', is_correct: false, marks: '', comment: '' },
+    { text: 'No', is_correct: false, marks: '', comment: '' }
   ]);
   
   const [freeTextMarks, setFreeTextMarks] = useState<string>('');
+  const [freeTextComment, setFreeTextComment] = useState<string>('');
 
   useEffect(() => {
     if (question?.id) {
@@ -64,7 +67,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               id: answer.id,
               text: answer.text,
               is_correct: answer.is_correct || false,
-              marks: answer.marks || ''
+              marks: answer.marks || '',
+              comment: answer.comment || ''
             };
           });
           
@@ -78,13 +82,15 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                 id: answer.id,
                 text: answer.text,
                 is_correct: answer.is_correct || false,
-                marks: answer.marks || ''
+                marks: answer.marks || '',
+                comment: answer.comment || ''
               };
             });
             setYesNoAnswers(updatedYesNoAnswers);
           }
         } else if (questionType === 'free_text') {
           setFreeTextMarks(data[0]?.marks || '');
+          setFreeTextComment(data[0]?.comment || '');
         }
       }
     } catch (e) {
@@ -179,6 +185,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         is_active: isActive,
         topic_id: topicId,
         created_by: userId,
+        sequence_number: sequenceNumber
       };
       
       let questionId = question?.id;
@@ -189,6 +196,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           .update({ 
             question: questionData.question,
             is_active: questionData.is_active,
+            sequence_number: questionData.sequence_number
           })
           .eq('id', questionId);
 
@@ -238,7 +246,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           question_id: questionId,
           text: answer.text,
           is_correct: answer.is_correct,
-          marks: answer.marks || null
+          marks: answer.marks || null,
+          comment: answer.comment || null
         }));
 
       if (validAnswers.length > 0) {
@@ -267,7 +276,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         question_id: questionId,
         text: answer.text,
         is_correct: answer.is_correct,
-        marks: answer.marks || null
+        marks: answer.marks || null,
+        comment: answer.comment || null
       }));
 
       const { error: insertError } = await supabase
@@ -296,7 +306,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           question_id: questionId,
           text: 'Free text answer',
           is_correct: null,
-          marks: freeTextMarks
+          marks: freeTextMarks,
+          comment: freeTextComment || null
         });
       
       if (insertError) throw insertError;
@@ -319,31 +330,45 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         />
       </div>
 
-      <div>
-        <Label>Question Type</Label>
-        {question?.id ? (
+      <div className="flex gap-6">
+        <div className="w-1/2">
+          <Label>Question Type</Label>
+          {question?.id ? (
+            <Input
+              value={questionType === 'multiple_choice' ? 'Multiple Choice' : 
+                    questionType === 'yes_no' ? 'Yes/No' : 'Free Text'}
+              disabled
+              className="w-full bg-muted"
+            />
+          ) : (
+            <Select 
+              value={questionType} 
+              onValueChange={(value) => setQuestionType(value as QuestionType)}
+              disabled={!!question?.id}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+                <SelectItem value="yes_no">Yes/No</SelectItem>
+                <SelectItem value="free_text">Free Text</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
+        
+        <div className="w-1/2">
+          <Label htmlFor="sequenceNumber">Sequence Number</Label>
           <Input
-            value={questionType === 'multiple_choice' ? 'Multiple Choice' : 
-                  questionType === 'yes_no' ? 'Yes/No' : 'Free Text'}
-            disabled
-            className="w-[180px] bg-muted"
+            id="sequenceNumber"
+            type="number"
+            min="0"
+            value={sequenceNumber}
+            onChange={(e) => setSequenceNumber(parseInt(e.target.value) || 0)}
+            placeholder="Enter sequence number"
           />
-        ) : (
-          <Select 
-            value={questionType} 
-            onValueChange={(value) => setQuestionType(value as QuestionType)}
-            disabled={!!question?.id}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-              <SelectItem value="yes_no">Yes/No</SelectItem>
-              <SelectItem value="free_text">Free Text</SelectItem>
-            </SelectContent>
-          </Select>
-        )}
+        </div>
       </div>
 
       {questionType === 'multiple_choice' && (
@@ -358,6 +383,14 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                   placeholder={`Option ${index + 1}`}
                   value={answer.text}
                   onChange={(e) => handleMultipleChoiceAnswerChange(index, 'text', e.target.value)}
+                />
+                <Label htmlFor={`comment-${index}`}>Comment (Optional)</Label>
+                <Textarea
+                  id={`comment-${index}`}
+                  placeholder="Optional comment"
+                  className="h-20"
+                  value={answer.comment || ''}
+                  onChange={(e) => handleMultipleChoiceAnswerChange(index, 'comment', e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -401,6 +434,14 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
                   value={answer.text}
                   onChange={(e) => handleYesNoAnswerChange(index, 'text', e.target.value)}
                 />
+                <Label htmlFor={`yesno-comment-${index}`}>Comment (Optional)</Label>
+                <Textarea
+                  id={`yesno-comment-${index}`}
+                  placeholder="Optional comment"
+                  className="h-20"
+                  value={answer.comment || ''}
+                  onChange={(e) => handleYesNoAnswerChange(index, 'comment', e.target.value)}
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor={`yesno-marks-${index}`}>Marks</Label>
@@ -429,15 +470,27 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       )}
 
       {questionType === 'free_text' && (
-        <div className="space-y-2">
-          <Label htmlFor="freeTextMarks">Marks</Label>
-          <Input
-            id="freeTextMarks"
-            placeholder="Enter marks for correct answer"
-            value={freeTextMarks}
-            onChange={(e) => setFreeTextMarks(e.target.value)}
-            className="w-32"
-          />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="freeTextMarks">Marks</Label>
+            <Input
+              id="freeTextMarks"
+              placeholder="Enter marks for correct answer"
+              value={freeTextMarks}
+              onChange={(e) => setFreeTextMarks(e.target.value)}
+              className="w-32"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="freeTextComment">Comment (Optional)</Label>
+            <Textarea
+              id="freeTextComment"
+              placeholder="Optional comment"
+              className="h-20"
+              value={freeTextComment || ''}
+              onChange={(e) => setFreeTextComment(e.target.value)}
+            />
+          </div>
         </div>
       )}
 
