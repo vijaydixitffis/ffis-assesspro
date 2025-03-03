@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, BookText } from 'lucide-react';
+import { Edit, BookOpen } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -128,7 +128,7 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
                     onClick={() => handleManageTopics(assessment.id)}
                     title="Manage Topics"
                   >
-                    <BookText className="h-4 w-4" />
+                    <BookOpen className="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>
