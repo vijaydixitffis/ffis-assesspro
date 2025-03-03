@@ -29,7 +29,7 @@ export default function AnswerOptions({
       
       // Add empty answers until we have 4
       for (let i = currentLength; i < 4; i++) {
-        newAnswers.push({ text: '', is_correct: false, marks: '0' });
+        newAnswers.push({ text: '', is_correct: false, marks: '0', comment: null });
       }
       
       setAnswers(newAnswers);
@@ -42,7 +42,7 @@ export default function AnswerOptions({
       newAnswers.splice(index, 1);
       // Add a new empty option to maintain 4 options
       if (questionType === 'multiple_choice' && newAnswers.length < 4) {
-        newAnswers.push({ text: '', is_correct: false, marks: '0' });
+        newAnswers.push({ text: '', is_correct: false, marks: '0', comment: null });
       }
       return newAnswers;
     });

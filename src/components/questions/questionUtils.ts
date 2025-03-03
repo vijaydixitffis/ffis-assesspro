@@ -156,3 +156,26 @@ export const setDefaultAnswers = (type: QuestionType): Answer[] => {
   }
   return [];
 };
+
+export function generateDefaultAnswersForQuestionType(questionType: QuestionType): Answer[] {
+  switch (questionType) {
+    case 'multiple_choice':
+      return [
+        { text: '', is_correct: true, marks: '', comment: null },
+        { text: '', is_correct: false, marks: '', comment: null },
+        { text: '', is_correct: false, marks: '', comment: null },
+        { text: '', is_correct: false, marks: '', comment: null }
+      ];
+    case 'yes_no':
+      return [
+        { text: 'Yes', is_correct: true, marks: '', comment: null },
+        { text: 'No', is_correct: false, marks: '', comment: null }
+      ];
+    case 'free_text':
+      return [
+        { text: '', is_correct: null, marks: '', comment: null }
+      ];
+    default:
+      return [];
+  }
+}
