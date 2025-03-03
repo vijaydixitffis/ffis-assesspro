@@ -25,7 +25,7 @@ export default function QuestionManagement() {
   const [topic, setTopic] = useState<Topic | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
-  const [questionForm, setQuestionForm] = useState<JSX.Element | null>(null);
+  const [initialQuestionType, setInitialQuestionType] = useState<QuestionType | undefined>(undefined);
   const [refreshQuestions, setRefreshQuestions] = useState(0);
 
   useEffect(() => {
@@ -69,37 +69,19 @@ export default function QuestionManagement() {
   const handleAddQuestion = (questionType: QuestionType) => {
     setIsAdding(true);
     setEditingQuestion(null);
-    setQuestionForm(null); // Clear existing form
-
-    setQuestionForm(
-      <QuestionForm
-        initialQuestionType={questionType}
-        topicId={selectedTopicId || ''}
-        userId={user?.id || ''}
-        onClose={handleCloseQuestionForm}
-      />
-    );
+    setInitialQuestionType(questionType);
   };
 
   const handleEditQuestion = (question: any) => {
     setIsAdding(false);
     setEditingQuestion(question);
-    setQuestionForm(null); // Clear existing form
-
-    setQuestionForm(
-      <QuestionForm
-        question={question}
-        topicId={selectedTopicId || ''}
-        userId={user?.id || ''}
-        onClose={handleCloseQuestionForm}
-      />
-    );
+    setInitialQuestionType(undefined);
   };
 
   const handleCloseQuestionForm = () => {
     setIsAdding(false);
     setEditingQuestion(null);
-    setQuestionForm(null);
+    setInitialQuestionType(undefined);
     setRefreshQuestions(prev => prev + 1);
   };
 
@@ -113,10 +95,16 @@ export default function QuestionManagement() {
         onAddQuestion={handleAddQuestion}
       />
 
-      {questionForm && (
+      {(isAdding || editingQuestion) && (
         <Card className="mb-6">
-          <CardContent>
-            {questionForm}
+          <CardContent className="pt-6">
+            <QuestionForm
+              question={editingQuestion}
+              initialQuestionType={initialQuestionType}
+              topicId={selectedTopicId || ''}
+              userId={user?.id || ''}
+              onClose={handleCloseQuestionForm}
+            />
           </CardContent>
         </Card>
       )}

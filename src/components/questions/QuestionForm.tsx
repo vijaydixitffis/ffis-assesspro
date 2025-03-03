@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -5,35 +6,64 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { QuestionFormProps, QuestionType, QUESTION_TYPES } from './types';
+import { supabase } from '@/integrations/supabase/client';
 
-interface QuestionFormProps {
-  onSubmit: (questionData: { question: string; type: "multiple_choice" | "yes_no" | "free_text"; is_active: boolean }) => Promise<void>;
-  initialQuestion?: string;
-  initialType?: "multiple_choice" | "yes_no" | "free_text";
-  initialIsActive?: boolean;
-  onCancel: () => void;
-}
-
-const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, initialQuestion = '', initialType = 'multiple_choice', initialIsActive = true, onCancel }) => {
-  const [question, setQuestion] = useState(initialQuestion);
-  const [questionType, setQuestionType] = useState<"multiple_choice" | "yes_no" | "free_text">(initialType);
-  const [isActive, setIsActive] = useState(initialIsActive);
+const QuestionForm: React.FC<QuestionFormProps> = ({ 
+  question, 
+  initialQuestionType,
+  topicId, 
+  userId, 
+  onClose 
+}) => {
+  const [questionText, setQuestionText] = useState(question?.question || '');
+  const [questionType, setQuestionType] = useState<QuestionType>(
+    initialQuestionType || question?.type || 'multiple_choice'
+  );
+  const [isActive, setIsActive] = useState(question?.is_active ?? true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async () => {
+    if (questionText.trim().length < 5) {
+      setError('Question must be at least 5 characters');
+      return;
+    }
+
     setIsSubmitting(true);
     setError('');
     
     try {
       const questionData = {
-        question: question,
+        question: questionText,
         type: questionType,
-        is_active: isActive
-      } as { question: string; type: "multiple_choice" | "yes_no" | "free_text"; is_active: boolean };
+        is_active: isActive,
+        topic_id: topicId,
+        created_by: userId,
+      };
       
-      await onSubmit(questionData);
+      if (question?.id) {
+        // Update existing question
+        const { error: updateError } = await supabase
+          .from('questions')
+          .update({ 
+            question: questionData.question,
+            is_active: questionData.is_active,
+          })
+          .eq('id', question.id);
+
+        if (updateError) throw updateError;
+      } else {
+        // Create new question
+        const { error: insertError } = await supabase
+          .from('questions')
+          .insert(questionData);
+
+        if (insertError) throw insertError;
+      }
+
       toast.success('Question saved successfully!');
+      onClose();
     } catch (e: any) {
       setError(e.message || 'Failed to save question');
       toast.error(e.message || 'Failed to save question');
@@ -49,24 +79,39 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, initialQuestion =
         <Input
           id="question"
           type="text"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
+          value={questionText}
+          onChange={(e) => setQuestionText(e.target.value)}
           placeholder="Enter question text"
         />
       </div>
 
       <div>
         <Label>Question Type</Label>
-        <Select value={questionType} onValueChange={(value) => setQuestionType(value as "multiple_choice" | "yes_no" | "free_text")}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
-            <SelectItem value="yes_no">Yes/No</SelectItem>
-            <SelectItem value="free_text">Free Text</SelectItem>
-          </SelectContent>
-        </Select>
+        {question?.id ? (
+          // For existing questions, just show the type as text
+          <Input
+            value={questionType === 'multiple_choice' ? 'Multiple Choice' : 
+                  questionType === 'yes_no' ? 'Yes/No' : 'Free Text'}
+            disabled
+            className="w-[180px] bg-muted"
+          />
+        ) : (
+          // For new questions, show the dropdown
+          <Select 
+            value={questionType} 
+            onValueChange={(value) => setQuestionType(value as QuestionType)}
+            disabled={!!question?.id}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
+              <SelectItem value="yes_no">Yes/No</SelectItem>
+              <SelectItem value="free_text">Free Text</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       <div className="flex items-center space-x-2">
@@ -81,7 +126,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ onSubmit, initialQuestion =
       {error && <p className="text-red-500">{error}</p>}
 
       <div className="flex justify-end space-x-2">
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
+        <Button variant="ghost" onClick={onClose}>Cancel</Button>
         <Button disabled={isSubmitting} onClick={handleSubmit}>
           {isSubmitting ? 'Saving...' : 'Save Question'}
         </Button>
