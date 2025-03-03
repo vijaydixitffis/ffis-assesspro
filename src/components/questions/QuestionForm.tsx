@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -26,7 +25,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   
-  // Answer related states
   const [multipleChoiceAnswers, setMultipleChoiceAnswers] = useState<Answer[]>([
     { text: '', is_correct: false, marks: '' },
     { text: '', is_correct: false, marks: '' },
@@ -41,7 +39,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   
   const [freeTextMarks, setFreeTextMarks] = useState<string>('');
 
-  // Load existing answers when editing
   useEffect(() => {
     if (question?.id) {
       fetchAnswers(question.id);
@@ -59,11 +56,9 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
       if (data && data.length > 0) {
         if (questionType === 'multiple_choice') {
-          // Ensure we always have exactly 4 options for multiple choice
           const existingAnswers = data.slice(0, 4);
           const newAnswers = [...multipleChoiceAnswers];
           
-          // Update with existing data
           existingAnswers.forEach((answer, index) => {
             newAnswers[index] = {
               id: answer.id,
@@ -75,11 +70,8 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
           
           setMultipleChoiceAnswers(newAnswers);
         } else if (questionType === 'yes_no') {
-          // For yes/no, we need to map the answers correctly
-          // We need to preserve the actual text values that were saved
           const updatedYesNoAnswers = [...yesNoAnswers];
           
-          // Find the answers in the data (we expect exactly 2)
           if (data.length >= 2) {
             data.slice(0, 2).forEach((answer, index) => {
               updatedYesNoAnswers[index] = {
@@ -106,7 +98,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
       
-      // If toggling is_correct, ensure only one answer is marked as correct
       if (field === 'is_correct' && value === true) {
         newAnswers.forEach((answer, i) => {
           if (i !== index) {
@@ -124,7 +115,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
       
-      // If toggling is_correct, ensure only one answer is marked as correct
       if (field === 'is_correct' && value === true) {
         newAnswers.forEach((answer, i) => {
           if (i !== index) {
@@ -144,44 +134,38 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     }
 
     if (questionType === 'multiple_choice') {
-      // Check if at least two answers are provided
       const filledAnswers = multipleChoiceAnswers.filter(a => a.text.trim() !== '');
       if (filledAnswers.length < 2) {
         setError('At least two answer options are required');
         return false;
       }
 
-      // Check if a correct answer is selected
       const hasCorrectAnswer = multipleChoiceAnswers.some(a => a.is_correct === true);
       if (!hasCorrectAnswer) {
         setError('Please select a correct answer');
         return false;
       }
       
-      // Check if marks are provided for correct answer
-      const correctAnswer = multipleChoiceAnswers.find(a => a.is_correct === true);
-      if (!correctAnswer?.marks) {
-        setError('Please provide marks for the correct answer');
+      const filledMarks = filledAnswers.filter(a => a.marks && a.marks.trim() !== '');
+      if (filledMarks.length > 0 && filledMarks.length < filledAnswers.length) {
+        setError('Either provide marks for all answers or leave all blank');
         return false;
       }
     } else if (questionType === 'yes_no') {
-      // Check if both answers are provided
       if (yesNoAnswers[0].text.trim() === '' || yesNoAnswers[1].text.trim() === '') {
         setError('Both Yes and No answers must be provided');
         return false;
       }
       
-      // Check if a correct answer is selected
       const hasCorrectAnswer = yesNoAnswers.some(a => a.is_correct === true);
       if (!hasCorrectAnswer) {
         setError('Please select a correct answer (Yes or No)');
         return false;
       }
       
-      // Check if marks are provided for correct answer
-      const correctAnswer = yesNoAnswers.find(a => a.is_correct === true);
-      if (!correctAnswer?.marks) {
-        setError('Please provide marks for the correct answer');
+      const filledMarks = yesNoAnswers.filter(a => a.marks && a.marks.trim() !== '');
+      if (filledMarks.length > 0 && filledMarks.length < yesNoAnswers.length) {
+        setError('Either provide marks for all answers or leave all blank');
         return false;
       }
     } else if (questionType === 'free_text') {
@@ -212,7 +196,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       let questionId = question?.id;
       
       if (questionId) {
-        // Update existing question
         const { error: updateError } = await supabase
           .from('questions')
           .update({ 
@@ -223,7 +206,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
         if (updateError) throw updateError;
       } else {
-        // Create new question
         const { data: newQuestion, error: insertError } = await supabase
           .from('questions')
           .insert(questionData)
@@ -233,7 +215,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         questionId = newQuestion?.[0].id;
       }
 
-      // Handle answers based on question type
       if (questionId) {
         if (questionType === 'multiple_choice') {
           await handleMultipleChoiceAnswers(questionId);
@@ -256,7 +237,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleMultipleChoiceAnswers = async (questionId: string) => {
     try {
-      // Delete existing answers for this question
       const { error: deleteError } = await supabase
         .from('answers')
         .delete()
@@ -264,14 +244,13 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       
       if (deleteError) throw deleteError;
 
-      // Filter out empty answers
       const validAnswers = multipleChoiceAnswers
         .filter(answer => answer.text.trim() !== '')
         .map(answer => ({
           question_id: questionId,
           text: answer.text,
           is_correct: answer.is_correct,
-          marks: answer.is_correct ? answer.marks : null
+          marks: answer.marks || null
         }));
 
       if (validAnswers.length > 0) {
@@ -289,7 +268,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleYesNoAnswers = async (questionId: string) => {
     try {
-      // Delete existing answers
       const { error: deleteError } = await supabase
         .from('answers')
         .delete()
@@ -297,12 +275,11 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       
       if (deleteError) throw deleteError;
 
-      // Create Yes/No answers with the custom text
       const answers = yesNoAnswers.map(answer => ({
         question_id: questionId,
         text: answer.text,
         is_correct: answer.is_correct,
-        marks: answer.is_correct ? answer.marks : null
+        marks: answer.marks || null
       }));
 
       const { error: insertError } = await supabase
@@ -318,7 +295,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleFreeTextAnswer = async (questionId: string) => {
     try {
-      // Delete existing answers
       const { error: deleteError } = await supabase
         .from('answers')
         .delete()
@@ -326,7 +302,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       
       if (deleteError) throw deleteError;
 
-      // Create a placeholder answer for free text with marks
       const { error: insertError } = await supabase
         .from('answers')
         .insert({
@@ -359,7 +334,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       <div>
         <Label>Question Type</Label>
         {question?.id ? (
-          // For existing questions, just show the type as text
           <Input
             value={questionType === 'multiple_choice' ? 'Multiple Choice' : 
                   questionType === 'yes_no' ? 'Yes/No' : 'Free Text'}
@@ -367,7 +341,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
             className="w-[180px] bg-muted"
           />
         ) : (
-          // For new questions, show the dropdown
           <Select 
             value={questionType} 
             onValueChange={(value) => setQuestionType(value as QuestionType)}
@@ -385,7 +358,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         )}
       </div>
 
-      {/* Answer options based on question type */}
       {questionType === 'multiple_choice' && (
         <div className="space-y-4">
           <Label>Answer Options (Exactly 4)</Label>
