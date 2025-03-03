@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       answers: {
         Row: {
+          comment: string | null
           created_at: string | null
           id: string
           is_correct: boolean | null
@@ -20,6 +21,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          comment?: string | null
           created_at?: string | null
           id?: string
           is_correct?: boolean | null
@@ -29,6 +31,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          comment?: string | null
           created_at?: string | null
           id?: string
           is_correct?: boolean | null
