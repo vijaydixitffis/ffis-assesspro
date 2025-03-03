@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Answer, QuestionType } from './types';
 import { toast } from 'sonner';
@@ -143,16 +144,16 @@ export const saveQuestion = async (
 export const setDefaultAnswers = (type: QuestionType): Answer[] => {
   if (type === 'yes_no') {
     return [
-      { text: 'Yes', is_correct: true, marks: '1' },
-      { text: 'No', is_correct: false, marks: '0' }
+      { text: 'Yes', is_correct: true, marks: '1', comment: null },
+      { text: 'No', is_correct: false, marks: '0', comment: null }
     ];
   } else if (type === 'multiple_choice') {
     return [
-      { text: 'Option 1', is_correct: true, marks: '1' },
-      { text: 'Option 2', is_correct: false, marks: '0' }
+      { text: 'Option 1', is_correct: true, marks: '1', comment: null },
+      { text: 'Option 2', is_correct: false, marks: '0', comment: null }
     ];
   } else if (type === 'free_text') {
-    return [{ text: 'Correct answer', is_correct: null, marks: '1' }];
+    return [{ text: 'Correct answer', is_correct: null, marks: '1', comment: null }];
   }
   return [];
 };
