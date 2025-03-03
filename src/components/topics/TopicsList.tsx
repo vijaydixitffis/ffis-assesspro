@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, List } from 'lucide-react';
+import { Edit, FileQuestion } from 'lucide-react';
 import { toast } from 'sonner';
-import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 interface TopicsListProps {
   assessmentId: string;
@@ -49,6 +49,29 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
     navigate(`/admin/questions?topicId=${topicId}`);
   };
 
+  const toggleTopicStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('topics')
+        .update({ is_active: !currentStatus })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setTopics(topics.map(topic => 
+        topic.id === id 
+          ? { ...topic, is_active: !currentStatus } 
+          : topic
+      ));
+      
+      toast.success(`Topic ${currentStatus ? 'deactivated' : 'activated'} successfully`);
+    } catch (error) {
+      console.error('Error toggling topic status:', error);
+      toast.error('Failed to update topic status');
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading topics...</div>;
   }
@@ -66,7 +89,7 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
             <TableHead className="w-20">Sequence</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Status</TableHead>
+            <TableHead>Active</TableHead>
             <TableHead className="w-[200px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -77,20 +100,18 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
               <TableCell className="font-medium">{topic.title}</TableCell>
               <TableCell>{topic.description.substring(0, 100)}{topic.description.length > 100 ? '...' : ''}</TableCell>
               <TableCell>
-                {topic.is_active ? (
-                  <Badge variant="success" className="bg-green-100 text-green-800">Active</Badge>
-                ) : (
-                  <Badge variant="secondary" className="bg-gray-100 text-gray-800">Inactive</Badge>
-                )}
+                <Switch
+                  checked={topic.is_active}
+                  onCheckedChange={() => toggleTopicStatus(topic.id, topic.is_active)}
+                />
               </TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => onEdit(topic)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleManageQuestions(topic.id)}>
-                    <List className="h-4 w-4 mr-2" />
-                    Questions
+                  <Button variant="outline" size="icon" onClick={() => handleManageQuestions(topic.id)} title="Manage Questions">
+                    <FileQuestion className="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>
