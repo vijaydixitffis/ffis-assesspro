@@ -139,12 +139,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
         setError('At least two answer options are required');
         return false;
       }
-
-      const hasCorrectAnswer = multipleChoiceAnswers.some(a => a.is_correct === true);
-      if (!hasCorrectAnswer) {
-        setError('Please select a correct answer');
-        return false;
-      }
       
       const filledMarks = filledAnswers.filter(a => a.marks && a.marks.trim() !== '');
       if (filledMarks.length > 0 && filledMarks.length < filledAnswers.length) {
@@ -154,12 +148,6 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     } else if (questionType === 'yes_no') {
       if (yesNoAnswers[0].text.trim() === '' || yesNoAnswers[1].text.trim() === '') {
         setError('Both Yes and No answers must be provided');
-        return false;
-      }
-      
-      const hasCorrectAnswer = yesNoAnswers.some(a => a.is_correct === true);
-      if (!hasCorrectAnswer) {
-        setError('Please select a correct answer (Yes or No)');
         return false;
       }
       
@@ -394,6 +382,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               </div>
             </div>
           ))}
+          <p className="text-sm text-muted-foreground">Note: Marking a correct answer is optional</p>
         </div>
       )}
 
@@ -435,6 +424,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
               </div>
             </div>
           ))}
+          <p className="text-sm text-muted-foreground">Note: Marking a correct answer is optional</p>
         </div>
       )}
 
