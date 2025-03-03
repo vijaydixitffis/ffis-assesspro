@@ -1,4 +1,6 @@
+
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Button } from '@/components/ui/button';
@@ -18,6 +20,7 @@ interface Assessment {
 
 export default function TopicManagementPage() {
   const { user } = useAuth();
+  const location = useLocation();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [selectedAssessmentId, setSelectedAssessmentId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,10 +34,14 @@ export default function TopicManagementPage() {
       return;
     }
 
-    fetchAssessments();
-  }, [user]);
+    // Extract assessmentId from URL if present
+    const params = new URLSearchParams(location.search);
+    const assessmentId = params.get('assessmentId');
+    
+    fetchAssessments(assessmentId);
+  }, [user, location.search]);
 
-  const fetchAssessments = async () => {
+  const fetchAssessments = async (preselectedId: string | null = null) => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -45,7 +52,11 @@ export default function TopicManagementPage() {
       if (error) throw error;
       
       setAssessments(data || []);
-      if (data && data.length > 0) {
+      
+      // Set selected assessment - either from URL param, first in list, or null
+      if (preselectedId) {
+        setSelectedAssessmentId(preselectedId);
+      } else if (data && data.length > 0) {
         setSelectedAssessmentId(data[0].id);
       }
     } catch (error) {

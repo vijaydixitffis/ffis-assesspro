@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Table, 
   TableBody, 
@@ -10,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit } from 'lucide-react';
+import { Edit, BookText } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -28,6 +29,7 @@ interface AssessmentsListProps {
 }
 
 export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
+  const navigate = useNavigate();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -77,6 +79,10 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
     }
   };
 
+  const handleManageTopics = (assessmentId: string) => {
+    navigate(`/admin/topics?assessmentId=${assessmentId}`);
+  };
+
   if (isLoading) {
     return <div>Loading assessments...</div>;
   }
@@ -93,7 +99,6 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
           <TableRow>
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Status</TableHead>
             <TableHead>Active</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -107,20 +112,25 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
                 : assessment.description}
               </TableCell>
               <TableCell>
-                <Badge variant={assessment.is_active ? "success" : "secondary"}>
-                  {assessment.is_active ? 'Active' : 'Inactive'}
-                </Badge>
-              </TableCell>
-              <TableCell>
                 <Switch
                   checked={assessment.is_active}
                   onCheckedChange={() => toggleAssessmentStatus(assessment.id, assessment.is_active)}
                 />
               </TableCell>
               <TableCell className="text-right">
-                <Button variant="outline" size="icon" onClick={() => onEdit(assessment)}>
-                  <Edit className="h-4 w-4" />
-                </Button>
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" size="icon" onClick={() => onEdit(assessment)} title="Edit Assessment">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => handleManageTopics(assessment.id)}
+                    title="Manage Topics"
+                  >
+                    <BookText className="h-4 w-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
