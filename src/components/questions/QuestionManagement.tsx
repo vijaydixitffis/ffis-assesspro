@@ -71,67 +71,14 @@ export default function QuestionManagement() {
     setEditingQuestion(null);
     setQuestionForm(null); // Clear existing form
 
-    // Find the next sequence number
-    const getNextSequenceNumber = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('questions')
-          .select('sequence_number')
-          .eq('topic_id', selectedTopicId)
-          .order('sequence_number', { ascending: false })
-          .limit(1);
-          
-        if (error) throw error;
-        
-        const nextSequence = data && data.length > 0 && data[0].sequence_number
-          ? data[0].sequence_number + 1
-          : 1;
-          
-        return nextSequence;
-      } catch (error) {
-        console.error('Error getting next sequence number:', error);
-        return 1; // Default to 1 if we can't determine
-      }
-    };
-
-    getNextSequenceNumber().then(nextSequence => {
-      const onSubmit = async (questionData: any) => {
-        try {
-          const { data, error } = await supabase
-            .from('questions')
-            .insert([
-              {
-                question: questionData.question,
-                type: questionData.type,
-                is_active: questionData.is_active,
-                sequence_number: questionData.sequence_number || nextSequence,
-                topic_id: selectedTopicId,
-                created_by: user?.id,
-              },
-            ])
-            .select('id')
-            .single();
-
-          if (error) throw error;
-
-          handleCloseQuestionForm();
-        } catch (error) {
-          console.error('Error creating question:', error);
-          throw new Error('Failed to create question');
-        }
-      };
-
-      setQuestionForm(
-        <QuestionForm
-          initialQuestion=""
-          initialType={questionType}
-          initialIsActive={true}
-          initialSequenceNumber={nextSequence}
-          onSubmit={onSubmit}
-          onCancel={handleCloseQuestionForm}
-        />
-      );
-    });
+    setQuestionForm(
+      <QuestionForm
+        initialQuestionType={questionType}
+        topicId={selectedTopicId || ''}
+        userId={user?.id || ''}
+        onClose={handleCloseQuestionForm}
+      />
+    );
   };
 
   const handleEditQuestion = (question: any) => {
@@ -139,36 +86,12 @@ export default function QuestionManagement() {
     setEditingQuestion(question);
     setQuestionForm(null); // Clear existing form
 
-    const onSubmit = async (questionData: any) => {
-      try {
-        const { error } = await supabase
-          .from('questions')
-          .update({
-            question: questionData.question,
-            type: questionData.type,
-            is_active: questionData.is_active,
-            sequence_number: questionData.sequence_number,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', question.id);
-
-        if (error) throw error;
-
-        handleCloseQuestionForm();
-      } catch (error) {
-        console.error('Error updating question:', error);
-        throw new Error('Failed to update question');
-      }
-    };
-
     setQuestionForm(
       <QuestionForm
-        initialQuestion={question.question}
-        initialType={question.type}
-        initialIsActive={question.is_active}
-        initialSequenceNumber={question.sequence_number}
-        onSubmit={onSubmit}
-        onCancel={handleCloseQuestionForm}
+        question={question}
+        topicId={selectedTopicId || ''}
+        userId={user?.id || ''}
+        onClose={handleCloseQuestionForm}
       />
     );
   };
