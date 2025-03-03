@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -93,7 +94,7 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead>Active</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -110,20 +111,16 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
                   {assessment.is_active ? 'Active' : 'Inactive'}
                 </Badge>
               </TableCell>
-              <TableCell>{new Date(assessment.created_at).toLocaleDateString()}</TableCell>
+              <TableCell>
+                <Switch
+                  checked={assessment.is_active}
+                  onCheckedChange={() => toggleAssessmentStatus(assessment.id, assessment.is_active)}
+                />
+              </TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button variant="outline" size="icon" onClick={() => onEdit(assessment)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant={assessment.is_active ? "outline" : "default"}
-                    size="sm"
-                    onClick={() => toggleAssessmentStatus(assessment.id, assessment.is_active)}
-                  >
-                    {assessment.is_active ? 'Deactivate' : 'Activate'}
-                  </Button>
-                </div>
+                <Button variant="outline" size="icon" onClick={() => onEdit(assessment)}>
+                  <Edit className="h-4 w-4" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}
