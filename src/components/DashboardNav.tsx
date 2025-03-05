@@ -11,7 +11,8 @@ import {
   HelpCircle,
   Home,
   LogOut,
-  Users
+  Users,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,13 @@ export function DashboardNav() {
       adminOnly: true,
     },
     {
+      label: "My Assessments",
+      icon: FileText,
+      href: "/my-assessments",
+      active: location.pathname === "/my-assessments",
+      clientOnly: true,
+    },
+    {
       label: "Reports",
       icon: BarChart2,
       href: "/reports",
@@ -73,14 +81,19 @@ export function DashboardNav() {
               <img
                 src="/lovable-uploads/74e171ed-dfc9-4ff4-8aae-44113fefa8f9.png"
                 alt="Future Focus IT Solutions Logo"
-                className="h-16 w-auto" // Increased from h-12 to h-16
+                className="h-16 w-auto"
               />
             </div>
           </Link>
           
           <div className="space-y-1">
-            {routes.map((route) =>
-              route.adminOnly && user?.role !== "admin" ? null : (
+            {routes.map((route) => {
+              // Skip adminOnly routes for non-admin users
+              if (route.adminOnly && user?.role !== "admin") return null;
+              // Skip clientOnly routes for non-client users
+              if (route.clientOnly && user?.role !== "client") return null;
+              
+              return (
                 <Link
                   to={route.href}
                   key={route.label}
@@ -94,8 +107,8 @@ export function DashboardNav() {
                   <route.icon className="mr-2 h-4 w-4" />
                   {route.label}
                 </Link>
-              )
-            )}
+              );
+            })}
           </div>
         </div>
         <Separator />
