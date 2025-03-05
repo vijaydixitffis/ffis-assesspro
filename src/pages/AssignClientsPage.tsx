@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DashboardNav } from '@/components/DashboardNav';
@@ -86,7 +85,6 @@ export default function AssignClientsPage() {
     try {
       setIsLoading(true);
       
-      // Get all clients (users with role 'client')
       const { data: clientsData, error: clientsError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, role, is_active')
@@ -102,7 +100,6 @@ export default function AssignClientsPage() {
         return;
       }
       
-      // Get existing assignments for the selected assessment
       const { data: assignmentsData, error: assignmentsError } = await supabase
         .from('assessment_assignments')
         .select('id, user_id, scope, status')
@@ -110,7 +107,6 @@ export default function AssignClientsPage() {
       
       if (assignmentsError) throw assignmentsError;
       
-      // Create a map of user_id -> assignment
       const assignmentMap = (assignmentsData || []).reduce((map, assignment) => {
         map[assignment.user_id] = { 
           id: assignment.id, 
@@ -120,7 +116,6 @@ export default function AssignClientsPage() {
         return map;
       }, {} as { [key: string]: { id: string, scope: string, status: string } });
       
-      // Initialize scope values
       const initialScopeValues = (assignmentsData || []).reduce((map, assignment) => {
         map[assignment.user_id] = assignment.scope;
         return map;
@@ -128,7 +123,6 @@ export default function AssignClientsPage() {
       
       setScopeValues(initialScopeValues);
       
-      // Merge clients with their assignments
       const clientsWithAssignments = clientsData.map(client => ({
         ...client,
         assignment: assignmentMap[client.id]
@@ -145,7 +139,6 @@ export default function AssignClientsPage() {
 
   const handleAssessmentChange = (value: string) => {
     setSelectedAssessmentId(value);
-    // Update URL with new assessment ID
     navigate(`/admin/assign-clients?assessmentId=${value}`);
   };
 
@@ -159,7 +152,6 @@ export default function AssignClientsPage() {
   const toggleAssignment = async (client: User, isAssigned: boolean) => {
     try {
       if (isAssigned) {
-        // Remove assignment
         const { error } = await supabase
           .from('assessment_assignments')
           .delete()
@@ -169,24 +161,20 @@ export default function AssignClientsPage() {
         
         toast.success(`Assessment unassigned from ${client.first_name} ${client.last_name}`);
         
-        // Update local state
         setClients(clients.map(c => 
           c.id === client.id ? { ...c, assignment: undefined } : c
         ));
         
-        // Remove scope value
         const newScopeValues = { ...scopeValues };
         delete newScopeValues[client.id];
         setScopeValues(newScopeValues);
       } else {
-        // Check if scope is provided
         const scope = scopeValues[client.id] || '';
         if (!scope.trim()) {
           toast.error('Scope is required');
           return;
         }
         
-        // Add assignment
         const { data, error } = await supabase
           .from('assessment_assignments')
           .insert([
@@ -204,7 +192,6 @@ export default function AssignClientsPage() {
         
         toast.success(`Assessment assigned to ${client.first_name} ${client.last_name}`);
         
-        // Update local state
         setClients(clients.map(c => 
           c.id === client.id ? { ...c, assignment: { id: data.id, scope, status: data.status } } : c
         ));
@@ -215,7 +202,6 @@ export default function AssignClientsPage() {
     }
   };
 
-  // Function to get the appropriate badge color based on status
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case 'ASSIGNED':
@@ -223,11 +209,11 @@ export default function AssignClientsPage() {
       case 'RE-ASSIGNED':
         return 'secondary';
       case 'STARTED':
-        return 'primary';
+        return 'default';
       case 'COMPLETED':
         return 'success';
       case 'RATED':
-        return 'warning';
+        return 'outline';
       case 'CLOSED':
         return 'default';
       default:
@@ -236,7 +222,7 @@ export default function AssignClientsPage() {
   };
 
   if (user?.role !== 'admin') {
-    return null; // Redirect handled in useEffect
+    return null;
   }
 
   return (
