@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Check, XCircle } from 'lucide-react';
+import { Check, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 type User = {
@@ -88,7 +88,7 @@ export default function AssignClientsPage() {
       const { data: clientsData, error: clientsError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, role, is_active')
-        .eq('role', 'client')
+        .eq('role', 'CLIENT')
         .eq('is_active', true)
         .order('last_name');
       
@@ -208,10 +208,6 @@ export default function AssignClientsPage() {
     }
   };
 
-  const goBack = () => {
-    navigate('/admin/assessments');
-  };
-
   if (user?.role !== 'admin') {
     return null; // Redirect handled in useEffect
   }
@@ -222,15 +218,7 @@ export default function AssignClientsPage() {
       <main className="flex-1 overflow-auto">
         <div className="container mx-auto max-w-7xl p-6">
           <div className="flex items-center mb-6">
-            <Button 
-              variant="ghost" 
-              onClick={goBack} 
-              className="mr-2"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Assessments
-            </Button>
-            <h1 className="text-2xl font-semibold">Assign Clients to Assessment</h1>
+            <h1 className="text-2xl font-semibold">Assign Assessment to Clients</h1>
           </div>
 
           <Card className="mb-6">
