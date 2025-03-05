@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,32 +27,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { Layout } from '@/components/layout/Header';
-
-  // Function to get the appropriate badge color based on status
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'ASSIGNED':
-        return 'secondary';
-      case 'RE-ASSIGNED':
-        return 'secondary';
-      case 'STARTED':
-        return 'primary';
-      case 'COMPLETED':
-        return 'success';
-      case 'RATED':
-        return 'warning';
-      case 'CLOSED':
-        return 'default';
-      default:
-        return 'secondary';
-    }
-  };
-
-// Function to get the status text without any special formatting
-const getStatusDisplay = (status: string) => {
-  return status;
-};
+import Header from '@/components/layout/Header';
 
 const AssignClientsPage = () => {
   const [assessments, setAssessments] = useState([]);
@@ -88,8 +64,9 @@ const AssignClientsPage = () => {
   const fetchClients = async () => {
     try {
       const { data, error } = await supabase
-        .from('clients')
-        .select('id, first_name, last_name, email');
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .eq('role', 'CLIENT');
       if (error) {
         throw error;
       }
@@ -103,8 +80,8 @@ const AssignClientsPage = () => {
   const fetchAssignments = async () => {
     try {
       const { data, error } = await supabase
-        .from('client_assessments')
-        .select('id, client_id, assessment_id, status');
+        .from('assessment_assignments')
+        .select('id, client_id:user_id, assessment_id, status');
       if (error) {
         throw error;
       }
@@ -131,11 +108,11 @@ const AssignClientsPage = () => {
     setAssigning(true);
     try {
       const { data, error } = await supabase
-        .from('client_assessments')
+        .from('assessment_assignments')
         .insert([
           { 
-            client_id: selectedClient.id, 
-            assessment_id: parseInt(selectedAssessment),
+            user_id: selectedClient.id, 
+            assessment_id: selectedAssessment, // Now a string, not converted to number
             status: 'ASSIGNED'
           }
         ]);
@@ -156,7 +133,8 @@ const AssignClientsPage = () => {
   };
   
   return (
-    <Layout>
+    <div>
+      <Header />
       <div className="container mx-auto py-10">
         <h1 className="text-2xl font-bold mb-6">Assign Assessments to Clients</h1>
         
@@ -192,7 +170,7 @@ const AssignClientsPage = () => {
             <TableBody>
               {clients.map((client) => {
                 const assignment = assignments.find(
-                  (a) => a.client_id === client.id && a.assessment_id === parseInt(selectedAssessment)
+                  (a) => a.client_id === client.id && a.assessment_id === selectedAssessment
                 );
                 
                 return (
@@ -202,7 +180,7 @@ const AssignClientsPage = () => {
                     <TableCell>
                       {assignment && (
                         <Badge variant="default">
-                          {getStatusDisplay(assignment.status)}
+                          {assignment.status}
                         </Badge>
                       )}
                     </TableCell>
@@ -249,7 +227,7 @@ const AssignClientsPage = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </Layout>
+    </div>
   );
 };
 
