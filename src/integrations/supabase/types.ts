@@ -58,6 +58,7 @@ export type Database = {
           due_date: string | null
           id: string
           scope: string
+          status: string
           updated_at: string | null
           user_id: string
         }
@@ -68,6 +69,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           scope?: string
+          status?: string
           updated_at?: string | null
           user_id: string
         }
@@ -78,6 +80,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           scope?: string
+          status?: string
           updated_at?: string | null
           user_id?: string
         }

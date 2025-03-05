@@ -19,6 +19,7 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 type User = {
   id: string;
@@ -29,6 +30,7 @@ type User = {
   assignment?: {
     id: string;
     scope: string;
+    status: string;
   };
 };
 
@@ -103,16 +105,20 @@ export default function AssignClientsPage() {
       // Get existing assignments for the selected assessment
       const { data: assignmentsData, error: assignmentsError } = await supabase
         .from('assessment_assignments')
-        .select('id, user_id, scope')
+        .select('id, user_id, scope, status')
         .eq('assessment_id', assessmentId);
       
       if (assignmentsError) throw assignmentsError;
       
       // Create a map of user_id -> assignment
       const assignmentMap = (assignmentsData || []).reduce((map, assignment) => {
-        map[assignment.user_id] = { id: assignment.id, scope: assignment.scope };
+        map[assignment.user_id] = { 
+          id: assignment.id, 
+          scope: assignment.scope,
+          status: assignment.status
+        };
         return map;
-      }, {} as { [key: string]: { id: string, scope: string } });
+      }, {} as { [key: string]: { id: string, scope: string, status: string } });
       
       // Initialize scope values
       const initialScopeValues = (assignmentsData || []).reduce((map, assignment) => {
@@ -187,10 +193,11 @@ export default function AssignClientsPage() {
             { 
               assessment_id: selectedAssessmentId, 
               user_id: client.id,
-              scope: scope 
+              scope: scope,
+              status: 'ASSIGNED'
             }
           ])
-          .select('id')
+          .select('id, status')
           .single();
         
         if (error) throw error;
@@ -199,12 +206,32 @@ export default function AssignClientsPage() {
         
         // Update local state
         setClients(clients.map(c => 
-          c.id === client.id ? { ...c, assignment: { id: data.id, scope } } : c
+          c.id === client.id ? { ...c, assignment: { id: data.id, scope, status: data.status } } : c
         ));
       }
     } catch (error) {
       console.error('Error toggling assignment:', error);
       toast.error('Failed to update assignment');
+    }
+  };
+
+  // Function to get the appropriate badge color based on status
+  const getStatusBadgeColor = (status: string) => {
+    switch (status) {
+      case 'ASSIGNED':
+        return 'secondary';
+      case 'RE-ASSIGNED':
+        return 'secondary';
+      case 'STARTED':
+        return 'primary';
+      case 'COMPLETED':
+        return 'success';
+      case 'RATED':
+        return 'warning';
+      case 'CLOSED':
+        return 'default';
+      default:
+        return 'secondary';
     }
   };
 
@@ -262,6 +289,7 @@ export default function AssignClientsPage() {
                       <TableRow>
                         <TableHead>Name</TableHead>
                         <TableHead>Scope</TableHead>
+                        <TableHead>Status</TableHead>
                         <TableHead className="w-[100px] text-center">Assigned</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -278,6 +306,15 @@ export default function AssignClientsPage() {
                               onChange={(e) => handleScopeChange(client.id, e.target.value)}
                               className="max-w-md"
                             />
+                          </TableCell>
+                          <TableCell>
+                            {client.assignment ? (
+                              <Badge variant={getStatusBadgeColor(client.assignment.status)}>
+                                {client.assignment.status}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground">Not assigned</span>
+                            )}
                           </TableCell>
                           <TableCell className="text-center">
                             <Switch
