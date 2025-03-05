@@ -10,9 +10,8 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Edit, BookOpen } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { Edit, BookOpen, Users } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -83,6 +82,10 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
     navigate(`/admin/topics?assessmentId=${assessmentId}`);
   };
 
+  const handleAssignClients = (assessmentId: string) => {
+    navigate(`/admin/assign-clients?assessmentId=${assessmentId}`);
+  };
+
   if (isLoading) {
     return <div>Loading assessments...</div>;
   }
@@ -129,6 +132,14 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
                     title="Manage Topics"
                   >
                     <BookOpen className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    onClick={() => handleAssignClients(assessment.id)}
+                    title="Assign to Clients"
+                  >
+                    <Users className="h-4 w-4" />
                   </Button>
                 </div>
               </TableCell>

@@ -13,6 +13,7 @@ import AssessmentManagementPage from '@/pages/AssessmentManagementPage';
 import TopicManagementPage from '@/pages/TopicManagementPage';
 import QuestionManagementPage from '@/pages/QuestionManagementPage';
 import UsersManagementPage from '@/pages/UsersManagementPage';
+import AssignClientsPage from '@/pages/AssignClientsPage';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -52,6 +53,12 @@ function App() {
               <Route path="/admin/users" element={
                 <ProtectedRoute requiredRole="admin">
                   <UsersManagementPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/admin/assign-clients" element={
+                <ProtectedRoute requiredRole="admin">
+                  <AssignClientsPage />
                 </ProtectedRoute>
               } />
               
