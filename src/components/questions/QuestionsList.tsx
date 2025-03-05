@@ -3,9 +3,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash, Check, X } from 'lucide-react';
+import { Edit, Trash } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 
 interface QuestionsListProps {
   topicId: string;
@@ -87,6 +88,29 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
     }
   };
 
+  const toggleQuestionStatus = async (id: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('questions')
+        .update({ is_active: !currentStatus })
+        .eq('id', id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setQuestions(questions.map(question => 
+        question.id === id 
+          ? { ...question, is_active: !currentStatus } 
+          : question
+      ));
+      
+      toast.success(`Question ${currentStatus ? 'deactivated' : 'activated'} successfully`);
+    } catch (error) {
+      console.error('Error toggling question status:', error);
+      toast.error('Failed to update question status');
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center py-4">Loading questions...</div>;
   }
@@ -118,7 +142,6 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
             <TableHead>Question</TableHead>
             <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
-            <TableHead>Answers</TableHead>
             <TableHead className="w-[120px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -131,13 +154,11 @@ export default function QuestionsList({ topicId, onEdit, refreshTrigger }: Quest
                 <Badge variant="outline">{getQuestionTypeLabel(question.type)}</Badge>
               </TableCell>
               <TableCell>
-                {question.is_active ? (
-                  <Badge variant="success" className="bg-green-100 text-green-800">Active</Badge>
-                ) : (
-                  <Badge variant="secondary" className="bg-gray-100 text-gray-800">Inactive</Badge>
-                )}
+                <Switch
+                  checked={question.is_active}
+                  onCheckedChange={() => toggleQuestionStatus(question.id, question.is_active)}
+                />
               </TableCell>
-              <TableCell>{question.answers?.length || 0} answers</TableCell>
               <TableCell className="space-x-2">
                 <Button variant="ghost" size="sm" onClick={() => onEdit(question)}>
                   <Edit className="h-4 w-4" />
