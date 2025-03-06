@@ -15,6 +15,7 @@ import QuestionManagementPage from '@/pages/QuestionManagementPage';
 import UsersManagementPage from '@/pages/UsersManagementPage';
 import AssignClientsPage from '@/pages/AssignClientsPage';
 import MyAssessmentsPage from '@/pages/MyAssessmentsPage';
+import AssessmentTopicsPage from '@/pages/AssessmentTopicsPage';
 import NotFound from '@/pages/NotFound';
 
 function App() {
@@ -66,6 +67,12 @@ function App() {
               <Route path="/my-assessments" element={
                 <ProtectedRoute requiredRole="client">
                   <MyAssessmentsPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/assessment-topics/:assessmentId" element={
+                <ProtectedRoute requiredRole="client">
+                  <AssessmentTopicsPage />
                 </ProtectedRoute>
               } />
               

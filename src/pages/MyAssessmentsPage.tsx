@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { DashboardNav } from "@/components/DashboardNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,7 @@ interface AssignedAssessment {
 }
 
 export default function MyAssessmentsPage() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [assessments, setAssessments] = useState<AssignedAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -79,10 +81,33 @@ export default function MyAssessmentsPage() {
     }
   }
 
-  const handleStartAssessment = (assessmentId: string) => {
-    // This would typically navigate to the assessment taking page
-    toast.info(`Starting assessment: ${assessmentId}`);
-    // Implementation for starting an assessment would go here
+  const handleStartAssessment = async (assessment: AssignedAssessment) => {
+    try {
+      // Update the assessment status to STARTED
+      const { error } = await supabase
+        .from('assessment_assignments')
+        .update({ status: 'STARTED' })
+        .eq('id', assessment.id);
+
+      if (error) {
+        console.error('Error starting assessment:', error);
+        toast.error('Failed to start assessment');
+        return;
+      }
+
+      // Update local state
+      setAssessments(assessments.map(a => 
+        a.id === assessment.id ? { ...a, status: 'STARTED' } : a
+      ));
+
+      toast.success(`Started assessment: ${assessment.assessment_title}`);
+      
+      // Navigate to the assessment topics page
+      navigate(`/assessment-topics/${assessment.assessment_id}`);
+    } catch (error) {
+      console.error('Error starting assessment:', error);
+      toast.error('An error occurred while starting the assessment');
+    }
   };
 
   const handleSubmitAssessment = (assessmentId: string) => {
@@ -144,7 +169,7 @@ export default function MyAssessmentsPage() {
                         <div className="flex space-x-2">
                           <Button 
                             size="sm" 
-                            onClick={() => handleStartAssessment(assessment.id)}
+                            onClick={() => handleStartAssessment(assessment)}
                             disabled={assessment.status !== 'ASSIGNED'}
                           >
                             <Play className="mr-1 h-4 w-4" />
