@@ -4,10 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AssignedAssessment } from "@/types/assessment";
 
-type StatusUpdateFunction = (assessmentId: string, status: string) => Promise<boolean>;
+type StatusUpdateFunction = (assignmentId: string, status: string) => Promise<boolean>;
 
 export const useAssessmentStatusUpdate = (
-  onStatusUpdate: (assessmentId: string, newStatus: string) => void
+  onStatusUpdate: (assignmentId: string, newStatus: string) => void
 ) => {
   const [updatingAssessment, setUpdatingAssessment] = useState<string | null>(null);
 
@@ -49,7 +49,7 @@ export const useAssessmentStatusUpdate = (
       }
 
       // Update assessment status using only the assignment ID
-      console.log('Attempting to update assessment with ID:', assignmentId);
+      console.log('Attempting to update assignment with ID:', assignmentId);
 
       const { data: updateData, error: updateError } = await supabase
         .from('assessment_assignments')
@@ -73,7 +73,7 @@ export const useAssessmentStatusUpdate = (
         return false;
       }
       
-      console.log(`Assessment ${assignmentId} successfully updated to ${newStatus}`);
+      console.log(`Assignment ${assignmentId} successfully updated to ${newStatus}`);
       
       onStatusUpdate(assignmentId, newStatus);
       

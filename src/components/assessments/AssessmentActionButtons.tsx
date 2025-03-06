@@ -22,7 +22,7 @@ export const AssessmentActionButtons = ({
   const { updatingAssessment, updateAssessmentStatus } = useAssessmentStatusUpdate(onStatusUpdate);
 
   const handleStartAssessment = async () => {
-    console.log(`Starting assessment ${assessment.id} for user ${userId}`);
+    console.log(`Starting assignment ${assessment.id} for user ${userId}`);
     const success = await updateAssessmentStatus(assessment.id, 'STARTED');
     if (success) {
       // After successful update, navigate to the assessment topics page
