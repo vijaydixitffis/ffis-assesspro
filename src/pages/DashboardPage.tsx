@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/contexts/auth';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +11,7 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   
   useEffect(() => {
-    console.log('DashboardPage mounted, auth state:', { user, isLoading });
+    console.log('DashboardPage mounted, auth state:', { user, isLoading, userId: user?.id });
     
     // If not loading and no user, redirect to login
     if (!isLoading && !user) {
@@ -23,21 +22,21 @@ export default function DashboardPage() {
     }
     
     const timer = setTimeout(() => {
-      console.log('Dashboard page ready, auth state:', { user, isLoading });
+      console.log('Dashboard page ready, auth state:', { user, isLoading, userId: user?.id });
       setIsPageLoading(false);
       
       // If authentication is complete but no user data is available, show error
       if (!isLoading && !user) {
         toast.error('Authentication error - please try logging in again');
       }
-    }, 1200); // Longer delay to ensure auth state is fully resolved
+    }, 1000); // Shorter delay to improve UX
     
     return () => clearTimeout(timer);
   }, [user, isLoading, navigate]);
   
   // Show loading state when either auth is loading or page is still initializing
   if (isLoading || isPageLoading) {
-    console.log('Dashboard showing loading state');
+    console.log('Dashboard showing loading state, auth status:', { isLoading, isPageLoading });
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -67,7 +66,13 @@ export default function DashboardPage() {
     );
   }
   
-  console.log('Dashboard rendering with user:', user);
+  console.log('Dashboard rendering with user:', { 
+    id: user.id, 
+    name: user.name, 
+    firstName: user.firstName, 
+    lastName: user.lastName, 
+    role: user.role 
+  });
   
   return (
     <div className="flex h-screen overflow-hidden">

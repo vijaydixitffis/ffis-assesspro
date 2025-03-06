@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,10 +31,12 @@ export default function LoginPage() {
   });
 
   const onLoginSubmit = async (data: LoginFormValues) => {
+    console.log("Login attempt", { email: data.email });
     setIsSubmitting(true);
     try {
       await login(data.email, data.password);
       // The navigation to dashboard is now handled in the AuthContext
+      console.log("Login successful, AuthContext will handle navigation");
     } catch (error) {
       // Error is already handled in the auth context
       console.error('Login error:', error);
