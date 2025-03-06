@@ -26,6 +26,7 @@ export const useAssessmentStatusUpdate = (
         .from('assessment_assignments')
         .select('status')
         .eq('id', assessmentId)
+        .eq('user_id', userId) // Add user_id to the check query
         .single();
 
       if (checkError) {
@@ -42,7 +43,7 @@ export const useAssessmentStatusUpdate = (
         return false;
       }
 
-      // Use RLS-compliant update by including user_id in the where clause
+      // Update with RLS-compliant query
       const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ 
@@ -50,7 +51,7 @@ export const useAssessmentStatusUpdate = (
           updated_at: new Date().toISOString()
         })
         .eq('id', assessmentId)
-        .eq('user_id', userId) // Ensure RLS compatibility
+        .eq('user_id', userId) // Add user_id to ensure RLS compatibility
         .select();
 
       if (error) {
