@@ -33,6 +33,7 @@ export default function MyAssessmentsPage() {
   const { user } = useAuth();
   const [assessments, setAssessments] = useState<AssignedAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [updatingAssessment, setUpdatingAssessment] = useState<string | null>(null);
 
   useEffect(() => {
     if (user?.id) {
@@ -85,11 +86,19 @@ export default function MyAssessmentsPage() {
     console.log("Starting assessment:", assessment);
     console.log("Assessment ID:", assessment.id);
     
+    // Prevent multiple clicks
+    if (updatingAssessment) return;
+    
+    setUpdatingAssessment(assessment.id);
+    
     try {
       // Update the assessment status to STARTED
       const { data, error } = await supabase
         .from('assessment_assignments')
-        .update({ status: 'STARTED' })
+        .update({ 
+          status: 'STARTED',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', assessment.id)
         .select();
 
@@ -101,6 +110,12 @@ export default function MyAssessmentsPage() {
 
       console.log("Update response:", data);
       
+      if (!data || data.length === 0) {
+        console.error('No rows were updated');
+        toast.error('Failed to start assessment: No rows updated');
+        return;
+      }
+      
       // Update local state
       setAssessments(prevAssessments => 
         prevAssessments.map(a => 
@@ -110,21 +125,35 @@ export default function MyAssessmentsPage() {
 
       toast.success(`Started assessment: ${assessment.assessment_title}`);
       
+      // Fetch the updated data to confirm changes
+      await fetchAssignedAssessments();
+      
       // After successful update, navigate to the assessment topics page
       navigate(`/assessment-topics/${assessment.assessment_id}`);
     } catch (error) {
       console.error('Error starting assessment:', error);
       toast.error('An error occurred while starting the assessment');
+    } finally {
+      setUpdatingAssessment(null);
     }
   };
 
   const handleSubmitAssessment = async (assessment: AssignedAssessment) => {
     console.log("Submitting assessment:", assessment.id);
+    
+    // Prevent multiple clicks
+    if (updatingAssessment) return;
+    
+    setUpdatingAssessment(assessment.id);
+    
     try {
       // Update the assessment status to COMPLETED
       const { data, error } = await supabase
         .from('assessment_assignments')
-        .update({ status: 'COMPLETED' })
+        .update({ 
+          status: 'COMPLETED',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', assessment.id)
         .select();
 
@@ -135,16 +164,29 @@ export default function MyAssessmentsPage() {
       }
 
       console.log("Update response for submission:", data);
+      
+      if (!data || data.length === 0) {
+        console.error('No rows were updated for submission');
+        toast.error('Failed to submit assessment: No rows updated');
+        return;
+      }
 
       // Update local state
-      setAssessments(assessments.map(a => 
-        a.id === assessment.id ? { ...a, status: 'COMPLETED' } : a
-      ));
+      setAssessments(prevAssessments => 
+        prevAssessments.map(a => 
+          a.id === assessment.id ? { ...a, status: 'COMPLETED' } : a
+        )
+      );
+
+      // Fetch the updated data to confirm changes
+      await fetchAssignedAssessments();
 
       toast.success(`Assessment submitted: ${assessment.assessment_title}`);
     } catch (error) {
       console.error('Error submitting assessment:', error);
       toast.error('An error occurred while submitting the assessment');
+    } finally {
+      setUpdatingAssessment(null);
     }
   };
 
@@ -193,7 +235,11 @@ export default function MyAssessmentsPage() {
                     <TableRow key={assessment.id}>
                       <TableCell className="font-medium">{assessment.assessment_title}</TableCell>
                       <TableCell>
-                        <Badge>{assessment.status}</Badge>
+                        <Badge 
+                          variant={assessment.status === 'COMPLETED' ? 'success' : 'default'}
+                        >
+                          {assessment.status}
+                        </Badge>
                       </TableCell>
                       <TableCell>{formatDate(assessment.assigned_at)}</TableCell>
                       <TableCell>{formatDate(assessment.due_date)}</TableCell>
@@ -202,19 +248,21 @@ export default function MyAssessmentsPage() {
                           <Button 
                             size="sm" 
                             onClick={() => handleStartAssessment(assessment)}
-                            disabled={assessment.status !== 'ASSIGNED'}
+                            disabled={assessment.status !== 'ASSIGNED' || updatingAssessment === assessment.id}
+                            className={updatingAssessment === assessment.id ? "opacity-70 cursor-not-allowed" : ""}
                           >
                             <Play className="mr-1 h-4 w-4" />
-                            Start
+                            {updatingAssessment === assessment.id && assessment.status === 'ASSIGNED' ? 'Starting...' : 'Start'}
                           </Button>
                           <Button 
                             size="sm" 
                             variant="secondary"
                             onClick={() => handleSubmitAssessment(assessment)}
-                            disabled={assessment.status !== 'STARTED'}
+                            disabled={assessment.status !== 'STARTED' || updatingAssessment === assessment.id}
+                            className={updatingAssessment === assessment.id ? "opacity-70 cursor-not-allowed" : ""}
                           >
                             <Upload className="mr-1 h-4 w-4" />
-                            Submit
+                            {updatingAssessment === assessment.id && assessment.status === 'STARTED' ? 'Submitting...' : 'Submit'}
                           </Button>
                         </div>
                       </TableCell>
