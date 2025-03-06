@@ -114,7 +114,7 @@ export default function MyAssessmentsPage() {
         return;
       }
 
-      // Update the assessment status to STARTED
+      // Fix: Use RLS-compliant update by including user_id in the where clause
       const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ 
@@ -122,6 +122,7 @@ export default function MyAssessmentsPage() {
           updated_at: new Date().toISOString()
         })
         .eq('id', assessment.id)
+        .eq('user_id', user?.id) // Add this line to ensure RLS compatibility
         .select();
 
       if (error) {
@@ -191,7 +192,7 @@ export default function MyAssessmentsPage() {
         return;
       }
 
-      // Update the assessment status to COMPLETED
+      // Fix: Use RLS-compliant update by including user_id in the where clause
       const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ 
@@ -199,6 +200,7 @@ export default function MyAssessmentsPage() {
           updated_at: new Date().toISOString()
         })
         .eq('id', assessment.id)
+        .eq('user_id', user?.id) // Add this line to ensure RLS compatibility
         .select();
 
       if (error) {
