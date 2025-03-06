@@ -14,6 +14,7 @@ interface StartButtonProps {
 
 export const StartButton = ({ 
   assessment, 
+  userId,
   updatingAssessment, 
   onStartAssessment,
   disabled = false

@@ -21,11 +21,12 @@ export const useAssessmentStatusUpdate = (
       // First verify the current status
       const expectedCurrentStatus = newStatus === 'STARTED' ? 'ASSIGNED' : 'STARTED';
       
+      // Use maybeSingle instead of single to avoid the error when no rows are found
       const { data: currentData, error: checkError } = await supabase
         .from('assessment_assignments')
         .select('status, user_id')
         .eq('id', assessmentId)
-        .single();
+        .maybeSingle();
 
       if (checkError) {
         console.error('Error checking assessment status:', checkError);
@@ -55,6 +56,7 @@ export const useAssessmentStatusUpdate = (
         currentStatus: currentData.status
       });
 
+      // Use maybeSingle instead of single to avoid the error when no rows are found
       const { data: updateData, error: updateError } = await supabase
         .from('assessment_assignments')
         .update({ 
@@ -64,7 +66,7 @@ export const useAssessmentStatusUpdate = (
         .eq('id', assessmentId)
         .eq('user_id', userId)
         .select()
-        .single();
+        .maybeSingle();
 
       if (updateError) {
         console.error(`Error updating assessment to ${newStatus}:`, updateError);
