@@ -7,11 +7,14 @@ import { AssessmentsTable } from "@/components/assessments/AssessmentsTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { AssignedAssessment } from "@/types/assessment";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 export default function MyAssessmentsPage() {
   const { user } = useAuth();
   const [assessments, setAssessments] = useState<AssignedAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDebugInfo, setShowDebugInfo] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -41,6 +44,9 @@ export default function MyAssessmentsPage() {
         toast.error('Failed to load your assessments');
         return;
       }
+
+      console.log('Fetched assessments:', data);
+      console.log('Current user ID:', user?.id);
 
       // Transform the data to include assessment title
       const formattedAssessments = data.map(item => ({
@@ -81,6 +87,14 @@ export default function MyAssessmentsPage() {
             <p className="text-muted-foreground">
               View and manage your assigned assessments
             </p>
+            <div className="mt-4 flex items-center space-x-2">
+              <Switch 
+                id="debug-mode" 
+                checked={showDebugInfo}
+                onCheckedChange={setShowDebugInfo}
+              />
+              <Label htmlFor="debug-mode">Show debug info</Label>
+            </div>
           </div>
           
           {isLoading ? (
@@ -97,6 +111,7 @@ export default function MyAssessmentsPage() {
               assessments={assessments} 
               userId={user?.id || ''} 
               onStatusUpdate={handleStatusUpdate}
+              showDebug={showDebugInfo}
             />
           )}
         </div>

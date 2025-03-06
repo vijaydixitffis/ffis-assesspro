@@ -17,12 +17,14 @@ interface AssessmentsTableProps {
   assessments: AssignedAssessment[];
   userId: string;
   onStatusUpdate: (assessmentId: string, newStatus: string) => void;
+  showDebug?: boolean;
 }
 
 export const AssessmentsTable = ({ 
   assessments, 
   userId,
-  onStatusUpdate 
+  onStatusUpdate,
+  showDebug = false
 }: AssessmentsTableProps) => {
   return (
     <div className="rounded-md border">
@@ -53,6 +55,7 @@ export const AssessmentsTable = ({
                   assessment={assessment} 
                   userId={userId}
                   onStatusUpdate={onStatusUpdate}
+                  showDebug={showDebug}
                 />
               </TableCell>
             </TableRow>

@@ -9,17 +9,20 @@ interface AssessmentActionButtonsProps {
   assessment: AssignedAssessment;
   userId: string;
   onStatusUpdate: (assessmentId: string, newStatus: string) => void;
+  showDebug?: boolean;
 }
 
 export const AssessmentActionButtons = ({ 
   assessment, 
   userId,
-  onStatusUpdate 
+  onStatusUpdate,
+  showDebug = false
 }: AssessmentActionButtonsProps) => {
   const navigate = useNavigate();
   const { updatingAssessment, updateAssessmentStatus } = useAssessmentStatusUpdate(onStatusUpdate);
 
   const handleStartAssessment = async () => {
+    console.log(`Starting assessment ${assessment.id} for user ${userId}`);
     const success = await updateAssessmentStatus(assessment.id, 'STARTED', userId);
     if (success) {
       // After successful update, navigate to the assessment topics page
@@ -38,6 +41,7 @@ export const AssessmentActionButtons = ({
         userId={userId}
         updatingAssessment={updatingAssessment}
         onStartAssessment={handleStartAssessment}
+        showDebug={showDebug}
       />
       <SubmitButton 
         assessment={assessment}
