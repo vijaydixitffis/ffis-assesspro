@@ -82,13 +82,16 @@ export default function MyAssessmentsPage() {
   }
 
   const handleStartAssessment = async (assessment: AssignedAssessment) => {
-    console.log("Starting assessment:", assessment.id);
+    console.log("Starting assessment:", assessment);
+    console.log("Assessment ID:", assessment.id);
+    
     try {
       // Update the assessment status to STARTED
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ status: 'STARTED' })
-        .eq('id', assessment.id);
+        .eq('id', assessment.id)
+        .select();
 
       if (error) {
         console.error('Error starting assessment:', error);
@@ -96,14 +99,18 @@ export default function MyAssessmentsPage() {
         return;
       }
 
+      console.log("Update response:", data);
+      
       // Update local state
-      setAssessments(assessments.map(a => 
-        a.id === assessment.id ? { ...a, status: 'STARTED' } : a
-      ));
+      setAssessments(prevAssessments => 
+        prevAssessments.map(a => 
+          a.id === assessment.id ? { ...a, status: 'STARTED' } : a
+        )
+      );
 
       toast.success(`Started assessment: ${assessment.assessment_title}`);
       
-      // Navigate to the assessment topics page
+      // After successful update, navigate to the assessment topics page
       navigate(`/assessment-topics/${assessment.assessment_id}`);
     } catch (error) {
       console.error('Error starting assessment:', error);
@@ -115,16 +122,19 @@ export default function MyAssessmentsPage() {
     console.log("Submitting assessment:", assessment.id);
     try {
       // Update the assessment status to COMPLETED
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ status: 'COMPLETED' })
-        .eq('id', assessment.id);
+        .eq('id', assessment.id)
+        .select();
 
       if (error) {
         console.error('Error submitting assessment:', error);
         toast.error('Failed to submit assessment: ' + error.message);
         return;
       }
+
+      console.log("Update response for submission:", data);
 
       // Update local state
       setAssessments(assessments.map(a => 
