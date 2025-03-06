@@ -12,21 +12,19 @@ export const useAssessmentStatusUpdate = (
   const [updatingAssessment, setUpdatingAssessment] = useState<string | null>(null);
 
   const updateAssessmentStatus: StatusUpdateFunction = async (assessmentId, newStatus, userId) => {
-    // Prevent multiple clicks
     if (updatingAssessment) return false;
     
     setUpdatingAssessment(assessmentId);
-    console.log(`Updating assessment ${assessmentId} to status: ${newStatus}`);
+    console.log(`Attempting to update assessment ${assessmentId} to status: ${newStatus} for user: ${userId}`);
     
     try {
-      // First verify the current status to make sure we're updating from the correct state
+      // First verify the current status
       const expectedCurrentStatus = newStatus === 'STARTED' ? 'ASSIGNED' : 'STARTED';
       
       const { data: currentData, error: checkError } = await supabase
         .from('assessment_assignments')
-        .select('status')
+        .select('status, user_id')
         .eq('id', assessmentId)
-        .eq('user_id', userId) // Add user_id to the check query
         .single();
 
       if (checkError) {
@@ -35,42 +33,53 @@ export const useAssessmentStatusUpdate = (
         return false;
       }
 
-      console.log("Current assessment status:", currentData?.status);
+      console.log("Current assessment data:", currentData);
+
+      if (!currentData) {
+        console.error('Assessment not found');
+        toast.error('Assessment not found');
+        return false;
+      }
       
-      if (currentData?.status !== expectedCurrentStatus) {
-        console.log(`Assessment is not in ${expectedCurrentStatus} state, current state:`, currentData?.status);
-        toast.error(`Assessment cannot be ${newStatus === 'STARTED' ? 'started' : 'submitted'} (current status: ${currentData?.status})`);
+      if (currentData.status !== expectedCurrentStatus) {
+        console.log(`Assessment status mismatch - current: ${currentData.status}, expected: ${expectedCurrentStatus}`);
+        toast.error(`Assessment cannot be ${newStatus === 'STARTED' ? 'started' : 'submitted'} (current status: ${currentData.status})`);
         return false;
       }
 
-      // Update with RLS-compliant query
-      const { data, error } = await supabase
+      // Update assessment status
+      console.log('Attempting to update assessment with:', {
+        assessmentId,
+        userId,
+        newStatus,
+        currentStatus: currentData.status
+      });
+
+      const { data: updateData, error: updateError } = await supabase
         .from('assessment_assignments')
         .update({ 
           status: newStatus,
           updated_at: new Date().toISOString()
         })
         .eq('id', assessmentId)
-        .eq('user_id', userId) // Add user_id to ensure RLS compatibility
-        .select();
+        .eq('user_id', userId)
+        .select()
+        .single();
 
-      if (error) {
-        console.error(`Error updating assessment to ${newStatus}:`, error);
-        toast.error(`Failed to update assessment: ${error.message}`);
+      if (updateError) {
+        console.error(`Error updating assessment to ${newStatus}:`, updateError);
+        toast.error(`Failed to update assessment: ${updateError.message}`);
         return false;
       }
 
-      console.log("Update response:", data);
-      
-      if (!data || data.length === 0) {
-        console.error('No rows were updated');
-        toast.error(`Failed to update assessment: No rows updated`);
+      if (!updateData) {
+        console.error('No rows were updated - Update response:', updateData);
+        toast.error(`Failed to update assessment: No matching assessment found`);
         return false;
       }
       
-      console.log(`Assessment status successfully updated to ${newStatus}`);
+      console.log(`Assessment ${assessmentId} successfully updated to ${newStatus}`);
       
-      // Update local state via callback
       onStatusUpdate(assessmentId, newStatus);
       
       const actionName = newStatus === 'STARTED' ? 'Started' : 'Submitted';
@@ -78,7 +87,7 @@ export const useAssessmentStatusUpdate = (
       return true;
     } catch (error) {
       console.error(`Error updating assessment to ${newStatus}:`, error);
-      toast.error(`An error occurred while updating the assessment`);
+      toast.error(`An unexpected error occurred while updating the assessment`);
       return false;
     } finally {
       setUpdatingAssessment(null);
