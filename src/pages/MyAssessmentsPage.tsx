@@ -83,15 +83,34 @@ export default function MyAssessmentsPage() {
   }
 
   const handleStartAssessment = async (assessment: AssignedAssessment) => {
-    console.log("Starting assessment:", assessment);
-    console.log("Assessment ID:", assessment.id);
-    
     // Prevent multiple clicks
     if (updatingAssessment) return;
     
     setUpdatingAssessment(assessment.id);
+    console.log("Starting assessment with ID:", assessment.id);
     
     try {
+      // First verify the current status to make sure we're updating from ASSIGNED state
+      const { data: currentData, error: checkError } = await supabase
+        .from('assessment_assignments')
+        .select('status')
+        .eq('id', assessment.id)
+        .single();
+
+      if (checkError) {
+        console.error('Error checking assessment status:', checkError);
+        toast.error('Failed to verify assessment status');
+        return;
+      }
+
+      console.log("Current assessment status:", currentData?.status);
+      
+      if (currentData?.status !== 'ASSIGNED') {
+        console.log("Assessment is not in ASSIGNED state, current state:", currentData?.status);
+        toast.error(`Assessment cannot be started (current status: ${currentData?.status})`);
+        return;
+      }
+
       // Update the assessment status to STARTED
       const { data, error } = await supabase
         .from('assessment_assignments')
@@ -104,7 +123,7 @@ export default function MyAssessmentsPage() {
 
       if (error) {
         console.error('Error starting assessment:', error);
-        toast.error('Failed to start assessment: ' + error.message);
+        toast.error(`Failed to start assessment: ${error.message}`);
         return;
       }
 
@@ -115,6 +134,8 @@ export default function MyAssessmentsPage() {
         toast.error('Failed to start assessment: No rows updated');
         return;
       }
+      
+      console.log("Assessment status successfully updated to STARTED");
       
       // Update local state
       setAssessments(prevAssessments => 
@@ -139,14 +160,34 @@ export default function MyAssessmentsPage() {
   };
 
   const handleSubmitAssessment = async (assessment: AssignedAssessment) => {
-    console.log("Submitting assessment:", assessment.id);
-    
     // Prevent multiple clicks
     if (updatingAssessment) return;
     
     setUpdatingAssessment(assessment.id);
+    console.log("Submitting assessment with ID:", assessment.id);
     
     try {
+      // First verify current status is STARTED
+      const { data: currentData, error: checkError } = await supabase
+        .from('assessment_assignments')
+        .select('status')
+        .eq('id', assessment.id)
+        .single();
+
+      if (checkError) {
+        console.error('Error checking assessment status:', checkError);
+        toast.error('Failed to verify assessment status');
+        return;
+      }
+
+      console.log("Current assessment status:", currentData?.status);
+      
+      if (currentData?.status !== 'STARTED') {
+        console.log("Assessment is not in STARTED state, current state:", currentData?.status);
+        toast.error(`Assessment cannot be submitted (current status: ${currentData?.status})`);
+        return;
+      }
+
       // Update the assessment status to COMPLETED
       const { data, error } = await supabase
         .from('assessment_assignments')
@@ -159,7 +200,7 @@ export default function MyAssessmentsPage() {
 
       if (error) {
         console.error('Error submitting assessment:', error);
-        toast.error('Failed to submit assessment: ' + error.message);
+        toast.error(`Failed to submit assessment: ${error.message}`);
         return;
       }
 
@@ -170,6 +211,8 @@ export default function MyAssessmentsPage() {
         toast.error('Failed to submit assessment: No rows updated');
         return;
       }
+
+      console.log("Assessment status successfully updated to COMPLETED");
 
       // Update local state
       setAssessments(prevAssessments => 
