@@ -14,19 +14,30 @@ export function useAssessmentStatusUpdate(
     try {
       console.log(`Updating assignment ${assignmentId} to status ${newStatus}`);
       
-      // Debug: Log the update operation details
-      console.log('Update operation:', {
-        table: 'assessment_assignments',
-        set: { status: newStatus },
-        where: { id: assignmentId }
-      });
+      // Debug: Log the update payload
+      const updatePayload = { status: newStatus };
+      console.log('Update payload:', updatePayload);
+      console.log('Update condition: id =', assignmentId);
       
-      // Update assessment assignment status
+      // Before update, check if record exists and log its current state
+      const { data: existingRecord, error: checkError } = await supabase
+        .from('assessment_assignments')
+        .select('*')
+        .eq('id', assignmentId)
+        .single();
+      
+      if (checkError) {
+        console.error('Error fetching record before update:', checkError);
+      } else {
+        console.log('Existing record before update:', existingRecord);
+      }
+      
+      // Update assessment assignment status with explicit commit
       const { data, error } = await supabase
         .from('assessment_assignments')
-        .update({ status: newStatus })
+        .update(updatePayload)
         .eq('id', assignmentId)
-        .select(); // Add select to return the updated record for verification
+        .select();
       
       if (error) {
         console.error('Error updating assessment status:', error);
@@ -35,7 +46,13 @@ export function useAssessmentStatusUpdate(
       }
       
       // Debug: Log the returned data
-      console.log('Updated record:', data);
+      console.log('Updated record returned from DB:', data);
+      
+      if (!data || data.length === 0) {
+        console.error('No record was updated in the database');
+        toast.error('No record was updated in the database');
+        return false;
+      }
       
       // Notify parent component of the status change
       onStatusUpdate(assignmentId, newStatus);

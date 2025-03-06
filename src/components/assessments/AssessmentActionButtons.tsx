@@ -23,19 +23,32 @@ export const AssessmentActionButtons = ({
 
   const handleStartAssessment = async () => {
     console.log(`Starting assignment with ID: ${assessment.id} for user ${userId}`);
-    console.log('Assessment data:', assessment);
+    console.log('Assessment data before update:', JSON.stringify(assessment, null, 2));
     
-    const success = await updateAssessmentStatus(assessment.id, 'STARTED');
-    if (success) {
-      // After successful update, navigate to the assessment topics page
-      // Using assessment_id (foreign key to assessments table) for navigation
-      navigate(`/assessment-topics/${assessment.assessment_id}`);
+    try {
+      const success = await updateAssessmentStatus(assessment.id, 'STARTED');
+      console.log('Update status returned:', success);
+      
+      if (success) {
+        console.log(`Navigating to assessment topics with ID: ${assessment.assessment_id}`);
+        // After successful update, navigate to the assessment topics page
+        // Using assessment_id (foreign key to assessments table) for navigation
+        navigate(`/assessment-topics/${assessment.assessment_id}`);
+      } else {
+        console.error('Failed to update assessment status');
+      }
+    } catch (err) {
+      console.error('Error in handleStartAssessment:', err);
     }
   };
 
   const handleSubmitAssessment = async () => {
     console.log(`Submitting assignment with ID: ${assessment.id}`);
-    await updateAssessmentStatus(assessment.id, 'COMPLETED');
+    try {
+      await updateAssessmentStatus(assessment.id, 'COMPLETED');
+    } catch (err) {
+      console.error('Error in handleSubmitAssessment:', err);
+    }
   };
 
   return (

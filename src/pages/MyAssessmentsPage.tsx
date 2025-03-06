@@ -25,9 +25,8 @@ export default function MyAssessmentsPage() {
   async function fetchAssignedAssessments() {
     setIsLoading(true);
     try {
+      console.log('Fetching assignments for user:', user?.id);
       // Fetch assessments assigned to the current user with the assessment title
-      // Note: id is the assignment_id (primary key of assessment_assignments)
-      // assessment_id is the foreign key to the assessments table
       const { data, error } = await supabase
         .from('assessment_assignments')
         .select(`
@@ -47,8 +46,7 @@ export default function MyAssessmentsPage() {
         return;
       }
 
-      console.log('Fetched assignments:', data);
-      console.log('Current user ID:', user?.id);
+      console.log('Fetched assignments data:', data);
 
       // Transform the data to include assessment title
       const formattedAssessments = data.map(item => ({
@@ -61,6 +59,7 @@ export default function MyAssessmentsPage() {
         scope: item.scope || ''
       }));
 
+      console.log('Formatted assessments:', formattedAssessments);
       setAssessments(formattedAssessments);
     } catch (error) {
       console.error('Error in fetch operation:', error);
@@ -71,10 +70,15 @@ export default function MyAssessmentsPage() {
   }
 
   const handleStatusUpdate = (assignmentId: string, newStatus: string) => {
+    console.log('Handling status update:', { assignmentId, newStatus });
     setAssessments(prevAssessments => 
-      prevAssessments.map(a => 
-        a.id === assignmentId ? { ...a, status: newStatus } : a
-      )
+      prevAssessments.map(a => {
+        if (a.id === assignmentId) {
+          console.log(`Updating assessment ${assignmentId} from ${a.status} to ${newStatus}`);
+          return { ...a, status: newStatus };
+        }
+        return a;
+      })
     );
   };
 
