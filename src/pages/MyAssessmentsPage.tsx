@@ -26,6 +26,7 @@ interface AssignedAssessment {
   status: string;
   due_date: string | null;
   assigned_at: string | null;
+  scope: string;
 }
 
 export default function MyAssessmentsPage() {
@@ -53,6 +54,7 @@ export default function MyAssessmentsPage() {
           status,
           due_date,
           assigned_at,
+          scope,
           assessments:assessment_id (title)
         `)
         .eq('user_id', user?.id);
@@ -70,7 +72,8 @@ export default function MyAssessmentsPage() {
         assessment_title: item.assessments.title,
         status: item.status,
         due_date: item.due_date,
-        assigned_at: item.assigned_at
+        assigned_at: item.assigned_at,
+        scope: item.scope || ''
       }));
 
       setAssessments(formattedAssessments);
@@ -268,6 +271,7 @@ export default function MyAssessmentsPage() {
                   <TableRow>
                     <TableHead>Assessment</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Scope</TableHead>
                     <TableHead>Assigned Date</TableHead>
                     <TableHead>Due Date</TableHead>
                     <TableHead>Actions</TableHead>
@@ -284,6 +288,7 @@ export default function MyAssessmentsPage() {
                           {assessment.status}
                         </Badge>
                       </TableCell>
+                      <TableCell>{assessment.scope}</TableCell>
                       <TableCell>{formatDate(assessment.assigned_at)}</TableCell>
                       <TableCell>{formatDate(assessment.due_date)}</TableCell>
                       <TableCell>
