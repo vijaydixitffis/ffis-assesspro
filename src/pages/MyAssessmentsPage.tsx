@@ -82,6 +82,7 @@ export default function MyAssessmentsPage() {
   }
 
   const handleStartAssessment = async (assessment: AssignedAssessment) => {
+    console.log("Starting assessment:", assessment.id);
     try {
       // Update the assessment status to STARTED
       const { error } = await supabase
@@ -91,7 +92,7 @@ export default function MyAssessmentsPage() {
 
       if (error) {
         console.error('Error starting assessment:', error);
-        toast.error('Failed to start assessment');
+        toast.error('Failed to start assessment: ' + error.message);
         return;
       }
 
@@ -110,10 +111,31 @@ export default function MyAssessmentsPage() {
     }
   };
 
-  const handleSubmitAssessment = (assessmentId: string) => {
-    // This would typically submit the assessment
-    toast.info(`Submitting assessment: ${assessmentId}`);
-    // Implementation for submitting an assessment would go here
+  const handleSubmitAssessment = async (assessment: AssignedAssessment) => {
+    console.log("Submitting assessment:", assessment.id);
+    try {
+      // Update the assessment status to COMPLETED
+      const { error } = await supabase
+        .from('assessment_assignments')
+        .update({ status: 'COMPLETED' })
+        .eq('id', assessment.id);
+
+      if (error) {
+        console.error('Error submitting assessment:', error);
+        toast.error('Failed to submit assessment: ' + error.message);
+        return;
+      }
+
+      // Update local state
+      setAssessments(assessments.map(a => 
+        a.id === assessment.id ? { ...a, status: 'COMPLETED' } : a
+      ));
+
+      toast.success(`Assessment submitted: ${assessment.assessment_title}`);
+    } catch (error) {
+      console.error('Error submitting assessment:', error);
+      toast.error('An error occurred while submitting the assessment');
+    }
   };
 
   // Format date to be more readable
@@ -178,7 +200,7 @@ export default function MyAssessmentsPage() {
                           <Button 
                             size="sm" 
                             variant="secondary"
-                            onClick={() => handleSubmitAssessment(assessment.id)}
+                            onClick={() => handleSubmitAssessment(assessment)}
                             disabled={assessment.status !== 'STARTED'}
                           >
                             <Upload className="mr-1 h-4 w-4" />
