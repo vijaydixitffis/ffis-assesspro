@@ -4,18 +4,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { AssignedAssessment } from "@/types/assessment";
 
-type StatusUpdateFunction = (assessmentId: string, status: string, userId: string) => Promise<boolean>;
+type StatusUpdateFunction = (assessmentId: string, status: string) => Promise<boolean>;
 
 export const useAssessmentStatusUpdate = (
   onStatusUpdate: (assessmentId: string, newStatus: string) => void
 ) => {
   const [updatingAssessment, setUpdatingAssessment] = useState<string | null>(null);
 
-  const updateAssessmentStatus: StatusUpdateFunction = async (assessmentId, newStatus, userId) => {
+  const updateAssessmentStatus: StatusUpdateFunction = async (assignmentId, newStatus) => {
     if (updatingAssessment) return false;
     
-    setUpdatingAssessment(assessmentId);
-    console.log(`Attempting to update assessment ${assessmentId} to status: ${newStatus} for user: ${userId}`);
+    setUpdatingAssessment(assignmentId);
+    console.log(`Attempting to update assignment with ID: ${assignmentId} to status: ${newStatus}`);
     
     try {
       // First verify the current status
@@ -24,8 +24,8 @@ export const useAssessmentStatusUpdate = (
       // Use maybeSingle instead of single to avoid the error when no rows are found
       const { data: currentData, error: checkError } = await supabase
         .from('assessment_assignments')
-        .select('status, user_id')
-        .eq('id', assessmentId)
+        .select('status, user_id, assessment_id')
+        .eq('id', assignmentId)
         .maybeSingle();
 
       if (checkError) {
@@ -48,23 +48,16 @@ export const useAssessmentStatusUpdate = (
         return false;
       }
 
-      // Update assessment status
-      console.log('Attempting to update assessment with:', {
-        assessmentId,
-        userId,
-        newStatus,
-        currentStatus: currentData.status
-      });
+      // Update assessment status using only the assignment ID
+      console.log('Attempting to update assessment with ID:', assignmentId);
 
-      // Use maybeSingle instead of single to avoid the error when no rows are found
       const { data: updateData, error: updateError } = await supabase
         .from('assessment_assignments')
         .update({ 
           status: newStatus,
           updated_at: new Date().toISOString()
         })
-        .eq('id', assessmentId)
-        .eq('user_id', userId)
+        .eq('id', assignmentId)
         .select()
         .maybeSingle();
 
@@ -80,9 +73,9 @@ export const useAssessmentStatusUpdate = (
         return false;
       }
       
-      console.log(`Assessment ${assessmentId} successfully updated to ${newStatus}`);
+      console.log(`Assessment ${assignmentId} successfully updated to ${newStatus}`);
       
-      onStatusUpdate(assessmentId, newStatus);
+      onStatusUpdate(assignmentId, newStatus);
       
       const actionName = newStatus === 'STARTED' ? 'Started' : 'Submitted';
       toast.success(`${actionName} assessment`);

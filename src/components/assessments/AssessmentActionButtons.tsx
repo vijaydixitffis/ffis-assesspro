@@ -23,7 +23,7 @@ export const AssessmentActionButtons = ({
 
   const handleStartAssessment = async () => {
     console.log(`Starting assessment ${assessment.id} for user ${userId}`);
-    const success = await updateAssessmentStatus(assessment.id, 'STARTED', userId);
+    const success = await updateAssessmentStatus(assessment.id, 'STARTED');
     if (success) {
       // After successful update, navigate to the assessment topics page
       navigate(`/assessment-topics/${assessment.assessment_id}`);
@@ -31,7 +31,7 @@ export const AssessmentActionButtons = ({
   };
 
   const handleSubmitAssessment = async () => {
-    await updateAssessmentStatus(assessment.id, 'COMPLETED', userId);
+    await updateAssessmentStatus(assessment.id, 'COMPLETED');
   };
 
   return (
