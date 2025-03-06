@@ -26,11 +26,13 @@ export default function MyAssessmentsPage() {
     setIsLoading(true);
     try {
       // Fetch assessments assigned to the current user with the assessment title
+      // Note: id is the assignment_id (primary key of assessment_assignments)
+      // assessment_id is the foreign key to the assessments table
       const { data, error } = await supabase
         .from('assessment_assignments')
         .select(`
-          id,               /* This is the assignment ID (primary key) */
-          assessment_id,    /* This is the foreign key to assessments table */
+          id,
+          assessment_id,
           status,
           due_date,
           assigned_at,
