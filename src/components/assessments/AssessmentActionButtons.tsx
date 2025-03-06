@@ -8,7 +8,7 @@ import { useAssessmentStatusUpdate } from "@/hooks/useAssessmentStatusUpdate";
 interface AssessmentActionButtonsProps {
   assessment: AssignedAssessment;
   userId: string;
-  onStatusUpdate: (assessmentId: string, newStatus: string) => void;
+  onStatusUpdate: (assignmentId: string, newStatus: string) => void;
   showDebug?: boolean;
 }
 
@@ -22,15 +22,19 @@ export const AssessmentActionButtons = ({
   const { updatingAssessment, updateAssessmentStatus } = useAssessmentStatusUpdate(onStatusUpdate);
 
   const handleStartAssessment = async () => {
-    console.log(`Starting assignment ${assessment.id} for user ${userId}`);
+    // assessment.id is the primary key of the assignment record
+    console.log(`Starting assignment with ID: ${assessment.id} for user ${userId}`);
     const success = await updateAssessmentStatus(assessment.id, 'STARTED');
     if (success) {
       // After successful update, navigate to the assessment topics page
+      // Using assessment_id (not the assignment ID) for navigation
       navigate(`/assessment-topics/${assessment.assessment_id}`);
     }
   };
 
   const handleSubmitAssessment = async () => {
+    // assessment.id is the primary key of the assignment record
+    console.log(`Submitting assignment with ID: ${assessment.id}`);
     await updateAssessmentStatus(assessment.id, 'COMPLETED');
   };
 

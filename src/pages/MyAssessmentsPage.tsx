@@ -29,8 +29,8 @@ export default function MyAssessmentsPage() {
       const { data, error } = await supabase
         .from('assessment_assignments')
         .select(`
-          id,
-          assessment_id,
+          id,               /* This is the assignment ID (primary key) */
+          assessment_id,    /* This is the foreign key to assessments table */
           status,
           due_date,
           assigned_at,
@@ -40,18 +40,18 @@ export default function MyAssessmentsPage() {
         .eq('user_id', user?.id);
 
       if (error) {
-        console.error('Error fetching assessments:', error);
-        toast.error('Failed to load your assessments');
+        console.error('Error fetching assignments:', error);
+        toast.error('Failed to load your assignments');
         return;
       }
 
-      console.log('Fetched assessments:', data);
+      console.log('Fetched assignments:', data);
       console.log('Current user ID:', user?.id);
 
       // Transform the data to include assessment title
       const formattedAssessments = data.map(item => ({
-        id: item.id,
-        assessment_id: item.assessment_id,
+        id: item.id,                   // Assignment ID (primary key)
+        assessment_id: item.assessment_id,  // Assessment ID (foreign key)
         assessment_title: item.assessments.title,
         status: item.status,
         due_date: item.due_date,
@@ -62,16 +62,16 @@ export default function MyAssessmentsPage() {
       setAssessments(formattedAssessments);
     } catch (error) {
       console.error('Error in fetch operation:', error);
-      toast.error('An error occurred while loading assessments');
+      toast.error('An error occurred while loading assignments');
     } finally {
       setIsLoading(false);
     }
   }
 
-  const handleStatusUpdate = (assessmentId: string, newStatus: string) => {
+  const handleStatusUpdate = (assignmentId: string, newStatus: string) => {
     setAssessments(prevAssessments => 
       prevAssessments.map(a => 
-        a.id === assessmentId ? { ...a, status: newStatus } : a
+        a.id === assignmentId ? { ...a, status: newStatus } : a
       )
     );
   };

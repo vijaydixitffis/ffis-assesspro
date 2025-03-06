@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { AssignedAssessment } from "@/types/assessment";
 
 type StatusUpdateFunction = (assignmentId: string, status: string) => Promise<boolean>;
 
@@ -25,31 +24,31 @@ export const useAssessmentStatusUpdate = (
       const { data: currentData, error: checkError } = await supabase
         .from('assessment_assignments')
         .select('status, user_id, assessment_id')
-        .eq('id', assignmentId)
+        .eq('id', assignmentId)  // Using assignment ID (primary key)
         .maybeSingle();
 
       if (checkError) {
-        console.error('Error checking assessment status:', checkError);
-        toast.error('Failed to verify assessment status');
+        console.error('Error checking assignment status:', checkError);
+        toast.error('Failed to verify assignment status');
         return false;
       }
 
-      console.log("Current assessment data:", currentData);
+      console.log("Current assignment data:", currentData);
 
       if (!currentData) {
-        console.error('Assessment not found');
-        toast.error('Assessment not found');
+        console.error('Assignment not found');
+        toast.error('Assignment not found');
         return false;
       }
       
       if (currentData.status !== expectedCurrentStatus) {
-        console.log(`Assessment status mismatch - current: ${currentData.status}, expected: ${expectedCurrentStatus}`);
-        toast.error(`Assessment cannot be ${newStatus === 'STARTED' ? 'started' : 'submitted'} (current status: ${currentData.status})`);
+        console.log(`Assignment status mismatch - current: ${currentData.status}, expected: ${expectedCurrentStatus}`);
+        toast.error(`Assignment cannot be ${newStatus === 'STARTED' ? 'started' : 'submitted'} (current status: ${currentData.status})`);
         return false;
       }
 
-      // Update assessment status using only the assignment ID
-      console.log('Attempting to update assignment with ID:', assignmentId);
+      // Update assignment status using the assignment ID (primary key)
+      console.log('Updating assignment with ID:', assignmentId);
 
       const { data: updateData, error: updateError } = await supabase
         .from('assessment_assignments')
@@ -57,19 +56,19 @@ export const useAssessmentStatusUpdate = (
           status: newStatus,
           updated_at: new Date().toISOString()
         })
-        .eq('id', assignmentId)
+        .eq('id', assignmentId)  // Using assignment ID (primary key)
         .select()
         .maybeSingle();
 
       if (updateError) {
-        console.error(`Error updating assessment to ${newStatus}:`, updateError);
-        toast.error(`Failed to update assessment: ${updateError.message}`);
+        console.error(`Error updating assignment to ${newStatus}:`, updateError);
+        toast.error(`Failed to update assignment: ${updateError.message}`);
         return false;
       }
 
       if (!updateData) {
         console.error('No rows were updated - Update response:', updateData);
-        toast.error(`Failed to update assessment: No matching assessment found`);
+        toast.error(`Failed to update assignment: No matching assignment found`);
         return false;
       }
       
@@ -81,8 +80,8 @@ export const useAssessmentStatusUpdate = (
       toast.success(`${actionName} assessment`);
       return true;
     } catch (error) {
-      console.error(`Error updating assessment to ${newStatus}:`, error);
-      toast.error(`An unexpected error occurred while updating the assessment`);
+      console.error(`Error updating assignment to ${newStatus}:`, error);
+      toast.error(`An unexpected error occurred while updating the assignment`);
       return false;
     } finally {
       setUpdatingAssessment(null);
