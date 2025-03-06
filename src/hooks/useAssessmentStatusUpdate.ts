@@ -14,17 +14,28 @@ export function useAssessmentStatusUpdate(
     try {
       console.log(`Updating assignment ${assignmentId} to status ${newStatus}`);
       
+      // Debug: Log the update operation details
+      console.log('Update operation:', {
+        table: 'assessment_assignments',
+        set: { status: newStatus },
+        where: { id: assignmentId }
+      });
+      
       // Update assessment assignment status
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ status: newStatus })
-        .eq('id', assignmentId);
+        .eq('id', assignmentId)
+        .select(); // Add select to return the updated record for verification
       
       if (error) {
         console.error('Error updating assessment status:', error);
         toast.error(`Failed to update assessment: ${error.message}`);
         return false;
       }
+      
+      // Debug: Log the returned data
+      console.log('Updated record:', data);
       
       // Notify parent component of the status change
       onStatusUpdate(assignmentId, newStatus);
