@@ -13,7 +13,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileQuestion, MessageSquareQuestion } from "lucide-react";
+import { FileQuestion, MessageCircleQuestion } from "lucide-react";
 import { toast } from "sonner";
 
 interface Topic {
@@ -137,7 +137,7 @@ export default function AssessmentTopicsPage() {
                           onClick={() => handleAnswerQuestions(topic.id)}
                           title="Answer Questions"
                         >
-                          <MessageSquareQuestion className="h-5 w-5" />
+                          <MessageCircleQuestion className="h-5 w-5" />
                         </Button>
                       </TableCell>
                     </TableRow>
