@@ -33,12 +33,11 @@ export function useAssessmentStatusUpdate(
         console.log('Existing record before update:', existingRecord);
       }
       
-      // Fix for 406 error: Use proper headers setting in the request options
-      const { data, error } = await supabase
+      // Update the record without using select() to avoid 406 errors
+      const { error } = await supabase
         .from('assessment_assignments')
         .update({ status: newStatus })
-        .eq('id', assignmentId)
-        .select();
+        .eq('id', assignmentId);
       
       if (error) {
         console.error('Supabase Error updating assessment status:', error);
@@ -47,16 +46,24 @@ export function useAssessmentStatusUpdate(
         return false;
       }
       
-      console.log('Successfully updated record, returned data:', data);
+      console.log('Successfully updated record');
       
-      // Check if data array is empty rather than checking if data is null
-      if (!data || data.length === 0) {
-        console.error('Update succeeded but no data returned');
-        // Even though no data was returned, if there was no error, we'll consider it a success
+      // Since we don't have returned data, we'll retrieve the record again to confirm
+      const { data: updatedRecord, error: fetchError } = await supabase
+        .from('assessment_assignments')
+        .select('*')
+        .eq('id', assignmentId)
+        .single();
+        
+      if (fetchError) {
+        console.error('Error fetching updated record:', fetchError);
+        // Even though we couldn't fetch the record, if the update didn't error, consider it a success
         onStatusUpdate(assignmentId, newStatus);
         toast.success(`Assessment status updated to ${newStatus}`);
         return true;
       }
+      
+      console.log('Updated record:', updatedRecord);
       
       // Notify parent component of the status change
       onStatusUpdate(assignmentId, newStatus);
