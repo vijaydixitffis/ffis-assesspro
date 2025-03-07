@@ -16,12 +16,16 @@ export const SubmitButton = ({
   onSubmitAssessment,
   disabled = false
 }: SubmitButtonProps) => {
+  const isDisabled = disabled || 
+                    assessment.status !== 'STARTED' || 
+                    updatingAssessment === assessment.id;
+                    
   return (
     <Button 
       size="sm" 
       variant="secondary"
       onClick={onSubmitAssessment}
-      disabled={disabled || assessment.status !== 'STARTED' || updatingAssessment === assessment.id}
+      disabled={isDisabled}
       className={updatingAssessment === assessment.id ? "opacity-70 cursor-not-allowed" : ""}
     >
       <Upload className="mr-1 h-4 w-4" />

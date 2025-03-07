@@ -1,8 +1,8 @@
-
 import { useNavigate } from "react-router-dom";
 import { AssignedAssessment } from "@/types/assessment";
 import { StartButton } from "./StartButton";
 import { SubmitButton } from "./SubmitButton";
+import { TopicsButton } from "./TopicsButton";
 import { useAssessmentStatusUpdate } from "@/hooks/useAssessmentStatusUpdate";
 
 interface AssessmentActionButtonsProps {
@@ -74,19 +74,32 @@ export const AssessmentActionButtons = ({
     }
   };
 
+  const handleViewTopics = () => {
+    navigate(`/assessment-topics/${assessment.assessment_id}`);
+  };
+
   return (
     <div className="flex space-x-2">
-      <StartButton 
-        assessment={assessment}
-        userId={userId}
-        updatingAssessment={updatingAssessment}
-        onStartAssessment={handleStartAssessment}
-        showDebug={showDebug}
-      />
+      {assessment.status === 'ASSIGNED' ? (
+        <StartButton 
+          assessment={assessment}
+          userId={userId}
+          updatingAssessment={updatingAssessment}
+          onStartAssessment={handleStartAssessment}
+          showDebug={showDebug}
+        />
+      ) : assessment.status === 'STARTED' ? (
+        <TopicsButton
+          assessment={assessment}
+          onViewTopics={handleViewTopics}
+        />
+      ) : null}
+      
       <SubmitButton 
         assessment={assessment}
         updatingAssessment={updatingAssessment}
         onSubmitAssessment={handleSubmitAssessment}
+        disabled={assessment.status !== 'STARTED'}
       />
     </div>
   );
