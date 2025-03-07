@@ -17,7 +17,7 @@ export const SubmitButton = ({
   disabled = false
 }: SubmitButtonProps) => {
   const isDisabled = disabled || 
-                    assessment.status !== 'STARTED' || 
+                    assessment.status !== 'COMPLETED' || 
                     updatingAssessment === assessment.id;
                     
   return (
