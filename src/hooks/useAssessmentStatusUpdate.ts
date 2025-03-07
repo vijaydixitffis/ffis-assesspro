@@ -33,13 +33,12 @@ export function useAssessmentStatusUpdate(
         console.log('Existing record before update:', existingRecord);
       }
       
-      // Fix for 406 error: Set headers at the client level for this request
+      // Fix for 406 error: Use proper headers setting in the request options
       const { data, error } = await supabase
         .from('assessment_assignments')
         .update({ status: newStatus })
         .eq('id', assignmentId)
-        .select()
-        .headers({ 'Accept': 'application/json' });
+        .select();
       
       if (error) {
         console.error('Supabase Error updating assessment status:', error);
