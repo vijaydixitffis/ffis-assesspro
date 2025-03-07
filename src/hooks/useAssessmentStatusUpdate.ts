@@ -33,6 +33,16 @@ export function useAssessmentStatusUpdate(
         console.log('Existing record before update:', existingRecord);
       }
       
+      // Get current user session to confirm we're authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.error('No active session found - user is not authenticated');
+        toast.error('Authentication required to update assessment status');
+        return false;
+      }
+      
+      console.log('Authenticated as user:', session.user.id);
+      
       // Perform the update with clear error handling
       const { error } = await supabase
         .from('assessment_assignments')
@@ -42,7 +52,7 @@ export function useAssessmentStatusUpdate(
       if (error) {
         console.error('Supabase Error updating assessment status:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
-        toast.error(`Error updating assessment status: ${newStatus}`);
+        toast.error(`Error updating assessment status: ${error.message}`);
         return false;
       }
       
