@@ -26,13 +26,18 @@ export const AssessmentActionButtons = ({
     console.log('Assessment data before update:', JSON.stringify(assessment, null, 2));
     
     try {
+      // Ensure we have a valid ID before attempting update
+      if (!assessment.id) {
+        console.error('Missing assessment ID, cannot update status');
+        return;
+      }
+      
       const success = await updateAssessmentStatus(assessment.id, 'STARTED');
       console.log('Update status returned:', success);
       
       if (success) {
         console.log(`Navigating to assessment topics with ID: ${assessment.assessment_id}`);
         // After successful update, navigate to the assessment topics page
-        // Using assessment_id (foreign key to assessments table) for navigation
         navigate(`/assessment-topics/${assessment.assessment_id}`);
       } else {
         console.error('Failed to update assessment status');
@@ -45,6 +50,11 @@ export const AssessmentActionButtons = ({
   const handleSubmitAssessment = async () => {
     console.log(`Submitting assignment with ID: ${assessment.id}`);
     try {
+      if (!assessment.id) {
+        console.error('Missing assessment ID, cannot update status');
+        return;
+      }
+      
       await updateAssessmentStatus(assessment.id, 'COMPLETED');
     } catch (err) {
       console.error('Error in handleSubmitAssessment:', err);
