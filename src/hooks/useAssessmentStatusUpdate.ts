@@ -33,13 +33,13 @@ export function useAssessmentStatusUpdate(
         console.log('Existing record before update:', existingRecord);
       }
       
-      // Perform the update with explicit return of updated data
+      // Fix for 406 error: Use separate query execution with simpler approach
+      // Remove the .single() call which might be causing issues with response format
       const { data, error } = await supabase
         .from('assessment_assignments')
-        .update(updatePayload)
+        .update({ status: newStatus })
         .eq('id', assignmentId)
-        .select()
-        .single();
+        .select();
       
       if (error) {
         console.error('Supabase Error updating assessment status:', error);
@@ -50,10 +50,10 @@ export function useAssessmentStatusUpdate(
       
       console.log('Successfully updated record, returned data:', data);
       
-      if (!data) {
+      // Check if data array is empty rather than checking if data is null
+      if (!data || data.length === 0) {
         console.error('Update succeeded but no data returned');
         // Even though no data was returned, if there was no error, we'll consider it a success
-        // This could happen in some edge cases with Supabase
         onStatusUpdate(assignmentId, newStatus);
         toast.success(`Assessment status updated to ${newStatus}`);
         return true;

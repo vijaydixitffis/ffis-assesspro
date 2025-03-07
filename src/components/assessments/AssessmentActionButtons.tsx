@@ -32,13 +32,16 @@ export const AssessmentActionButtons = ({
         return;
       }
       
+      // Use a slight delay to ensure UI updates before navigation
       const success = await updateAssessmentStatus(assessment.id, 'STARTED');
       console.log('Update status returned:', success);
       
       if (success) {
         console.log(`Navigating to assessment topics with ID: ${assessment.assessment_id}`);
-        // After successful update, navigate to the assessment topics page
-        navigate(`/assessment-topics/${assessment.assessment_id}`);
+        // Add a small delay before navigation to allow state updates to complete
+        setTimeout(() => {
+          navigate(`/assessment-topics/${assessment.assessment_id}`);
+        }, 100);
       } else {
         console.error('Failed to update assessment status');
       }
