@@ -14,7 +14,7 @@ export function useAssessmentStatusUpdate(
     try {
       console.log(`Updating assignment ${assignmentId} to status ${newStatus}`);
       
-      // Debug: Log the update payload
+      // Enhanced debugging: Log the update payload
       const updatePayload = { status: newStatus };
       console.log('Update payload:', updatePayload);
       
@@ -33,10 +33,10 @@ export function useAssessmentStatusUpdate(
         console.log('Existing record before update:', existingRecord);
       }
       
-      // Update the record without using select() to avoid 406 errors
+      // Perform the update with clear error handling
       const { error } = await supabase
         .from('assessment_assignments')
-        .update({ status: newStatus })
+        .update(updatePayload)
         .eq('id', assignmentId);
       
       if (error) {
@@ -46,9 +46,9 @@ export function useAssessmentStatusUpdate(
         return false;
       }
       
-      console.log('Successfully updated record');
+      console.log('Successfully sent update request');
       
-      // Since we don't have returned data, we'll retrieve the record again to confirm
+      // Verify the update by fetching the record again
       const { data: updatedRecord, error: fetchError } = await supabase
         .from('assessment_assignments')
         .select('*')
@@ -57,13 +57,19 @@ export function useAssessmentStatusUpdate(
         
       if (fetchError) {
         console.error('Error fetching updated record:', fetchError);
-        // Even though we couldn't fetch the record, if the update didn't error, consider it a success
+        // If we couldn't verify the update, we'll still notify but log the issue
         onStatusUpdate(assignmentId, newStatus);
         toast.success(`Assessment status updated to ${newStatus}`);
         return true;
       }
       
-      console.log('Updated record:', updatedRecord);
+      console.log('Record after update:', updatedRecord);
+      
+      if (updatedRecord.status !== newStatus) {
+        console.error(`Update verification failed: Expected status ${newStatus} but got ${updatedRecord.status}`);
+        toast.error('Status update failed to persist');
+        return false;
+      }
       
       // Notify parent component of the status change
       onStatusUpdate(assignmentId, newStatus);

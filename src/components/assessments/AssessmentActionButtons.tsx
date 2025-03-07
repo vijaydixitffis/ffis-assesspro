@@ -32,7 +32,9 @@ export const AssessmentActionButtons = ({
         return;
       }
       
-      // Use a slight delay to ensure UI updates before navigation
+      // Add assessment ID debug info
+      console.log(`Attempting to update assessment with ID: ${assessment.id}`);
+      
       const success = await updateAssessmentStatus(assessment.id, 'STARTED');
       console.log('Update status returned:', success);
       
@@ -58,7 +60,15 @@ export const AssessmentActionButtons = ({
         return;
       }
       
-      await updateAssessmentStatus(assessment.id, 'COMPLETED');
+      // Add assessment ID debug info
+      console.log(`Attempting to update assessment with ID: ${assessment.id}`);
+      
+      const success = await updateAssessmentStatus(assessment.id, 'COMPLETED');
+      console.log('Submit update status returned:', success);
+      
+      if (!success) {
+        console.error('Failed to update assessment status to COMPLETED');
+      }
     } catch (err) {
       console.error('Error in handleSubmitAssessment:', err);
     }
