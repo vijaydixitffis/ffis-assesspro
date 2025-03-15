@@ -1,7 +1,7 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ProtectedRoute } from './components/RouteGuard';
+import { AuthProvider } from './contexts/auth';
+import { ProtectedRoute, PublicRoute } from './components/RouteGuard';
 import DashboardPage from './pages/DashboardPage';
 import AssessmentManagementPage from './pages/AssessmentManagementPage';
 import TopicManagementPage from './pages/TopicManagementPage';
@@ -17,8 +17,8 @@ import TopicQuestionsPage from './pages/TopicQuestionsPage';
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
+      <AuthProvider>
         <Routes>
           <Route path="/" element={<ProtectedRoute requiredRole="client"><Index /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
@@ -33,11 +33,11 @@ function App() {
           <Route path="/users" element={<ProtectedRoute requiredRole="admin"><UsersManagementPage /></ProtectedRoute>} />
           <Route path="/assign-clients" element={<ProtectedRoute requiredRole="admin"><AssignClientsPage /></ProtectedRoute>} />
 
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </Router>
-    </AuthProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 
