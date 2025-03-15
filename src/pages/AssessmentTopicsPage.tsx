@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import { DashboardNav } from "@/components/DashboardNav";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +26,7 @@ interface Topic {
 export default function AssessmentTopicsPage() {
   const { assessmentId } = useParams<{ assessmentId: string }>();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [assessmentTitle, setAssessmentTitle] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -84,8 +85,7 @@ export default function AssessmentTopicsPage() {
   }
 
   const handleAnswerQuestions = (topicId: string) => {
-    toast.info(`Navigate to answer questions for topic: ${topicId}`);
-    // Implementation for navigating to questions would go here
+    navigate(`/topic-questions/${topicId}`);
   };
 
   return (
