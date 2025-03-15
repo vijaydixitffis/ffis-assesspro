@@ -29,7 +29,11 @@ interface Topic {
 export function useTopicQuestions(topicId: string | undefined, userId: string | undefined) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [topic, setTopic] = useState<Topic | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isTopicLoading, setIsTopicLoading] = useState(false);
+  const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
+  const [isSubmissionLoading, setIsSubmissionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [submission, setSubmission] = useState<{ id: string } | null>(null);
 
   useEffect(() => {
@@ -37,32 +41,59 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
       fetchTopic();
       fetchQuestions();
       checkSubmission();
+    } else {
+      // Reset states if no topicId or userId
+      setQuestions([]);
+      setTopic(null);
+      setSubmission(null);
+      setError(null);
     }
   }, [topicId, userId]);
 
+  // Update overall loading state whenever any individual loading state changes
+  useEffect(() => {
+    setIsLoading(isTopicLoading || isQuestionsLoading || isSubmissionLoading);
+  }, [isTopicLoading, isQuestionsLoading, isSubmissionLoading]);
+
   async function fetchTopic() {
+    setIsTopicLoading(true);
+    setError(null);
+    
     try {
       const { data, error } = await supabase
         .from('topics')
         .select('id, title, assessment_id')
         .eq('id', topicId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching topic:', error);
+        setError(`Failed to load topic: ${error.message}`);
         toast.error('Failed to load topic');
+        return;
+      }
+
+      if (!data) {
+        setError('Topic not found');
+        toast.error('Topic not found');
         return;
       }
 
       setTopic(data);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       console.error('Error in fetch operation:', error);
+      setError(`An error occurred while loading topic: ${errorMessage}`);
       toast.error('An error occurred while loading topic');
+    } finally {
+      setIsTopicLoading(false);
     }
   }
 
   async function checkSubmission() {
     if (!userId || !topicId) return;
+    
+    setIsSubmissionLoading(true);
     
     try {
       // First get the assessment_id for this topic
@@ -70,10 +101,16 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
         .from('topics')
         .select('assessment_id')
         .eq('id', topicId)
-        .single();
+        .maybeSingle();
       
       if (topicError) {
         console.error('Error fetching topic assessment:', topicError);
+        setError(`Failed to check submission status: ${topicError.message}`);
+        return;
+      }
+      
+      if (!topicData) {
+        setError('Topic assessment not found');
         return;
       }
       
@@ -84,23 +121,28 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
         .eq('assessment_id', topicData.assessment_id)
         .eq('user_id', userId)
         .is('completed_at', null)
-        .single();
+        .maybeSingle();
       
-      if (submissionError && submissionError.code !== 'PGRST116') {
+      if (submissionError) {
         console.error('Error checking submission:', submissionError);
+        setError(`Failed to check submission status: ${submissionError.message}`);
         return;
       }
       
-      if (submissionData) {
-        setSubmission(submissionData);
-      }
+      setSubmission(submissionData);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       console.error('Error checking submission status:', error);
+      setError(`Failed to check submission status: ${errorMessage}`);
+    } finally {
+      setIsSubmissionLoading(false);
     }
   }
 
   async function fetchQuestions() {
-    setIsLoading(true);
+    setIsQuestionsLoading(true);
+    setError(null);
+    
     try {
       const { data, error } = await supabase
         .from('questions')
@@ -123,29 +165,52 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
 
       if (error) {
         console.error('Error fetching questions:', error);
+        setError(`Failed to load questions: ${error.message}`);
         toast.error('Failed to load questions');
         return;
       }
 
+      if (!data || data.length === 0) {
+        // Not setting an error here as empty questions is a valid state
+        setQuestions([]);
+        return;
+      }
+
       // Cast the type to ensure it matches the QuestionType
-      const typedQuestions = data?.map(q => ({
+      const typedQuestions = data.map(q => ({
         ...q,
         type: q.type as QuestionType,
-      })) || [];
+      }));
 
       setQuestions(typedQuestions);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       console.error('Error in fetch operation:', error);
+      setError(`An error occurred while loading questions: ${errorMessage}`);
       toast.error('An error occurred while loading questions');
     } finally {
-      setIsLoading(false);
+      setIsQuestionsLoading(false);
     }
   }
+
+  // Function to manually retry fetching everything
+  const retryFetching = () => {
+    if (topicId && userId) {
+      fetchTopic();
+      fetchQuestions();
+      checkSubmission();
+    }
+  };
 
   return {
     questions,
     topic,
     isLoading,
-    submission
+    isTopicLoading,
+    isQuestionsLoading,
+    isSubmissionLoading,
+    error,
+    submission,
+    retryFetching
   };
 }
