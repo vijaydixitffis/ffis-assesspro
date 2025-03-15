@@ -8,6 +8,7 @@ import { QuestionCard } from "@/components/questions/QuestionCard";
 import { NoSubmissionWarning } from "@/components/questions/NoSubmissionWarning";
 import { useTopicQuestions } from "@/hooks/useTopicQuestions";
 import { useTopicSubmission } from "@/hooks/useTopicSubmission";
+import { toast } from "sonner";
 
 export default function TopicQuestionsPage() {
   const { topicId } = useParams<{ topicId: string }>();
@@ -16,7 +17,7 @@ export default function TopicQuestionsPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({});
   const [textAnswers, setTextAnswers] = useState<{ [key: string]: string }>({});
   
-  const { questions, topic, isLoading, submission } = useTopicQuestions(topicId, user?.id);
+  const { questions, topic, isLoading, submission, error } = useTopicQuestions(topicId, user?.id);
   const { isSubmitting, submitAnswers } = useTopicSubmission();
 
   const handleAnswerSelect = (questionId: string, answerId: string) => {
@@ -34,6 +35,11 @@ export default function TopicQuestionsPage() {
   };
 
   const handleSubmitAnswers = async () => {
+    if (!submission) {
+      toast.error("Cannot submit answers without an active assessment session");
+      return;
+    }
+    
     await submitAnswers(questions, selectedAnswers, textAnswers, submission, topic);
   };
 
@@ -55,6 +61,10 @@ export default function TopicQuestionsPage() {
           {isLoading ? (
             <div className="flex justify-center p-8">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            </div>
+          ) : error ? (
+            <div className="rounded-lg border border-destructive p-4 text-destructive">
+              <p>{error}</p>
             </div>
           ) : questions.length === 0 ? (
             <div className="rounded-lg border border-dashed p-8 text-center">

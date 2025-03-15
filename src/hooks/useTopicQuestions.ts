@@ -113,6 +113,8 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
         setError('Topic assessment not found');
         return;
       }
+
+      console.log('Checking submission for assessment:', topicData.assessment_id, 'and user:', userId);
       
       // Check if there's an active submission for this assessment
       const { data: submissionData, error: submissionError } = await supabase
@@ -128,8 +130,50 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
         setError(`Failed to check submission status: ${submissionError.message}`);
         return;
       }
+
+      console.log('Submission data:', submissionData);
       
-      setSubmission(submissionData);
+      if (!submissionData) {
+        // If no active submission exists, check if the assessment is in STARTED state
+        const { data: assignmentData, error: assignmentError } = await supabase
+          .from('assessment_assignments')
+          .select('id, status')
+          .eq('assessment_id', topicData.assessment_id)
+          .eq('user_id', userId)
+          .eq('status', 'STARTED')
+          .maybeSingle();
+        
+        if (assignmentError) {
+          console.error('Error checking assignment status:', assignmentError);
+          return;
+        }
+        
+        console.log('Assignment data:', assignmentData);
+        
+        // If assessment is in STARTED state but no submission exists, create one
+        if (assignmentData) {
+          console.log('Assessment is in STARTED state but no submission exists. Creating submission...');
+          const { data: newSubmission, error: createError } = await supabase
+            .from('assessment_submissions')
+            .insert({
+              assessment_id: topicData.assessment_id,
+              user_id: userId
+            })
+            .select('id')
+            .single();
+          
+          if (createError) {
+            console.error('Error creating submission:', createError);
+            toast.error('Failed to create submission record');
+            return;
+          }
+          
+          console.log('Created new submission:', newSubmission);
+          setSubmission(newSubmission);
+        }
+      } else {
+        setSubmission(submissionData);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       console.error('Error checking submission status:', error);
