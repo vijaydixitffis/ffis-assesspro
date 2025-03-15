@@ -15,11 +15,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { AlertCircle } from "lucide-react";
+import { QuestionType } from "@/components/questions/types";
 
 interface Question {
   id: string;
   question: string;
-  type: 'multiple_choice' | 'yes_no' | 'free_text';
+  type: QuestionType;
   is_active: boolean;
   sequence_number: number;
   answers: Answer[];
@@ -145,7 +146,13 @@ export default function TopicQuestionsPage() {
         return;
       }
 
-      setQuestions(data || []);
+      // Cast the type to ensure it matches the QuestionType
+      const typedQuestions = data?.map(q => ({
+        ...q,
+        type: q.type as QuestionType,
+      })) || [];
+
+      setQuestions(typedQuestions);
     } catch (error) {
       console.error('Error in fetch operation:', error);
       toast.error('An error occurred while loading questions');

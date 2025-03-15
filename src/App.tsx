@@ -1,6 +1,7 @@
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import { RouteGuard } from './components/RouteGuard';
+import { ProtectedRoute } from './components/RouteGuard';
 import DashboardPage from './pages/DashboardPage';
 import AssessmentManagementPage from './pages/AssessmentManagementPage';
 import TopicManagementPage from './pages/TopicManagementPage';
@@ -19,22 +20,18 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route element={<RouteGuard allowedRoles={['admin', 'client']} />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/my-assessments" element={<MyAssessmentsPage />} />
-            <Route path="/assessment-topics/:assessmentId" element={<AssessmentTopicsPage />} />
-            <Route path="/topic-questions/:topicId" element={<TopicQuestionsPage />} />
-          </Route>
+          <Route path="/" element={<ProtectedRoute requiredRole="client"><Index /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/my-assessments" element={<ProtectedRoute requiredRole="client"><MyAssessmentsPage /></ProtectedRoute>} />
+          <Route path="/assessment-topics/:assessmentId" element={<ProtectedRoute requiredRole="client"><AssessmentTopicsPage /></ProtectedRoute>} />
+          <Route path="/topic-questions/:topicId" element={<ProtectedRoute requiredRole="client"><TopicQuestionsPage /></ProtectedRoute>} />
 
           {/* Admin-only routes */}
-          <Route element={<RouteGuard allowedRoles={['admin']} />}>
-            <Route path="/assessments" element={<AssessmentManagementPage />} />
-            <Route path="/topics" element={<TopicManagementPage />} />
-            <Route path="/questions" element={<QuestionManagementPage />} />
-            <Route path="/users" element={<UsersManagementPage />} />
-            <Route path="/assign-clients" element={<AssignClientsPage />} />
-          </Route>
+          <Route path="/assessments" element={<ProtectedRoute requiredRole="admin"><AssessmentManagementPage /></ProtectedRoute>} />
+          <Route path="/topics" element={<ProtectedRoute requiredRole="admin"><TopicManagementPage /></ProtectedRoute>} />
+          <Route path="/questions" element={<ProtectedRoute requiredRole="admin"><QuestionManagementPage /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute requiredRole="admin"><UsersManagementPage /></ProtectedRoute>} />
+          <Route path="/assign-clients" element={<ProtectedRoute requiredRole="admin"><AssignClientsPage /></ProtectedRoute>} />
 
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />
