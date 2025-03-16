@@ -17,7 +17,7 @@ export default function TopicQuestionsPage() {
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({});
   const [textAnswers, setTextAnswers] = useState<{ [key: string]: string }>({});
   
-  const { questions, topic, isLoading, submission, error } = useTopicQuestions(topicId, user?.id);
+  const { questions, topic, isLoading, assessmentState, error } = useTopicQuestions(topicId, user?.id);
   const { isSubmitting, submitAnswers } = useTopicSubmission();
 
   const handleAnswerSelect = (questionId: string, answerId: string) => {
@@ -35,13 +35,15 @@ export default function TopicQuestionsPage() {
   };
 
   const handleSubmitAnswers = async () => {
-    if (!submission) {
-      toast.error("Cannot submit answers without an active assessment session");
+    if (assessmentState !== 'STARTED') {
+      toast.error("Cannot submit answers. The assessment must be in STARTED state.");
       return;
     }
     
-    await submitAnswers(questions, selectedAnswers, textAnswers, submission, topic);
+    await submitAnswers(questions, selectedAnswers, textAnswers, null, topic);
   };
+
+  const isAssessmentStarted = assessmentState === 'STARTED';
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -94,13 +96,13 @@ export default function TopicQuestionsPage() {
                 </Button>
                 <Button 
                   onClick={handleSubmitAnswers} 
-                  disabled={isSubmitting || !submission}
+                  disabled={isSubmitting || !isAssessmentStarted}
                 >
                   {isSubmitting ? "Submitting..." : "Submit Answers"}
                 </Button>
               </div>
 
-              {!submission && <NoSubmissionWarning />}
+              {!isAssessmentStarted && <NoSubmissionWarning />}
             </div>
           )}
         </div>

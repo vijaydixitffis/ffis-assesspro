@@ -37,8 +37,8 @@ export function useTopicSubmission() {
     submission: { id: string } | null,
     topic: Topic | null
   ) => {
-    if (!submission || !topic) {
-      toast.error("Unable to submit answers. Please try again later.");
+    if (!topic) {
+      toast.error("Unable to submit answers. Topic information is missing.");
       return false;
     }
 
@@ -58,6 +58,17 @@ export function useTopicSubmission() {
 
     setIsSubmitting(true);
     try {
+      let submissionId = submission?.id;
+      
+      // If no submission exists, we need to use the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Authentication required. Please log in again.");
+        return false;
+      }
+      
+      // No need to create a submission record here - we just submit the answers
       // Submit each answer
       for (const question of questions) {
         if (question.type === 'free_text') {
@@ -66,7 +77,7 @@ export function useTopicSubmission() {
             .from('submitted_answers')
             .insert({
               question_id: question.id,
-              submission_id: submission.id,
+              submission_id: submissionId,
               text_answer: textAnswers[question.id]
             });
         } else {
@@ -78,7 +89,7 @@ export function useTopicSubmission() {
             .from('submitted_answers')
             .insert({
               question_id: question.id,
-              submission_id: submission.id,
+              submission_id: submissionId,
               answer_id: answerId,
               is_correct: selectedAnswer?.is_correct || null
             });

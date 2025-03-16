@@ -35,18 +35,20 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
   const [isSubmissionLoading, setIsSubmissionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submission, setSubmission] = useState<{ id: string } | null>(null);
+  const [assessmentState, setAssessmentState] = useState<string | null>(null);
 
   useEffect(() => {
     if (topicId && userId) {
       fetchTopic();
       fetchQuestions();
-      checkSubmission();
+      checkAssessmentState();
     } else {
       // Reset states if no topicId or userId
       setQuestions([]);
       setTopic(null);
       setSubmission(null);
       setError(null);
+      setAssessmentState(null);
     }
   }, [topicId, userId]);
 
@@ -90,7 +92,7 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
     }
   }
 
-  async function checkSubmission() {
+  async function checkAssessmentState() {
     if (!userId || !topicId) return;
     
     setIsSubmissionLoading(true);
@@ -105,7 +107,7 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
       
       if (topicError) {
         console.error('Error fetching topic assessment:', topicError);
-        setError(`Failed to check submission status: ${topicError.message}`);
+        setError(`Failed to check assessment status: ${topicError.message}`);
         return;
       }
       
@@ -114,70 +116,52 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
         return;
       }
 
-      console.log('Checking submission for assessment:', topicData.assessment_id, 'and user:', userId);
+      console.log('Checking assessment state for:', topicData.assessment_id, 'and user:', userId);
       
-      // Check if there's an active submission for this assessment
-      const { data: submissionData, error: submissionError } = await supabase
-        .from('assessment_submissions')
-        .select('id')
+      // Check the assignment status
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('assessment_assignments')
+        .select('id, status')
         .eq('assessment_id', topicData.assessment_id)
         .eq('user_id', userId)
-        .is('completed_at', null)
         .maybeSingle();
       
-      if (submissionError) {
-        console.error('Error checking submission:', submissionError);
-        setError(`Failed to check submission status: ${submissionError.message}`);
+      if (assignmentError) {
+        console.error('Error checking assignment status:', assignmentError);
+        setError(`Failed to check assessment status: ${assignmentError.message}`);
         return;
       }
-
-      console.log('Submission data:', submissionData);
       
-      if (!submissionData) {
-        // If no active submission exists, check if the assessment is in STARTED state
-        const { data: assignmentData, error: assignmentError } = await supabase
-          .from('assessment_assignments')
-          .select('id, status')
-          .eq('assessment_id', topicData.assessment_id)
-          .eq('user_id', userId)
-          .eq('status', 'STARTED')
-          .maybeSingle();
+      console.log('Assignment data:', assignmentData);
+      
+      if (assignmentData) {
+        setAssessmentState(assignmentData.status);
         
-        if (assignmentError) {
-          console.error('Error checking assignment status:', assignmentError);
-          return;
-        }
-        
-        console.log('Assignment data:', assignmentData);
-        
-        // If assessment is in STARTED state but no submission exists, create one
-        if (assignmentData) {
-          console.log('Assessment is in STARTED state but no submission exists. Creating submission...');
-          const { data: newSubmission, error: createError } = await supabase
+        // If assessment is already completed, check for existing submission
+        if (assignmentData.status === 'COMPLETED') {
+          const { data: submissionData, error: submissionError } = await supabase
             .from('assessment_submissions')
-            .insert({
-              assessment_id: topicData.assessment_id,
-              user_id: userId
-            })
             .select('id')
-            .single();
+            .eq('assessment_id', topicData.assessment_id)
+            .eq('user_id', userId)
+            .not('completed_at', 'is', null)
+            .maybeSingle();
           
-          if (createError) {
-            console.error('Error creating submission:', createError);
-            toast.error('Failed to create submission record');
+          if (submissionError) {
+            console.error('Error checking submission:', submissionError);
             return;
           }
           
-          console.log('Created new submission:', newSubmission);
-          setSubmission(newSubmission);
+          console.log('Submission data for completed assessment:', submissionData);
+          setSubmission(submissionData);
         }
       } else {
-        setSubmission(submissionData);
+        setAssessmentState(null);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
-      console.error('Error checking submission status:', error);
-      setError(`Failed to check submission status: ${errorMessage}`);
+      console.error('Error checking assessment status:', error);
+      setError(`Failed to check assessment status: ${errorMessage}`);
     } finally {
       setIsSubmissionLoading(false);
     }
@@ -242,7 +226,7 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
     if (topicId && userId) {
       fetchTopic();
       fetchQuestions();
-      checkSubmission();
+      checkAssessmentState();
     }
   };
 
@@ -255,6 +239,7 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
     isSubmissionLoading,
     error,
     submission,
+    assessmentState,
     retryFetching
   };
 }
