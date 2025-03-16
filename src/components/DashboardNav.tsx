@@ -30,22 +30,22 @@ export function DashboardNav() {
     {
       label: "Assessments",
       icon: ClipboardList,
-      href: "/admin/assessments",
-      active: location.pathname === "/admin/assessments",
+      href: "/assessments",
+      active: location.pathname === "/assessments",
       adminOnly: true,
     },
     {
       label: "Topics",
       icon: BookOpen,
-      href: "/admin/topics",
-      active: location.pathname === "/admin/topics",
+      href: "/topics",
+      active: location.pathname === "/topics",
       adminOnly: true,
     },
     {
       label: "Users",
       icon: Users,
-      href: "/admin/users",
-      active: location.pathname === "/admin/users",
+      href: "/users",
+      active: location.pathname === "/users",
       adminOnly: true,
     },
     {

@@ -14,6 +14,7 @@ import Index from './pages/Index';
 import MyAssessmentsPage from './pages/MyAssessmentsPage';
 import AssessmentTopicsPage from './pages/AssessmentTopicsPage';
 import TopicQuestionsPage from './pages/TopicQuestionsPage';
+import AccessDeniedPage from './pages/AccessDeniedPage';
 
 function App() {
   return (
@@ -32,6 +33,10 @@ function App() {
           <Route path="/questions" element={<ProtectedRoute requiredRole="admin"><QuestionManagementPage /></ProtectedRoute>} />
           <Route path="/users" element={<ProtectedRoute requiredRole="admin"><UsersManagementPage /></ProtectedRoute>} />
           <Route path="/assign-clients" element={<ProtectedRoute requiredRole="admin"><AssignClientsPage /></ProtectedRoute>} />
+          
+          {/* Fallback pages for routes that don't have dedicated pages yet */}
+          <Route path="/reports" element={<ProtectedRoute><AccessDeniedPage /></ProtectedRoute>} />
+          <Route path="/help" element={<ProtectedRoute><AccessDeniedPage /></ProtectedRoute>} />
 
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="*" element={<NotFound />} />
