@@ -46,7 +46,8 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
   };
 
   const handleManageQuestions = (topicId: string) => {
-    navigate(`/admin/questions?topicId=${topicId}`);
+    // Fixed path to match the route in App.tsx
+    navigate(`/questions?topicId=${topicId}`);
   };
 
   const toggleTopicStatus = async (id: string, currentStatus: boolean) => {

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -79,11 +78,11 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
   };
 
   const handleManageTopics = (assessmentId: string) => {
-    navigate(`/admin/topics?assessmentId=${assessmentId}`);
+    navigate(`/topics?assessmentId=${assessmentId}`);
   };
 
   const handleAssignClients = (assessmentId: string) => {
-    navigate(`/admin/assign-clients?assessmentId=${assessmentId}`);
+    navigate(`/assign-clients?assessmentId=${assessmentId}`);
   };
 
   if (isLoading) {

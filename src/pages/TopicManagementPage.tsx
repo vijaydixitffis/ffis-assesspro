@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { DashboardNav } from '@/components/DashboardNav';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
