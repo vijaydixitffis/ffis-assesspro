@@ -139,7 +139,7 @@ export default function AssignClientsPage() {
 
   const handleAssessmentChange = (value: string) => {
     setSelectedAssessmentId(value);
-    navigate(`/admin/assign-clients?assessmentId=${value}`);
+    navigate(`/assign-clients?assessmentId=${value}`);
   };
 
   const handleScopeChange = (userId: string, value: string) => {
