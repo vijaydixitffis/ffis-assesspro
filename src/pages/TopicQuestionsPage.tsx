@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -10,6 +9,7 @@ import { useTopicQuestions } from "@/hooks/useTopicQuestions";
 import { useTopicSubmission } from "@/hooks/useTopicSubmission";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function TopicQuestionsPage() {
   const { topicId } = useParams<{ topicId: string }>();
