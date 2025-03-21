@@ -68,6 +68,28 @@ export function useTopicSubmission() {
         return false;
       }
       
+      // Create a submission if it doesn't exist
+      if (!submissionId) {
+        const { data: newSubmission, error: submissionError } = await supabase
+          .from('assessment_submissions')
+          .insert({
+            assessment_id: topic.assessment_id,
+            user_id: user.id
+          })
+          .select('id')
+          .single();
+          
+        if (submissionError) {
+          console.error('Error creating submission:', submissionError);
+          toast.error("Failed to create submission. Please try again.");
+          return false;
+        }
+        
+        submissionId = newSubmission.id;
+      }
+      
+      console.log("Submitting answers to submission ID:", submissionId);
+      
       // Submit each answer
       for (const question of questions) {
         if (question.type === 'free_text') {

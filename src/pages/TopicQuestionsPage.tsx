@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
@@ -26,10 +27,34 @@ export default function TopicQuestionsPage() {
     assessmentState, 
     error, 
     submission,
+    previousAnswers,
+    previousTextAnswers,
     retryFetching
   } = useTopicQuestions(topicId, user?.id);
   
   const { isSubmitting, submitAnswers } = useTopicSubmission();
+
+  // Initialize selected answers with previous answers when they are loaded
+  useEffect(() => {
+    if (previousAnswers && Object.keys(previousAnswers).length > 0) {
+      console.log("Setting selected answers from previous:", previousAnswers);
+      const validAnswers: { [key: string]: string } = {};
+      
+      // Filter out any null values
+      Object.entries(previousAnswers).forEach(([key, value]) => {
+        if (value !== null) {
+          validAnswers[key] = value;
+        }
+      });
+      
+      setSelectedAnswers(validAnswers);
+    }
+    
+    if (previousTextAnswers && Object.keys(previousTextAnswers).length > 0) {
+      console.log("Setting text answers from previous:", previousTextAnswers);
+      setTextAnswers(previousTextAnswers);
+    }
+  }, [previousAnswers, previousTextAnswers]);
 
   // Fetch or create the topic assignment on load
   useEffect(() => {
@@ -143,6 +168,31 @@ export default function TopicQuestionsPage() {
       return;
     }
     
+    // For completed topics, we need to delete previous answers first
+    if (topicAssignment?.status === 'COMPLETED' && submission) {
+      try {
+        // Get IDs of questions in this topic
+        const questionIds = questions.map(q => q.id);
+        
+        // Delete previous answers for these questions
+        const { error: deleteError } = await supabase
+          .from('submitted_answers')
+          .delete()
+          .eq('submission_id', submission.id)
+          .in('question_id', questionIds);
+        
+        if (deleteError) {
+          console.error('Error deleting previous answers:', deleteError);
+          toast.error("Failed to delete previous answers");
+          return;
+        }
+      } catch (error) {
+        console.error('Error deleting previous answers:', error);
+        toast.error("Failed to delete previous answers");
+        return;
+      }
+    }
+    
     const success = await submitAnswers(questions, selectedAnswers, textAnswers, submission, topic);
     
     if (success && topicAssignment) {
@@ -168,6 +218,7 @@ export default function TopicQuestionsPage() {
 
   const isAssessmentStarted = assessmentState === 'STARTED';
   const isTopicCompleted = topicAssignment?.status === 'COMPLETED';
+  const canResubmit = isAssessmentStarted && isTopicCompleted;
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -228,16 +279,16 @@ export default function TopicQuestionsPage() {
                 </Button>
                 <Button 
                   onClick={handleSubmitAnswers} 
-                  disabled={isSubmitting || !isAssessmentStarted || isTopicCompleted}
+                  disabled={isSubmitting || !isAssessmentStarted}
                 >
-                  {isSubmitting ? "Submitting..." : isTopicCompleted ? "Already Completed" : "Submit Answers"}
+                  {isSubmitting ? "Submitting..." : canResubmit ? "Resubmit Answers" : "Submit Answers"}
                 </Button>
               </div>
 
               {!isAssessmentStarted && <NoSubmissionWarning />}
               {isTopicCompleted && (
                 <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800 mt-4">
-                  <p>You have already completed this topic.</p>
+                  <p>You have already completed this topic. You can review your answers and resubmit if needed.</p>
                 </div>
               )}
             </div>
