@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -52,7 +51,6 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
     }
   }, [topicId, userId]);
 
-  // Update overall loading state whenever any individual loading state changes
   useEffect(() => {
     setIsLoading(isTopicLoading || isQuestionsLoading || isSubmissionLoading);
   }, [isTopicLoading, isQuestionsLoading, isSubmissionLoading]);
@@ -98,7 +96,6 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
     setIsSubmissionLoading(true);
     
     try {
-      // First get the assessment_id for this topic
       const { data: topicData, error: topicError } = await supabase
         .from('topics')
         .select('assessment_id')
@@ -118,7 +115,6 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
 
       console.log('Checking assessment state for:', topicData.assessment_id, 'and user:', userId);
       
-      // Check the assignment status
       const { data: assignmentData, error: assignmentError } = await supabase
         .from('assessment_assignments')
         .select('id, status')
@@ -137,7 +133,6 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
       if (assignmentData) {
         setAssessmentState(assignmentData.status);
         
-        // If assessment is already completed, check for existing submission
         if (assignmentData.status === 'COMPLETED') {
           const { data: submissionData, error: submissionError } = await supabase
             .from('assessment_submissions')
@@ -199,12 +194,10 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
       }
 
       if (!data || data.length === 0) {
-        // Not setting an error here as empty questions is a valid state
         setQuestions([]);
         return;
       }
 
-      // Cast the type to ensure it matches the QuestionType
       const typedQuestions = data.map(q => ({
         ...q,
         type: q.type as QuestionType,
@@ -221,7 +214,6 @@ export function useTopicQuestions(topicId: string | undefined, userId: string | 
     }
   }
 
-  // Function to manually retry fetching everything
   const retryFetching = () => {
     if (topicId && userId) {
       fetchTopic();

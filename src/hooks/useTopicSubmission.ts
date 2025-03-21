@@ -68,7 +68,6 @@ export function useTopicSubmission() {
         return false;
       }
       
-      // No need to create a submission record here - we just submit the answers
       // Submit each answer
       for (const question of questions) {
         if (question.type === 'free_text') {
@@ -97,8 +96,6 @@ export function useTopicSubmission() {
       }
       
       toast.success("Answers submitted successfully!");
-      // Navigate back to the topics page
-      navigate(`/assessment-topics/${topic.assessment_id}`);
       return true;
     } catch (error) {
       console.error('Error submitting answers:', error);
