@@ -15,12 +15,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { FileQuestion, MessageCircleQuestion } from "lucide-react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 interface Topic {
   id: string;
   title: string;
   description: string;
   sequence_number: number;
+  status?: string | null;
 }
 
 export default function AssessmentTopicsPage() {
@@ -62,6 +64,20 @@ export default function AssessmentTopicsPage() {
   async function fetchTopics() {
     setIsLoading(true);
     try {
+      // First get the assignment for this assessment
+      const { data: assignmentData, error: assignmentError } = await supabase
+        .from('assessment_assignments')
+        .select('id')
+        .eq('assessment_id', assessmentId)
+        .eq('user_id', user?.id)
+        .maybeSingle();
+
+      if (assignmentError) {
+        console.error('Error fetching assessment assignment:', assignmentError);
+        toast.error('Failed to load assessment assignment');
+      }
+
+      // Fetch topics
       const { data, error } = await supabase
         .from('topics')
         .select('id, title, description, sequence_number')
@@ -75,7 +91,38 @@ export default function AssessmentTopicsPage() {
         return;
       }
 
-      setTopics(data || []);
+      const topicsData = data || [];
+      
+      // If we have an assignment, fetch topic status for each topic
+      if (assignmentData) {
+        const assignmentId = assignmentData.id;
+        
+        // For each topic, check if there's a corresponding topic assignment
+        const topicsWithStatus = await Promise.all(topicsData.map(async (topic) => {
+          const { data: topicAssignmentData, error: topicAssignmentError } = await supabase
+            .from('topic_assignments')
+            .select('status')
+            .eq('topic_id', topic.id)
+            .eq('user_id', user?.id)
+            .eq('assessment_assignment_id', assignmentId)
+            .maybeSingle();
+            
+          if (topicAssignmentError) {
+            console.error('Error fetching topic assignment:', topicAssignmentError);
+            return { ...topic, status: null };
+          }
+          
+          return { 
+            ...topic, 
+            status: topicAssignmentData?.status || null 
+          };
+        }));
+        
+        setTopics(topicsWithStatus);
+      } else {
+        // No assignment, just set topics without status
+        setTopics(topicsData);
+      }
     } catch (error) {
       console.error('Error in fetch operation:', error);
       toast.error('An error occurred while loading topics');
@@ -88,6 +135,17 @@ export default function AssessmentTopicsPage() {
     navigate(`/topic-questions/${topicId}`);
   };
 
+  const getStatusBadge = (status: string | null | undefined) => {
+    if (!status) return null;
+    
+    const variant = 
+      status === 'COMPLETED' ? 'success' : 
+      status === 'STARTED' ? 'secondary' : 
+      'outline';
+    
+    return <Badge variant={variant}>{status}</Badge>;
+  };
+
   return (
     <div className="flex h-screen overflow-hidden">
       <DashboardNav />
@@ -95,9 +153,11 @@ export default function AssessmentTopicsPage() {
       <main className="flex-1 overflow-auto p-6">
         <div className="container mx-auto max-w-7xl animate-in">
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight">Topics of Assessment</h1>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {assessmentTitle ? assessmentTitle : 'Loading assessment...'}
+            </h1>
             <p className="text-muted-foreground">
-              {assessmentTitle ? `Viewing topics for "${assessmentTitle}"` : 'Loading assessment details...'}
+              Select a topic to answer questions
             </p>
           </div>
           
@@ -117,6 +177,7 @@ export default function AssessmentTopicsPage() {
                     <TableHead className="w-16">Sequence</TableHead>
                     <TableHead>Title</TableHead>
                     <TableHead>Description</TableHead>
+                    <TableHead className="w-24">Status</TableHead>
                     <TableHead className="w-24 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -129,6 +190,9 @@ export default function AssessmentTopicsPage() {
                         {topic.description.length > 100 
                           ? `${topic.description.substring(0, 100)}...` 
                           : topic.description}
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(topic.status)}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button 
