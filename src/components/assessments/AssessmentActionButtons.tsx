@@ -10,13 +10,15 @@ interface AssessmentActionButtonsProps {
   userId: string;
   onStatusUpdate: (assignmentId: string, newStatus: string) => void;
   showDebug?: boolean;
+  isAllTopicsCompleted: boolean;
 }
 
 export const AssessmentActionButtons = ({ 
   assessment, 
   userId,
   onStatusUpdate,
-  showDebug = false
+  showDebug = false,
+  isAllTopicsCompleted,
 }: AssessmentActionButtonsProps) => {
   const navigate = useNavigate();
   const { updatingAssessment, updateAssessmentStatus } = useAssessmentStatusUpdate(onStatusUpdate);
@@ -99,6 +101,7 @@ export const AssessmentActionButtons = ({
         assessment={assessment}
         updatingAssessment={updatingAssessment}
         onSubmitAssessment={handleSubmitAssessment}
+        isAllTopicsCompleted={isAllTopicsCompleted}
         disabled={assessment.status !== 'STARTED'}
       />
     </div>

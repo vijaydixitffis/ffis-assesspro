@@ -1,4 +1,3 @@
-
 import { formatDate } from "@/utils/formatUtils";
 import { AssignedAssessment } from "@/types/assessment";
 import { AssessmentStatusBadge } from "./AssessmentStatusBadge";
@@ -18,13 +17,15 @@ interface AssessmentsTableProps {
   userId: string;
   onStatusUpdate: (assessmentId: string, newStatus: string) => void;
   showDebug?: boolean;
+  completionMap: Record<string, boolean>;
 }
 
 export const AssessmentsTable = ({ 
   assessments, 
   userId,
   onStatusUpdate,
-  showDebug = false
+  showDebug = false,
+  completionMap,
 }: AssessmentsTableProps) => {
   return (
     <div className="rounded-md border">
@@ -56,6 +57,7 @@ export const AssessmentsTable = ({
                   userId={userId}
                   onStatusUpdate={onStatusUpdate}
                   showDebug={showDebug}
+                  isAllTopicsCompleted={completionMap[assessment.id] || false}
                 />
               </TableCell>
             </TableRow>

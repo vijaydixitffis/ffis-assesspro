@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,13 +44,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
   const [freeTextMarks, setFreeTextMarks] = useState<string>('');
   const [freeTextComment, setFreeTextComment] = useState<string>('');
 
-  useEffect(() => {
-    if (question?.id) {
-      fetchAnswers(question.id);
-    }
-  }, [question?.id]);
-
-  const fetchAnswers = async (questionId: string) => {
+  const fetchAnswers = useCallback(async (questionId: string) => {
     try {
       const { data, error } = await supabase
         .from('answers')
@@ -99,9 +93,15 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
       console.error('Error fetching answers:', e);
       toast.error('Failed to load answers');
     }
-  };
+  }, [questionType, multipleChoiceAnswers, yesNoAnswers]);
 
-  const handleMultipleChoiceAnswerChange = (index: number, field: keyof Answer, value: any) => {
+  useEffect(() => {
+    if (question?.id) {
+      fetchAnswers(question.id);
+    }
+  }, [question?.id, fetchAnswers]);
+
+  const handleMultipleChoiceAnswerChange = (index: number, field: keyof Answer, value: string | boolean | null) => {
     setMultipleChoiceAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
@@ -118,7 +118,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({
     });
   };
 
-  const handleYesNoAnswerChange = (index: number, field: keyof Answer, value: any) => {
+  const handleYesNoAnswerChange = (index: number, field: keyof Answer, value: string | boolean | null) => {
     setYesNoAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };

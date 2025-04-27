@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Upload } from "lucide-react";
 import { AssignedAssessment } from "@/types/assessment";
@@ -8,17 +7,19 @@ interface SubmitButtonProps {
   updatingAssessment: string | null;
   onSubmitAssessment: () => void;
   disabled?: boolean;
+  isAllTopicsCompleted: boolean;
 }
 
 export const SubmitButton = ({ 
   assessment, 
   updatingAssessment, 
   onSubmitAssessment,
-  disabled = false
+  disabled = false,
+  isAllTopicsCompleted,
 }: SubmitButtonProps) => {
   const isDisabled = disabled || 
-                    assessment.status !== 'COMPLETED' || 
-                    updatingAssessment === assessment.id;
+                    updatingAssessment === assessment.id ||
+                    !isAllTopicsCompleted;
                     
   return (
     <Button 

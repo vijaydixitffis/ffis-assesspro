@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth";
 import { DashboardNav } from "@/components/DashboardNav";
@@ -15,6 +14,7 @@ export default function MyAssessmentsPage() {
   const [assessments, setAssessments] = useState<AssignedAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showDebugInfo, setShowDebugInfo] = useState(false);
+  const [completionMap, setCompletionMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (user?.id) {
@@ -61,12 +61,32 @@ export default function MyAssessmentsPage() {
 
       console.log('Formatted assessments:', formattedAssessments);
       setAssessments(formattedAssessments);
+      await computeCompletionMap(formattedAssessments);
     } catch (error) {
       console.error('Error in fetch operation:', error);
       toast.error('An error occurred while loading assignments');
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function computeCompletionMap(assignments: AssignedAssessment[]) {
+    const map: Record<string, boolean> = {};
+    for (const a of assignments) {
+      const { count: total, error: tErr } = await supabase
+        .from('topics')
+        .select('id', { count: 'exact', head: true })
+        .eq('assessment_id', a.assessment_id)
+        .eq('is_active', true);
+      const { count: done, error: dErr } = await supabase
+        .from('topic_assignments')
+        .select('id', { count: 'exact', head: true })
+        .eq('assessment_assignment_id', a.id)
+        .eq('user_id', user?.id)
+        .eq('status', 'COMPLETED');
+      map[a.id] = (total || 0) > 0 && done === total;
+    }
+    setCompletionMap(map);
   }
 
   const handleStatusUpdate = (assignmentId: string, newStatus: string) => {
@@ -118,6 +138,7 @@ export default function MyAssessmentsPage() {
               userId={user?.id || ''} 
               onStatusUpdate={handleStatusUpdate}
               showDebug={showDebugInfo}
+              completionMap={completionMap}
             />
           )}
         </div>

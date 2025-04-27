@@ -48,7 +48,7 @@ export default function AnswerOptions({
     });
   };
 
-  const updateAnswer = (index: number, field: keyof Answer, value: any) => {
+  const updateAnswer = (index: number, field: keyof Answer, value: string | boolean | number | null) => {
     setAnswers(prevAnswers => {
       const newAnswers = [...prevAnswers];
       newAnswers[index] = { ...newAnswers[index], [field]: value };
