@@ -13,10 +13,11 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileQuestion, MessageCircleQuestion, ArrowLeft } from "lucide-react";
+import { FileQuestion, MessageCircleQuestion, ArrowLeft, Database, Table2, Key, GitBranch, Shield, Zap, Cloud, BarChart3, Play, Clock, CheckCircle2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { QuestionsModal } from "@/components/assessment/QuestionsModal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Answer {
   id: string;
@@ -277,6 +278,21 @@ export default function AssessmentTopicsPage() {
     navigate('/my-assessments');
   };
 
+  const getTopicIcon = (topicTitle: string) => {
+    const iconMap = {
+      'Database Fundamentals': Database,
+      'Entity-Relationship Modeling': Table2,
+      'Normalization': Key,
+      'Indexing and Query Optimization': GitBranch,
+      'Database Security': Shield,
+      'Transaction Management': Zap,
+      'Backup and Recovery': Cloud,
+      'Non-Functional Requirements': BarChart3
+    };
+    
+    return iconMap[topicTitle] || Database;
+  };
+
   const getStatusBadge = (status: string | null | undefined) => {
     if (!status) return null;
     
@@ -313,52 +329,89 @@ export default function AssessmentTopicsPage() {
           </div>
           
           {isLoading ? (
-            <div className="flex justify-center p-8">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <div className="flex justify-center p-12">
+              <div className="text-center space-y-4">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mx-auto"></div>
+                <p className="text-gray-600 dark:text-gray-400">Loading assessment topics...</p>
+              </div>
             </div>
           ) : topics.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <p className="text-muted-foreground">No topics found for this assessment.</p>
+            <div className="rounded-lg border border-dashed p-12 text-center">
+              <Database className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600 dark:text-gray-400 text-lg">No topics found for this assessment.</p>
+              <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Contact your administrator to add topics.</p>
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-16">Sequence</TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="w-24">Status</TableHead>
-                    <TableHead className="w-24 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topics.map((topic) => (
-                    <TableRow key={topic.id}>
-                      <TableCell>{topic.sequence_number}</TableCell>
-                      <TableCell className="font-medium">{topic.title}</TableCell>
-                      <TableCell>
-                        {topic.description.length > 100 
-                          ? `${topic.description.substring(0, 100)}...` 
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {topics.map((topic) => {
+                const IconComponent = getTopicIcon(topic.title);
+                const isCompleted = topic.status === 'COMPLETED';
+                const isStarted = topic.status === 'STARTED';
+                
+                return (
+                  <Card 
+                    key={topic.id} 
+                    className={`group relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer border-2 ${
+                      isCompleted 
+                        ? 'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-900/20' 
+                        : isStarted 
+                          ? 'border-blue-200 bg-blue-50/50 dark:border-blue-800 dark:bg-blue-900/20' 
+                          : 'border-gray-200 hover:border-blue-300 dark:border-gray-700 dark:hover:border-blue-600'
+                    }`}
+                    onClick={() => handleAnswerQuestions(topic.id)}
+                  >
+                    <CardHeader className="pb-4">
+                      <div className="flex items-center justify-between">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
+                          isCompleted 
+                            ? 'bg-green-500 text-white' 
+                            : isStarted 
+                              ? 'bg-blue-500 text-white' 
+                              : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 group-hover:bg-blue-500 group-hover:text-white'
+                        } transition-colors duration-200`}>
+                          {isCompleted ? (
+                            <CheckCircle2 className="h-6 w-6" />
+                          ) : (
+                            <IconComponent className="h-6 w-6" />
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded">
+                            #{topic.sequence_number}
+                          </span>
+                          {getStatusBadge(topic.status)}
+                        </div>
+                      </div>
+                      <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {topic.title}
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4">
+                        {topic.description.length > 120 
+                          ? `${topic.description.substring(0, 120)}...` 
                           : topic.description}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(topic.status)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleAnswerQuestions(topic.id)}
-                          title="Answer Questions"
-                        >
-                          <MessageCircleQuestion className="h-5 w-5" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                      </p>
+                      
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2 text-xs text-gray-500 dark:text-gray-400">
+                          <Clock className="h-3 w-3" />
+                          <span>Click to start</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Play className="h-4 w-4 text-blue-500 group-hover:text-blue-600 transition-colors" />
+                          <span className="text-xs text-blue-500 group-hover:text-blue-600 font-medium">
+                            Answer Questions
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                    
+                    {/* Hover effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  </Card>
+                );
+              })}
             </div>
           )}
         </div>

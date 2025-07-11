@@ -12,6 +12,11 @@ This is a full-stack web application built with a React frontend and Express bac
 - ✓ Fixed Supabase URL concatenation issue causing authentication failures
 - ✓ Populated Database Architecture Assessment data in Supabase
 - ✓ Removed temporary assessment creation components and scripts
+- ✓ Enhanced login page with modern interactive layout inspired by Moderna design
+- ✓ Implemented questions modal for better UX instead of separate page navigation
+- ✓ Added interactive topic cards with suitable icons for each database topic
+- ✓ Created enhanced My Assessments page with statistics dashboard
+- ✓ Improved assessment UI with gradient backgrounds and hover effects
 
 ## User Preferences
 

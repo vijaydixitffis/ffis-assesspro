@@ -8,6 +8,10 @@ import { toast } from "sonner";
 import { AssignedAssessment } from "@/types/assessment";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, CheckCircle2, Play, Database, BookOpen, Target, TrendingUp } from "lucide-react";
 
 export default function MyAssessmentsPage() {
   const { user } = useAuth();
@@ -102,18 +106,97 @@ export default function MyAssessmentsPage() {
     );
   };
 
+  const getStatusStats = () => {
+    const total = assessments.length;
+    const completed = assessments.filter(a => a.status === 'COMPLETED').length;
+    const started = assessments.filter(a => a.status === 'STARTED').length;
+    const notStarted = assessments.filter(a => a.status === 'ASSIGNED').length;
+    
+    return { total, completed, started, notStarted };
+  };
+
+  const stats = getStatusStats();
+
   return (
     <div className="flex h-screen overflow-hidden">
       <DashboardNav />
       
-      <main className="flex-1 overflow-auto p-6">
+      <main className="flex-1 overflow-auto p-6 bg-gray-50/30 dark:bg-gray-900/30">
         <div className="container mx-auto max-w-7xl animate-in">
+          {/* Header Section */}
           <div className="mb-8">
-            <h1 className="text-2xl font-semibold tracking-tight">My Assessments</h1>
-            <p className="text-muted-foreground">
-              View and manage your assigned assessments
-            </p>
-            <div className="mt-4 flex items-center space-x-2">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <BookOpen className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Assessments</h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Track your progress and manage assigned assessments
+                </p>
+              </div>
+            </div>
+            
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Assessments</p>
+                      <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                      <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.completed}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                      <CheckCircle2 className="w-6 h-6 text-green-600 dark:text-green-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">In Progress</p>
+                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{stats.started}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                      <Play className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Not Started</p>
+                      <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.notStarted}</p>
+                    </div>
+                    <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900 rounded-lg flex items-center justify-center">
+                      <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="flex items-center space-x-2 mb-6">
               <Switch 
                 id="debug-mode" 
                 checked={showDebugInfo}
@@ -129,8 +212,10 @@ export default function MyAssessmentsPage() {
               <Skeleton className="h-32 w-full" />
             </div>
           ) : assessments.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-8 text-center">
-              <p className="text-muted-foreground">No assessments have been assigned to you yet.</p>
+            <div className="rounded-lg border border-dashed p-12 text-center">
+              <Database className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-gray-600 dark:text-gray-400 text-lg">No assessments have been assigned to you yet.</p>
+              <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Contact your administrator to get started.</p>
             </div>
           ) : (
             <AssessmentsTable 
