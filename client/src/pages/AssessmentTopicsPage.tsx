@@ -13,7 +13,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { FileQuestion, MessageCircleQuestion, ArrowLeft, Database, Table2, Key, GitBranch, Shield, Zap, Cloud, BarChart3, Play, Clock, CheckCircle2, Users } from "lucide-react";
+import { FileQuestion, MessageCircleQuestion, ArrowLeft, Database, Table2, Key, GitBranch, Shield, Zap, Cloud, BarChart3, Play, Clock, CheckCircle2, Users, Server, Network, Layers, Settings, Code, Workflow, Target, TrendingUp, Building, Cpu, HardDrive, Globe, Lock, FileText, Briefcase, MonitorSpeaker } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { QuestionsModal } from "@/components/assessment/QuestionsModal";
@@ -280,6 +280,7 @@ export default function AssessmentTopicsPage() {
 
   const getTopicIcon = (topicTitle: string) => {
     const iconMap = {
+      // Database-related topics
       'Database Fundamentals': Database,
       'Entity-Relationship Modeling': Table2,
       'Normalization': Key,
@@ -287,10 +288,85 @@ export default function AssessmentTopicsPage() {
       'Database Security': Shield,
       'Transaction Management': Zap,
       'Backup and Recovery': Cloud,
-      'Non-Functional Requirements': BarChart3
+      'Non-Functional Requirements': BarChart3,
+      
+      // IT Portfolio and Architecture topics
+      'IT Portfolio Overview': Building,
+      'Strategic Alignment': Target,
+      'Technology Assessment': Cpu,
+      'Risk Management': Shield,
+      'Governance Framework': Settings,
+      'Performance Metrics': TrendingUp,
+      'Cost Management': BarChart3,
+      'Compliance Standards': FileText,
+      
+      // Application Architecture topics
+      'Application Design': Code,
+      'System Architecture': Layers,
+      'Integration Patterns': Network,
+      'Scalability Planning': Server,
+      'Security Architecture': Lock,
+      'Performance Optimization': Zap,
+      'Data Management': Database,
+      'User Experience Design': Users,
+      
+      // Application Modernization topics
+      'Legacy System Analysis': HardDrive,
+      'Migration Strategy': Workflow,
+      'Cloud Adoption': Cloud,
+      'Microservices Architecture': Layers,
+      'API Management': Network,
+      'DevOps Integration': GitBranch,
+      'Testing Strategy': CheckCircle2,
+      'Change Management': Users,
+      
+      // DevOps Assessment topics
+      'CI/CD Pipeline': GitBranch,
+      'Infrastructure as Code': Code,
+      'Monitoring and Logging': MonitorSpeaker,
+      'Security Practices': Shield,
+      'Container Management': Server,
+      'Automation Strategy': Workflow,
+      'Team Collaboration': Users,
+      'Release Management': Target,
+      
+      // General IT topics
+      'Business Requirements': Briefcase,
+      'Technical Standards': Settings,
+      'Project Management': Target,
+      'Quality Assurance': CheckCircle2,
+      'Documentation': FileText,
+      'Training and Support': Users,
+      'Vendor Management': Building,
+      'Innovation Strategy': TrendingUp
     };
     
-    return iconMap[topicTitle] || Database;
+    // For exact matches
+    if (iconMap[topicTitle]) {
+      return iconMap[topicTitle];
+    }
+    
+    // For partial matches (case-insensitive)
+    const lowerTitle = topicTitle.toLowerCase();
+    for (const [key, icon] of Object.entries(iconMap)) {
+      if (lowerTitle.includes(key.toLowerCase()) || key.toLowerCase().includes(lowerTitle)) {
+        return icon;
+      }
+    }
+    
+    // Default fallback based on keywords
+    if (lowerTitle.includes('database') || lowerTitle.includes('data')) return Database;
+    if (lowerTitle.includes('security') || lowerTitle.includes('secure')) return Shield;
+    if (lowerTitle.includes('cloud') || lowerTitle.includes('infrastructure')) return Cloud;
+    if (lowerTitle.includes('architecture') || lowerTitle.includes('design')) return Layers;
+    if (lowerTitle.includes('application') || lowerTitle.includes('app')) return Code;
+    if (lowerTitle.includes('devops') || lowerTitle.includes('pipeline')) return GitBranch;
+    if (lowerTitle.includes('management') || lowerTitle.includes('strategy')) return Target;
+    if (lowerTitle.includes('performance') || lowerTitle.includes('optimization')) return Zap;
+    if (lowerTitle.includes('user') || lowerTitle.includes('team')) return Users;
+    if (lowerTitle.includes('business') || lowerTitle.includes('portfolio')) return Building;
+    
+    return Database; // Final fallback
   };
 
   const getStatusBadge = (status: string | null | undefined) => {
