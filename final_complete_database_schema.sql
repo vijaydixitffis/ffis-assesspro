@@ -33,6 +33,7 @@ CREATE TABLE topics (
     description TEXT NOT NULL,
     assessment_id UUID NOT NULL REFERENCES assessments(id) ON DELETE CASCADE,
     sequence_number INTEGER,
+    icon TEXT, -- Lucide React icon name (e.g., 'Database', 'Shield', 'Cloud')
     is_active BOOLEAN DEFAULT TRUE,
     created_by UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

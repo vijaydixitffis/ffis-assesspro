@@ -15,6 +15,7 @@ const topicSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
   sequence_number: z.number().min(1, 'Sequence number must be at least 1'),
+  icon: z.string().optional(),
   is_active: z.boolean().default(true),
 });
 
@@ -37,6 +38,7 @@ export default function TopicForm({ topic, assessmentId, onCancel, onSuccess }: 
       title: topic?.title || '',
       description: topic?.description || '',
       sequence_number: topic?.sequence_number || 1,
+      icon: topic?.icon || '',
       is_active: topic?.is_active ?? true,
     },
   });
@@ -57,6 +59,7 @@ export default function TopicForm({ topic, assessmentId, onCancel, onSuccess }: 
             title: data.title,
             description: data.description,
             sequence_number: data.sequence_number,
+            icon: data.icon || null,
             is_active: data.is_active,
           })
           .eq('id', topic.id);
@@ -71,6 +74,7 @@ export default function TopicForm({ topic, assessmentId, onCancel, onSuccess }: 
             title: data.title,
             description: data.description,
             sequence_number: data.sequence_number,
+            icon: data.icon || null,
             is_active: data.is_active,
             assessment_id: assessmentId,
             created_by: user.id,
@@ -126,6 +130,21 @@ export default function TopicForm({ topic, assessmentId, onCancel, onSuccess }: 
         />
         {form.formState.errors.sequence_number && (
           <p className="text-sm text-red-500">{form.formState.errors.sequence_number.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="icon">Icon Name (Lucide React)</Label>
+        <Input
+          id="icon"
+          {...form.register('icon')}
+          placeholder="e.g., Database, Shield, Cloud, Code, Settings"
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          Enter the name of a Lucide React icon (e.g., Database, Shield, Cloud, Code, Settings)
+        </p>
+        {form.formState.errors.icon && (
+          <p className="text-sm text-red-500">{form.formState.errors.icon.message}</p>
         )}
       </div>
 
