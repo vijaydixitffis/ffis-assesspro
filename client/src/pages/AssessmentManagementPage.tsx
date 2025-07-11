@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import AssessmentsList from '@/components/assessments/AssessmentsList';
 import AssessmentForm from '@/components/assessments/AssessmentForm';
-import { CreateAIAssessment } from '@/components/assessments/CreateAIAssessment';
+
 
 export default function AssessmentManagementPage() {
   const { user } = useAuth();
@@ -69,12 +69,7 @@ export default function AssessmentManagementPage() {
             )}
           </div>
 
-          {/* Quick Create AI Assessment */}
-          {!isAdding && !editingAssessment && (
-            <div className="mb-6">
-              <CreateAIAssessment />
-            </div>
-          )}
+
 
           {isAdding && (
             <Card className="mb-6">
