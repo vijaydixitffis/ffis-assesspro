@@ -86,10 +86,13 @@ export const AssessmentActionButtons = ({
     navigate(`/assessment-topics/${assessment.assessment_id}`);
   };
 
+  // Normalize status to lowercase for comparison
+  const normalizedStatus = assessment.status.toLowerCase();
+  
   return (
     <div className="flex space-x-2">
       {/* New Take Assessment Button */}
-      {assessment.status === 'assigned' && (
+      {(normalizedStatus === 'assigned' || normalizedStatus === 'not_started') && (
         <Button 
           onClick={handleTakeAssessment}
           className="flex items-center gap-2"
@@ -100,7 +103,7 @@ export const AssessmentActionButtons = ({
         </Button>
       )}
       
-      {assessment.status === 'in_progress' && (
+      {(normalizedStatus === 'in_progress' || normalizedStatus === 'started') && (
         <Button 
           onClick={handleTakeAssessment}
           variant="outline"
@@ -112,7 +115,7 @@ export const AssessmentActionButtons = ({
         </Button>
       )}
       
-      {assessment.status === 'completed' && (
+      {normalizedStatus === 'completed' && (
         <Button 
           onClick={handleTakeAssessment}
           variant="outline"
