@@ -134,6 +134,9 @@ export default function MyAssessmentsPage() {
                 <p className="text-gray-600 dark:text-gray-400">
                   Track your progress and manage assigned assessments
                 </p>
+                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
+                  Future Focus IT Solutions - Driving Business Outcomes
+                </p>
               </div>
             </div>
             

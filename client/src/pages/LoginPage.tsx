@@ -52,13 +52,18 @@ export default function LoginPage() {
         {/* Left side - Hero content */}
         <div className="space-y-8 lg:pr-8">
           <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <Database className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                AssessPro
+            <div className="mb-6">
+              <img 
+                src="/lovable-uploads/74e171ed-dfc9-4ff4-8aae-44113fefa8f9.png" 
+                alt="Future Focus IT Solutions Logo" 
+                className="h-16 w-auto mb-4" 
+              />
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Future Focus IT Solutions
               </h1>
+              <p className="text-lg text-blue-600 dark:text-blue-400 font-medium">
+                Driving Business Outcomes
+              </p>
             </div>
             
             <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white leading-tight">
@@ -85,7 +90,7 @@ export default function LoginPage() {
               <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                 <Database className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <span className="text-gray-700 dark:text-gray-300">Comprehensive Database Architecture Testing</span>
+              <span className="text-gray-700 dark:text-gray-300">Comprehensive Assessment Solutions</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
