@@ -60,8 +60,9 @@ async function extractAllData() {
     } else {
       console.log('-- Insert topics data');
       topics.forEach(topic => {
-        console.log(`INSERT INTO topics (id, title, description, assessment_id, sequence_number, is_active, created_by, created_at, updated_at) VALUES`);
-        console.log(`('${topic.id}', '${topic.title.replace(/'/g, "''")}', '${topic.description.replace(/'/g, "''")}', '${topic.assessment_id}', ${topic.sequence_number}, ${topic.is_active}, '${topic.created_by}', '${topic.created_at}', '${topic.updated_at}');`);
+        const iconValue = topic.icon ? `'${topic.icon}'` : 'NULL';
+        console.log(`INSERT INTO topics (id, title, description, assessment_id, sequence_number, icon, is_active, created_by, created_at, updated_at) VALUES`);
+        console.log(`('${topic.id}', '${topic.title.replace(/'/g, "''")}', '${topic.description.replace(/'/g, "''")}', '${topic.assessment_id}', ${topic.sequence_number}, ${iconValue}, ${topic.is_active}, '${topic.created_by}', '${topic.created_at}', '${topic.updated_at}');`);
       });
       console.log('');
     }
