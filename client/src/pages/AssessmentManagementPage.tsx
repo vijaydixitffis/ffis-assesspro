@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import AssessmentsList from '@/components/assessments/AssessmentsList';
 import AssessmentForm from '@/components/assessments/AssessmentForm';
+import { CreateModernizationAssessment } from '@/components/assessments/CreateModernizationAssessment';
 
 
 export default function AssessmentManagementPage() {
@@ -68,6 +69,13 @@ export default function AssessmentManagementPage() {
               <Button onClick={handleAddAssessment}>Add New Assessment</Button>
             )}
           </div>
+
+          {/* Quick Create Templates */}
+          {!isAdding && !editingAssessment && (
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <CreateModernizationAssessment />
+            </div>
+          )}
 
 
 

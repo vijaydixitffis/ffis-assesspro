@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Application Modernization Assessment</title>
+  <style>
+    :root {
+      --primary-color: #4a6cf7;
+      --primary-hover: #3a5bd9;
+      --text-color: #2d3748;
+      --border-color: #e2e8f0;
+      --bg-color: #f8fafc;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text-color);
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      color: white;
+      padding: 1.5rem 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    
+    .assessment-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-bottom: 2rem;
+    }
+    
+    .assessment-table th {
+      background-color: var(--bg-color);
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid var(--border-color);
+    }
+    
+    .assessment-table td {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      vertical-align: middle;
+    }
+    
+    .category-row {
+      background-color: #f0f4f8;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .question-cell {
+      width: 70%;
+    }
+    
+    .answer-cell {
+      width: 30%;
+      text-align: center;
+    }
+    
+    .radio-group {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+    
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+    
+    .radio-option input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    
+    .submit-btn {
+      display: block;
+      width: 200px;
+      margin: 2rem auto;
+      padding: 0.8rem 1.5rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .submit-btn:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .submit-btn:disabled {
+      background-color: #cbd5e1;
+      cursor: not-allowed;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        border-radius: 0;
+      }
+      
+      .question-cell {
+        width: 60%;
+      }
+      
+      .answer-cell {
+        width: 40%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Application Modernization Assessment</h1>
+    </header>
+    
+    <form id="modernizationForm">
+      <table class="assessment-table">
+        <thead>
+          <tr>
+            <th>Category & Question</th>
+            <th class="answer-cell">Response</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Architecture -->
+          <tr class="category-row">
+            <td colspan="2">Architecture</td>
+          </tr>
+          <tr>
+            <td class="question-cell">1. Uses microservices or modular architecture?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q1" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q1" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">2. Provides API-first or event-driven design (RESTful/GraphQL APIs, WebSockets, event streaming)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q2" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q2" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">3. Uses containerization & orchestration (Docker, Kubernetes)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q3" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q3" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">4. Is serverless or cloud-native (auto-scaling, managed services, cloud-agnostic)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q4" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q4" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">5. Supports edge computing?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q5" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q5" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Development & Deployment -->
+          <tr class="category-row">
+            <td colspan="2">Development & Deployment</td>
+          </tr>
+          <tr>
+            <td class="question-cell">6. Implements CI/CD automation?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q6" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q6" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">7. Uses Infrastructure as Code (IaC)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q7" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q7" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">8. Integrates DevSecOps into the lifecycle?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q8" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q8" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Scalability & Performance -->
+          <tr class="category-row">
+            <td colspan="2">Scalability & Performance</td>
+          </tr>
+          <tr>
+            <td class="question-cell">9. Supports elastic scalability?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q9" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q9" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">10. Uses high availability & fault tolerance strategies?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q10" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q10" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">11. Uses async processing or event-driven architecture for scalability?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q11" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q11" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Data & Storage -->
+          <tr class="category-row">
+            <td colspan="2">Data & Storage</td>
+          </tr>
+          <tr>
+            <td class="question-cell">12. Supports polyglot persistence (multiple database types)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q12" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q12" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">13. Uses streaming or real-time data processing technologies?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q13" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q13" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">14. Ensures data governance & compliance (encryption, privacy, regulations)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q14" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q14" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Security & Compliance -->
+          <tr class="category-row">
+            <td colspan="2">Security & Compliance</td>
+          </tr>
+          <tr>
+            <td class="question-cell">15. Implements zero trust architecture (strong authentication, least privilege)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q15" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q15" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">16. Encrypts data end-to-end (at rest and in transit)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q16" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q16" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">17. Uses modern API security standards (OAuth2, OpenID Connect, JWT, API gateways)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q17" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q17" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">18. Integrates automated security testing into CI/CD pipelines?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q18" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q18" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- User Experience (UX) -->
+          <tr class="category-row">
+            <td colspan="2">User Experience (UX)</td>
+          </tr>
+          <tr>
+            <td class="question-cell">19. Uses responsive & progressive UI (modern frameworks)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q19" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q19" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">20. Is mobile-first & cross-platform (PWA, responsive web, mobile apps)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q20" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q20" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">21. Optimized for low latency & high performance (CDN, caching, efficient rendering)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q21" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q21" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Observability & Monitoring -->
+          <tr class="category-row">
+            <td colspan="2">Observability & Monitoring</td>
+          </tr>
+          <tr>
+            <td class="question-cell">22. Uses centralized logging & monitoring (ELK, Prometheus, Grafana, OpenTelemetry)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q22" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q22" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">23. Has automated incident response (AIOps, alerting, self-healing)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q23" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q23" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">24. Tracks business & technical metrics (performance, SLAs, user behavior)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q24" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q24" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Technical Debt Management -->
+          <tr class="category-row">
+            <td colspan="2">Technical Debt Management</td>
+          </tr>
+          <tr>
+            <td class="question-cell">25. Minimizes reliance on legacy code and outdated technologies?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q25" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q25" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">26. Codebase is maintainable and clean (SOLID, DDD, separation of concerns)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q26" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q26" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">27. Performs automated refactoring & code quality checks regularly?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q27" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q27" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Backward Compatibility & Lifecycle -->
+          <tr class="category-row">
+            <td colspan="2">Backward Compatibility & Lifecycle</td>
+          </tr>
+          <tr>
+            <td class="question-cell">28. New updates are backward compatible and do not break integrations?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q28" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q28" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">29. Tech stack lifecycle is managed (dependencies/frameworks upgraded regularly)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q29" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q29" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Business Agility -->
+          <tr class="category-row">
+            <td colspan="2">Business Agility</td>
+          </tr>
+          <tr>
+            <td class="question-cell">30. Fast time-to-market (DevOps, CI/CD, modular architecture)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q30" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q30" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">31. Low change failure rate (frequent, stable releases, DORA metrics)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q31" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q31" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">32. Uses data-driven decision-making (real-time analytics, A/B testing, AI insights)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q32" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q32" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">33. Application is API and ecosystem ready (easy integration with third-party services)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q33" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q33" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td class="question-cell">34. Business capabilities are composable & reusable (APIs, microservices)?</td>
+            <td class="answer-cell">
+              <div class="radio-group">
+                <label class="radio-option">
+                  <input type="radio" name="q34" value="yes" required> Yes
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="q34" value="no"> No
+                </label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <button type="submit" class="submit-btn" id="submitBtn">Submit Assessment</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('modernizationForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let total = 34;
+      let yesCount = 0;
+      
+      // Count all "Yes" answers
+      for (let i = 1; i <= total; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected && selected.value === 'yes') {
+          yesCount++;
+        }
+      }
+      
+      // Calculate percentage
+      const percent = Math.round((yesCount / total) * 100);
+      
+      // Determine status
+      let status, statusClass;
+      if (percent >= 80) {
+        status = "Fully Modern";
+        statusClass = "status-fully-modern";
+      } else if (percent >= 60) {
+        status = "Moderately Modern";
+        statusClass = "status-moderately-modern";
+      } else if (percent >= 40) {
+        status = "Needs Modernization";
+        statusClass = "status-needs-modernization";
+      } else {
+        status = "Legacy System";
+        statusClass = "status-legacy";
+      }
+      
+      // Show result in a styled alert
+      const resultHtml = `
+        <div style="
+          padding: 20px;
+          border-radius: 8px;
+          background: #f8f9fa;
+          border-left: 5px solid #4a6cf7;
+          margin: 20px 0;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        ">
+          <h3 style="margin-top: 0; color: #2d3748;">Assessment Results</h3>
+          <div style="
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #4a6cf7;
+            margin: 10px 0;
+          ">${percent}%</div>
+          <div style="
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: #e2e8f0;
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 10px;
+          ">${status}</div>
+          <div style="color: #4a5568; margin-top: 10px;">
+            You answered <strong>${yesCount} out of ${total}</strong> questions with "Yes"
+          </div>
+        </div>
+      `;
+      
+      // Create a modal to show the results
+      const modal = document.createElement('div');
+      modal.style.position = 'fixed';
+      modal.style.top = '0';
+      modal.style.left = '0';
+      modal.style.width = '100%';
+      modal.style.height = '100%';
+      modal.style.backgroundColor = 'rgba(0,0,0,0.5)';
+      modal.style.display = 'flex';
+      modal.style.justifyContent = 'center';
+      modal.style.alignItems = 'center';
+      modal.style.zIndex = '1000';
+      
+      modal.innerHTML = `
+        <div style="
+          background: white;
+          padding: 30px;
+          border-radius: 10px;
+          max-width: 500px;
+          width: 90%;
+          max-height: 90vh;
+          overflow-y: auto;
+          position: relative;
+        ">
+          <button style="
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+          " onclick="this.parentElement.parentElement.remove()">×</button>
+          ${resultHtml}
+          <div style="margin-top: 20px; text-align: center;">
+            <button onclick="this.closest('div[style*=\"position: fixed\"]').remove()" style="
+              background: #4a6cf7;
+              color: white;
+              border: none;
+              padding: 10px 20px;
+              border-radius: 5px;
+              cursor: pointer;
+              font-size: 16px;
+            ">Close</button>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(modal);
+    });
+  </script>
+</body>
+</html>
