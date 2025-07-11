@@ -1,23 +1,39 @@
-
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Edit, FileQuestion } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from '@/components/ui/table';
+import { Edit, Trash2, FileQuestion } from 'lucide-react';
 import { toast } from 'sonner';
-import { Switch } from '@/components/ui/switch';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+
+interface Topic {
+  id: string;
+  title: string;
+  description: string;
+  sequence_number: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 interface TopicsListProps {
   assessmentId: string;
-  onEdit: (topic: any) => void;
+  onEdit: (topic: Topic) => void;
   refreshTrigger: number;
 }
 
 export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: TopicsListProps) {
-  const navigate = useNavigate();
-  const [topics, setTopics] = useState<any[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (assessmentId) {
@@ -30,12 +46,11 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
       setIsLoading(true);
       const { data, error } = await supabase
         .from('topics')
-        .select('id, title, description, is_active, created_at, sequence_number')
+        .select('*')
         .eq('assessment_id', assessmentId)
-        .order('sequence_number', { ascending: true });
-      
+        .order('sequence_number');
+
       if (error) throw error;
-      
       setTopics(data || []);
     } catch (error) {
       console.error('Error fetching topics:', error);
@@ -45,79 +60,102 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
     }
   };
 
-  const handleManageQuestions = (topicId: string) => {
-    // Fixed path to match the route in App.tsx
-    navigate(`/questions?topicId=${topicId}`);
-  };
+  const handleDeleteTopic = async (topicId: string) => {
+    if (!confirm('Are you sure you want to delete this topic?')) return;
 
-  const toggleTopicStatus = async (id: string, currentStatus: boolean) => {
     try {
       const { error } = await supabase
         .from('topics')
-        .update({ is_active: !currentStatus })
-        .eq('id', id);
-      
+        .delete()
+        .eq('id', topicId);
+
       if (error) throw error;
-      
-      // Update local state
-      setTopics(topics.map(topic => 
-        topic.id === id 
-          ? { ...topic, is_active: !currentStatus } 
-          : topic
-      ));
-      
-      toast.success(`Topic ${currentStatus ? 'deactivated' : 'activated'} successfully`);
+
+      toast.success('Topic deleted successfully');
+      fetchTopics(); // Refresh the list
     } catch (error) {
-      console.error('Error toggling topic status:', error);
-      toast.error('Failed to update topic status');
+      console.error('Error deleting topic:', error);
+      toast.error('Failed to delete topic');
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center py-4">Loading topics...</div>;
-  }
+  const handleManageQuestions = (topicId: string) => {
+    navigate(`/questions?topicId=${topicId}`);
+  };
 
-  if (topics.length === 0) {
-    return <div className="text-center py-4">No topics found for this assessment. Add your first topic!</div>;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold mb-4">Topics ({topics.length})</h2>
+    <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-20">Sequence</TableHead>
+            <TableHead>Sequence</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Description</TableHead>
-            <TableHead>Active</TableHead>
-            <TableHead className="w-[200px]">Actions</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {topics.map((topic) => (
-            <TableRow key={topic.id}>
-              <TableCell>{topic.sequence_number}</TableCell>
-              <TableCell className="font-medium">{topic.title}</TableCell>
-              <TableCell>{topic.description.substring(0, 100)}{topic.description.length > 100 ? '...' : ''}</TableCell>
-              <TableCell>
-                <Switch
-                  checked={topic.is_active}
-                  onCheckedChange={() => toggleTopicStatus(topic.id, topic.is_active)}
-                />
-              </TableCell>
-              <TableCell>
-                <div className="flex items-center space-x-2">
-                  <Button variant="ghost" size="sm" onClick={() => onEdit(topic)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="outline" size="icon" onClick={() => handleManageQuestions(topic.id)} title="Manage Questions">
-                    <FileQuestion className="h-4 w-4" />
-                  </Button>
-                </div>
+          {topics.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                No topics found for this assessment
               </TableCell>
             </TableRow>
-          ))}
+          ) : (
+            topics.map((topic) => (
+              <TableRow key={topic.id}>
+                <TableCell className="font-medium">
+                  {topic.sequence_number}
+                </TableCell>
+                <TableCell className="font-medium">
+                  {topic.title}
+                </TableCell>
+                <TableCell className="max-w-md truncate">
+                  {topic.description}
+                </TableCell>
+                <TableCell>
+                  <Badge variant={topic.is_active ? 'default' : 'destructive'}>
+                    {topic.is_active ? 'Active' : 'Inactive'}
+                  </Badge>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleManageQuestions(topic.id)}
+                      title="Manage Questions"
+                    >
+                      <FileQuestion className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(topic)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteTopic(topic.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </div>

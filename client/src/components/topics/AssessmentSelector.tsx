@@ -1,6 +1,5 @@
-
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
+import React from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Assessment {
   id: string;
@@ -11,40 +10,21 @@ interface Assessment {
 interface AssessmentSelectorProps {
   assessments: Assessment[];
   selectedId: string | null;
-  onChange: (id: string) => void;
-  isLoading: boolean;
+  onChange: (assessmentId: string) => void;
 }
 
-export default function AssessmentSelector({ 
-  assessments, 
-  selectedId, 
-  onChange, 
-  isLoading 
-}: AssessmentSelectorProps) {
-  if (isLoading) {
-    return <Skeleton className="h-10 w-full" />;
-  }
-
-  if (assessments.length === 0) {
-    return <p className="text-muted-foreground">No assessments available</p>;
-  }
-
+export default function AssessmentSelector({ assessments, selectedId, onChange }: AssessmentSelectorProps) {
   return (
-    <Select 
-      value={selectedId || undefined} 
-      onValueChange={onChange}
-    >
-      <SelectTrigger className="w-full">
+    <Select value={selectedId || undefined} onValueChange={onChange}>
+      <SelectTrigger>
         <SelectValue placeholder="Select an assessment" />
       </SelectTrigger>
       <SelectContent>
-        <SelectGroup>
-          {assessments.map((assessment) => (
-            <SelectItem key={assessment.id} value={assessment.id}>
-              {assessment.title}
-            </SelectItem>
-          ))}
-        </SelectGroup>
+        {assessments.map((assessment) => (
+          <SelectItem key={assessment.id} value={assessment.id}>
+            {assessment.title}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   );

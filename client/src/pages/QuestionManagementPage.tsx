@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { DashboardNav } from '@/components/DashboardNav';
 import { useTopicData } from '@/components/questions/useTopicData';
 import AccessDeniedView from '@/components/questions/AccessDeniedView';
