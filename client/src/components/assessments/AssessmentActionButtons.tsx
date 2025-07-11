@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AssignedAssessment } from "@/types/assessment";
 import { StartButton } from "./StartButton";
 import { SubmitButton } from "./SubmitButton";
 import { TopicsButton } from "./TopicsButton";
 import { useAssessmentStatusUpdate } from "@/hooks/useAssessmentStatusUpdate";
-import { AssessmentModal } from "@/components/assessment/AssessmentModal";
 import { Button } from "@/components/ui/button";
 import { PlayCircle, CheckCircle } from "lucide-react";
 
@@ -23,7 +23,7 @@ export const AssessmentActionButtons = ({
   showDebug = false,
   isAllTopicsCompleted,
 }: AssessmentActionButtonsProps) => {
-  const [isAssessmentModalOpen, setIsAssessmentModalOpen] = useState(false);
+  const navigate = useNavigate();
   const { updatingAssessment, updateAssessmentStatus } = useAssessmentStatusUpdate(onStatusUpdate);
 
   const handleStartAssessment = async () => {
@@ -44,8 +44,8 @@ export const AssessmentActionButtons = ({
       console.log('Update status returned:', success);
       
       if (success) {
-        console.log(`Opening assessment modal for assessment ID: ${assessment.assessment_id}`);
-        setIsAssessmentModalOpen(true);
+        console.log(`Navigating to assessment topics for assessment ID: ${assessment.assessment_id}`);
+        navigate(`/assessment-topics/${assessment.assessment_id}`);
       } else {
         console.error('Failed to update assessment status');
       }
@@ -85,21 +85,11 @@ export const AssessmentActionButtons = ({
         return;
       }
     }
-    setIsAssessmentModalOpen(true);
+    navigate(`/assessment-topics/${assessment.assessment_id}`);
   };
 
   const handleViewTopics = () => {
-    setIsAssessmentModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsAssessmentModalOpen(false);
-  };
-
-  const handleAssessmentComplete = () => {
-    setIsAssessmentModalOpen(false);
-    // Trigger a refresh of the assessments list
-    onStatusUpdate(assessment.id, 'COMPLETED');
+    navigate(`/assessment-topics/${assessment.assessment_id}`);
   };
 
   // Normalize status to lowercase for comparison
@@ -171,16 +161,6 @@ export const AssessmentActionButtons = ({
           />
         </>
       )}
-
-      {/* Assessment Modal */}
-      <AssessmentModal
-        isOpen={isAssessmentModalOpen}
-        onClose={handleCloseModal}
-        assignmentId={assessment.id}
-        assessmentId={assessment.assessment_id}
-        assessmentTitle={assessment.assessment_title}
-        onComplete={handleAssessmentComplete}
-      />
     </div>
   );
 };
