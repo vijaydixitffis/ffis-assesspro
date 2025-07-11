@@ -10,7 +10,7 @@ import { Loader2 } from 'lucide-react';
 const assessmentData = {
   assessment: {
     title: "Database Architecture Assessment",
-    description: "A comprehensive 30-question assessment designed for Database Owners to evaluate their database environment across critical categories: infrastructure, compute capacity, data architecture principles, security, data lifecycle, data quality, and data governance."
+    description: "A comprehensive 40-question assessment designed for Database Owners to evaluate their database environment across critical categories: infrastructure, compute capacity, data architecture principles, security, data lifecycle, data quality, data governance, and NFR (Non-Functional Requirements)."
   },
   topics: [
     {
@@ -391,6 +391,123 @@ const assessmentData = {
           ]
         }
       ]
+    },
+    {
+      title: "NFR – Scalability, Performance, Resilience, and More",
+      description: "Non-Functional Requirements covering scalability, performance, resilience, availability, reliability, and maintainability",
+      sequence_number: 8,
+      questions: [
+        {
+          question: "The database can handle increased workload without significant performance degradation:",
+          sequence_number: 31,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        },
+        {
+          question: "How is horizontal scaling (adding more nodes) supported in your current setup?",
+          sequence_number: 32,
+          answers: [
+            { text: "Not supported", marks: "1" },
+            { text: "Manual only", marks: "2" },
+            { text: "Automated with downtime", marks: "3" },
+            { text: "Automated with minimal downtime", marks: "4" },
+            { text: "Fully automated and seamless", marks: "5" }
+          ]
+        },
+        {
+          question: "The database is architected to minimize single points of failure:",
+          sequence_number: 33,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        },
+        {
+          question: "How quickly can the database recover from a critical failure?",
+          sequence_number: 34,
+          answers: [
+            { text: "More than 24 hours", marks: "1" },
+            { text: "12–24 hours", marks: "2" },
+            { text: "2–12 hours", marks: "3" },
+            { text: "1–2 hours", marks: "4" },
+            { text: "Less than 1 hour", marks: "5" }
+          ]
+        },
+        {
+          question: "Performance monitoring tools are in place to proactively detect issues:",
+          sequence_number: 35,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        },
+        {
+          question: "The database supports automated failover mechanisms:",
+          sequence_number: 36,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        },
+        {
+          question: "How often is load testing performed on the database environment?",
+          sequence_number: 37,
+          answers: [
+            { text: "Never", marks: "1" },
+            { text: "Annually", marks: "2" },
+            { text: "Quarterly", marks: "3" },
+            { text: "Monthly", marks: "4" },
+            { text: "With every major change", marks: "5" }
+          ]
+        },
+        {
+          question: "The system is designed to ensure data consistency during failover or recovery:",
+          sequence_number: 38,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        },
+        {
+          question: "Maintenance activities (patching, upgrades) can be performed with minimal downtime:",
+          sequence_number: 39,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        },
+        {
+          question: "The database supports multi-region or geo-redundant deployments for disaster recovery:",
+          sequence_number: 40,
+          answers: [
+            { text: "Strongly disagree", marks: "1" },
+            { text: "Disagree", marks: "2" },
+            { text: "Neutral", marks: "3" },
+            { text: "Agree", marks: "4" },
+            { text: "Strongly agree", marks: "5" }
+          ]
+        }
+      ]
     }
   ]
 };
@@ -508,9 +625,9 @@ export function CreateDatabaseAssessment() {
           answersCreated += questionData.answers.length;
 
           // Update progress
-          const progressValue = 30 + (questionsCreated / 30) * 60;
+          const progressValue = 30 + (questionsCreated / 40) * 60;
           setProgress(progressValue);
-          setCurrentStep(`Created ${questionsCreated}/30 questions`);
+          setCurrentStep(`Created ${questionsCreated}/40 questions`);
         }
       }
 
@@ -543,7 +660,7 @@ export function CreateDatabaseAssessment() {
               Assessment Overview
             </h3>
             <p className="text-sm text-blue-800 dark:text-blue-200 mb-3">
-              This will create a comprehensive 30-question assessment covering:
+              This will create a comprehensive 40-question assessment covering:
             </p>
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
               <li>• Infrastructure (5 questions)</li>
@@ -553,6 +670,7 @@ export function CreateDatabaseAssessment() {
               <li>• Data Lifecycle (5 questions)</li>
               <li>• Data Quality (3 questions)</li>
               <li>• Data Governance (2 questions)</li>
+              <li>• NFR – Scalability, Performance, Resilience (10 questions)</li>
             </ul>
           </div>
 

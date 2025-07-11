@@ -1,0 +1,308 @@
+## Database Architecture Assessment: 30 Questions
+
+This assessment is designed for a Database Owner to evaluate their database environment across critical categories: infrastructure, compute capacity, data architecture principles, security, data lifecycle, data quality, and data governance. Each question provides 5 options, with values 1–5, either on a Likert scale or as categorical selections.
+
+### Section 1: Infrastructure
+
+1. Which primary database platform do you use?
+   - Oracle (1)
+   - MS SQL Server (2)
+   - PostgreSQL (3)
+   - MySQL (4)
+   - Other (5)
+
+2. The database infrastructure is hosted on:
+   - On-premises only (1)
+   - Private cloud (2)
+   - Public cloud (3)
+   - Hybrid (4)
+   - Multi-cloud (5)
+
+3. How would you rate the scalability of your current database infrastructure?
+   - Very poor (1)
+   - Poor (2)
+   - Fair (3)
+   - Good (4)
+   - Excellent (5)
+
+4. How often is your database infrastructure reviewed for modernization?
+   - Never (1)
+   - Every 3+ years (2)
+   - Every 2–3 years (3)
+   - Annually (4)
+   - Semi-annually or more (5)
+
+5. The database supports high availability and disaster recovery:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+### Section 2: Compute Capacity
+
+6. The current compute resources (CPU, RAM) meet performance needs:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+7. How is compute scaling managed?
+   - Manual only (1)
+   - Scheduled (2)
+   - Automated (3)
+   - Both scheduled and automated (4)
+   - Dynamic/autoscaling with monitoring (5)
+
+8. How frequently are performance bottlenecks encountered?
+   - Daily (1)
+   - Weekly (2)
+   - Monthly (3)
+   - Rarely (4)
+   - Never (5)
+
+9. Compute resource utilization is monitored in real-time:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+10. The database supports elastic scaling:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+### Section 3: Data Architecture Principles & Best Practices
+
+11. The database design follows normalization principles:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+12. Data models are documented and maintained:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+13. Naming conventions and standards are consistently applied:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+14. The database supports both OLTP and OLAP workloads:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+15. How often are schema changes reviewed and approved?
+    - Never (1)
+    - Annually (2)
+    - Quarterly (3)
+    - Monthly (4)
+    - Every change (5)
+
+### Section 4: Security
+
+16. Data encryption is implemented at rest and in transit:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+17. Role-based access control (RBAC) is enforced:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+18. Database audit logs are enabled and reviewed:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+19. How often are security patches applied?
+    - Rarely/never (1)
+    - Annually (2)
+    - Quarterly (3)
+    - Monthly (4)
+    - As soon as released (5)
+
+20. Sensitive data is masked or tokenized:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+### Section 5: Data Lifecycle
+
+21. Data retention policies are defined and enforced:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+22. Data archiving is automated:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+23. How often is obsolete data purged?
+    - Never (1)
+    - Annually (2)
+    - Quarterly (3)
+    - Monthly (4)
+    - As per policy (5)
+
+24. Backups are taken and tested regularly:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+25. The database supports data versioning and change tracking:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+### Section 6: Data Quality
+
+26. Data validation rules are enforced at the database level:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+27. Duplicate data is systematically identified and resolved:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+28. Data quality metrics (accuracy, completeness, consistency) are tracked:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+### Section 7: Data Governance
+
+29. There is a documented data governance framework in place:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+30. Data ownership and stewardship roles are clearly defined:
+    - Strongly disagree (1)
+    - Disagree (2)
+    - Neutral (3)
+    - Agree (4)
+    - Strongly agree (5)
+
+## Additional NFR (Non-Functional Requirements) Assessment Questions
+
+Below are 10 more questions to extend your database architecture assessment, focusing on key NFR categories: **Scalability, Performance, Resilience, Availability, Reliability, and Maintainability**. Each question uses a 5-point scale or categorical options, with values 1–5.
+
+### Section 8: NFR – Scalability, Performance, Resilience, and More
+
+31. The database can handle increased workload without significant performance degradation:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+32. How is horizontal scaling (adding more nodes) supported in your current setup?
+   - Not supported (1)
+   - Manual only (2)
+   - Automated with downtime (3)
+   - Automated with minimal downtime (4)
+   - Fully automated and seamless (5)
+
+33. The database is architected to minimize single points of failure:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+34. How quickly can the database recover from a critical failure?
+   - More than 24 hours (1)
+   - 12–24 hours (2)
+   - 2–12 hours (3)
+   - 1–2 hours (4)
+   - Less than 1 hour (5)
+
+35. Performance monitoring tools are in place to proactively detect issues:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+36. The database supports automated failover mechanisms:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+37. How often is load testing performed on the database environment?
+   - Never (1)
+   - Annually (2)
+   - Quarterly (3)
+   - Monthly (4)
+   - With every major change (5)
+
+38. The system is designed to ensure data consistency during failover or recovery:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+39. Maintenance activities (patching, upgrades) can be performed with minimal downtime:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+40. The database supports multi-region or geo-redundant deployments for disaster recovery:
+   - Strongly disagree (1)
+   - Disagree (2)
+   - Neutral (3)
+   - Agree (4)
+   - Strongly agree (5)
+
+**Instructions:**  
+For each question, select the option that best reflects your current environment or practice. Assign a value (1–5) based on your selection. These questions help further assess your database’s readiness and robustness in critical NFR areas.
+**Instructions:**  
+For each question, select the option that best represents your current environment or practice. Assign a value (1–5) based on the selected option. This assessment can be used to identify strengths and gaps in your database architecture and management practices.
