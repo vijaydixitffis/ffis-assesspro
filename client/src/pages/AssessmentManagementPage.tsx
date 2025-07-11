@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import AssessmentsList from '@/components/assessments/AssessmentsList';
 import AssessmentForm from '@/components/assessments/AssessmentForm';
+import { CreateDatabaseAssessment } from '@/components/assessments/CreateDatabaseAssessment';
 
 
 
@@ -106,6 +107,12 @@ export default function AssessmentManagementPage() {
           {/* Only show the Separator and AssessmentsList when not editing or adding */}
           {!isAdding && !editingAssessment && (
             <>
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold mb-4">Pre-built Assessments</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <CreateDatabaseAssessment />
+                </div>
+              </div>
               <Separator className="my-6" />
               <AssessmentsList key={refreshKey} onEdit={handleEditAssessment} />
             </>
