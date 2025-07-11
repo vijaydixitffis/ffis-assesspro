@@ -4,6 +4,15 @@
 
 This is a full-stack web application built with a React frontend and Express backend, designed for assessment management. The application uses a PostgreSQL database with Drizzle ORM and follows a modern TypeScript-first architecture with shadcn/ui components.
 
+## Recent Changes
+
+**July 11, 2025:**
+- ✓ Successfully migrated from Replit Agent to Replit environment
+- ✓ Created comprehensive 40-question Database Architecture Assessment with 8 topics
+- ✓ Fixed Supabase URL concatenation issue causing authentication failures
+- ✓ Populated Database Architecture Assessment data in Supabase
+- ✓ Removed temporary assessment creation components and scripts
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
