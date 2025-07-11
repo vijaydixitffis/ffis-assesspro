@@ -14,6 +14,7 @@ import Index from './pages/Index';
 import MyAssessmentsPage from './pages/MyAssessmentsPage';
 import AssessmentTopicsPage from './pages/AssessmentTopicsPage';
 import TopicQuestionsPage from './pages/TopicQuestionsPage';
+import TakeAssessmentPage from './pages/TakeAssessmentPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/" element={<ProtectedRoute requiredRole="client"><Index /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/my-assessments" element={<ProtectedRoute requiredRole="client"><MyAssessmentsPage /></ProtectedRoute>} />
+          <Route path="/take-assessment/:assignmentId" element={<ProtectedRoute requiredRole="client"><TakeAssessmentPage /></ProtectedRoute>} />
           <Route path="/assessment-topics/:assessmentId" element={<ProtectedRoute requiredRole="client"><AssessmentTopicsPage /></ProtectedRoute>} />
           <Route path="/topic-questions/:topicId" element={<ProtectedRoute requiredRole="client"><TopicQuestionsPage /></ProtectedRoute>} />
 

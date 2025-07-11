@@ -4,6 +4,8 @@ import { StartButton } from "./StartButton";
 import { SubmitButton } from "./SubmitButton";
 import { TopicsButton } from "./TopicsButton";
 import { useAssessmentStatusUpdate } from "@/hooks/useAssessmentStatusUpdate";
+import { Button } from "@/components/ui/button";
+import { PlayCircle, CheckCircle } from "lucide-react";
 
 interface AssessmentActionButtonsProps {
   assessment: AssignedAssessment;
@@ -76,34 +78,80 @@ export const AssessmentActionButtons = ({
     }
   };
 
+  const handleTakeAssessment = () => {
+    navigate(`/take-assessment/${assessment.id}`);
+  };
+
   const handleViewTopics = () => {
     navigate(`/assessment-topics/${assessment.assessment_id}`);
   };
 
   return (
     <div className="flex space-x-2">
-      {assessment.status === 'ASSIGNED' ? (
-        <StartButton 
-          assessment={assessment}
-          userId={userId}
-          updatingAssessment={updatingAssessment}
-          onStartAssessment={handleStartAssessment}
-          showDebug={showDebug}
-        />
-      ) : assessment.status === 'STARTED' ? (
-        <TopicsButton
-          assessment={assessment}
-          onViewTopics={handleViewTopics}
-        />
-      ) : null}
+      {/* New Take Assessment Button */}
+      {assessment.status === 'assigned' && (
+        <Button 
+          onClick={handleTakeAssessment}
+          className="flex items-center gap-2"
+          size="sm"
+        >
+          <PlayCircle className="w-4 h-4" />
+          Take Assessment
+        </Button>
+      )}
       
-      <SubmitButton 
-        assessment={assessment}
-        updatingAssessment={updatingAssessment}
-        onSubmitAssessment={handleSubmitAssessment}
-        isAllTopicsCompleted={isAllTopicsCompleted}
-        disabled={assessment.status !== 'STARTED'}
-      />
+      {assessment.status === 'in_progress' && (
+        <Button 
+          onClick={handleTakeAssessment}
+          variant="outline"
+          className="flex items-center gap-2"
+          size="sm"
+        >
+          <PlayCircle className="w-4 h-4" />
+          Continue
+        </Button>
+      )}
+      
+      {assessment.status === 'completed' && (
+        <Button 
+          onClick={handleTakeAssessment}
+          variant="outline"
+          className="flex items-center gap-2"
+          size="sm"
+          disabled
+        >
+          <CheckCircle className="w-4 h-4" />
+          Completed
+        </Button>
+      )}
+
+      {/* Legacy buttons for debugging */}
+      {showDebug && (
+        <>
+          {assessment.status === 'ASSIGNED' ? (
+            <StartButton 
+              assessment={assessment}
+              userId={userId}
+              updatingAssessment={updatingAssessment}
+              onStartAssessment={handleStartAssessment}
+              showDebug={showDebug}
+            />
+          ) : assessment.status === 'STARTED' ? (
+            <TopicsButton
+              assessment={assessment}
+              onViewTopics={handleViewTopics}
+            />
+          ) : null}
+          
+          <SubmitButton 
+            assessment={assessment}
+            updatingAssessment={updatingAssessment}
+            onSubmitAssessment={handleSubmitAssessment}
+            isAllTopicsCompleted={isAllTopicsCompleted}
+            disabled={assessment.status !== 'STARTED'}
+          />
+        </>
+      )}
     </div>
   );
 };
