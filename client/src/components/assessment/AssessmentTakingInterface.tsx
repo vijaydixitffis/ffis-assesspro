@@ -296,21 +296,49 @@ export function AssessmentTakingInterface({
 
   const handleNext = () => {
     const currentTopic = topics[currentTopicIndex];
+    console.log('handleNext called:', {
+      currentTopicIndex,
+      currentQuestionIndex,
+      totalTopics: topics.length,
+      questionsInCurrentTopic: currentTopic?.questions?.length
+    });
+    
+    if (!currentTopic || !currentTopic.questions) {
+      console.error('Current topic or questions are undefined');
+      return;
+    }
+    
     if (currentQuestionIndex < currentTopic.questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      console.log('Moving to next question');
+      setCurrentQuestionIndex(prev => prev + 1);
     } else if (currentTopicIndex < topics.length - 1) {
-      setCurrentTopicIndex(currentTopicIndex + 1);
+      console.log('Moving to next topic');
+      setCurrentTopicIndex(prev => prev + 1);
       setCurrentQuestionIndex(0);
+    } else {
+      console.log('Already at last question of last topic');
     }
   };
 
   const handlePrevious = () => {
+    console.log('handlePrevious called:', {
+      currentTopicIndex,
+      currentQuestionIndex,
+      totalTopics: topics.length
+    });
+    
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
+      console.log('Moving to previous question');
+      setCurrentQuestionIndex(prev => prev - 1);
     } else if (currentTopicIndex > 0) {
-      setCurrentTopicIndex(currentTopicIndex - 1);
-      const prevTopic = topics[currentTopicIndex - 1];
-      setCurrentQuestionIndex(prevTopic.questions.length - 1);
+      console.log('Moving to previous topic');
+      setCurrentTopicIndex(prev => {
+        const prevTopic = topics[prev - 1];
+        setCurrentQuestionIndex(prevTopic.questions.length - 1);
+        return prev - 1;
+      });
+    } else {
+      console.log('Already at first question of first topic');
     }
   };
 
@@ -373,6 +401,21 @@ export function AssessmentTakingInterface({
   if (currentView === 'questions') {
     const currentTopic = topics[currentTopicIndex];
     const isLastTopic = currentTopicIndex === topics.length - 1;
+    
+    console.log('Rendering questions view:', {
+      currentTopicIndex,
+      currentQuestionIndex,
+      currentTopic: currentTopic?.title,
+      isLastTopic,
+      totalTopics: topics.length
+    });
+    
+    // Safety check - if current topic doesn't exist, go back to topics view
+    if (!currentTopic) {
+      console.error('Current topic is undefined, returning to topics view');
+      setCurrentView('topics');
+      return null;
+    }
     
     return (
       <div className="min-h-screen bg-gray-50 py-6">

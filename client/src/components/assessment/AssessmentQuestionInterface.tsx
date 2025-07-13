@@ -228,7 +228,10 @@ export function AssessmentQuestionInterface({
                 </Button>
               ) : (
                 <Button
-                  onClick={onNext}
+                  onClick={() => {
+                    console.log('Next Topic button clicked');
+                    onNext();
+                  }}
                   className="flex items-center gap-2"
                 >
                   Next Topic
@@ -237,7 +240,10 @@ export function AssessmentQuestionInterface({
               )
             ) : (
               <Button
-                onClick={onNext}
+                onClick={() => {
+                  console.log('Next button clicked');
+                  onNext();
+                }}
                 className="flex items-center gap-2"
               >
                 Next
