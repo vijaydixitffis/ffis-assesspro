@@ -10,6 +10,15 @@ import { supabase } from '@/integrations/supabase/client';
 import TopicsList from '@/components/topics/TopicsList';
 import TopicForm from '@/components/topics/TopicForm';
 import AssessmentSelector from '@/components/topics/AssessmentSelector';
+import { BookOpen } from 'lucide-react';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from '@/components/ui/dialog';
 
 interface Assessment {
   id: string;
@@ -103,71 +112,92 @@ export default function TopicManagementPage() {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <DashboardNav />
       <main className="flex-1 overflow-auto">
-        <div className="container mx-auto max-w-7xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-semibold">Manage Topics</h1>
-            {!isAdding && !editingTopic && selectedAssessmentId && (
-              <Button onClick={handleAddTopic}>Add New Topic</Button>
-            )}
+        <div className="container mx-auto max-w-7xl p-6 space-y-6">
+          {/* Enhanced Header */}
+          <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">Manage Topics</h1>
+                  <p className="text-green-100 text-sm">Organize and structure your assessment content</p>
+                </div>
+              </div>
+              <Dialog open={isAdding} onOpenChange={setIsAdding}>
+                {!isAdding && !editingTopic && selectedAssessmentId && (
+                  <DialogTrigger asChild>
+                    <Button className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-sm">
+                      Add New Topic
+                    </Button>
+                  </DialogTrigger>
+                )}
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Topic</DialogTitle>
+                  </DialogHeader>
+                  <TopicForm
+                    assessmentId={selectedAssessmentId}
+                    onCancel={() => setIsAdding(false)}
+                    onSuccess={() => setIsAdding(false)}
+                  />
+                </DialogContent>
+              </Dialog>
+              <Dialog open={!!editingTopic} onOpenChange={(open) => { if (!open) handleFormClose(); }}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Edit Topic</DialogTitle>
+                  </DialogHeader>
+                  <TopicForm
+                    topic={editingTopic}
+                    assessmentId={selectedAssessmentId || ''}
+                    onCancel={handleFormClose}
+                    onSuccess={handleFormClose}
+                  />
+                </DialogContent>
+              </Dialog>
+            </div>
           </div>
 
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg">Select Assessment</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AssessmentSelector 
-                assessments={assessments} 
-                selectedId={selectedAssessmentId} 
-                onChange={handleAssessmentChange} 
-                isLoading={isLoading}
-              />
-            </CardContent>
-          </Card>
-
-          {isAdding && selectedAssessmentId && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Add New Topic</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TopicForm 
-                  assessmentId={selectedAssessmentId} 
-                  userId={user?.id || ''} 
-                  onClose={handleFormClose} 
-                />
-              </CardContent>
-            </Card>
-          )}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Select Assessment</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Choose an assessment to manage its topics</p>
+            </div>
+            <AssessmentSelector 
+              assessments={assessments} 
+              selectedId={selectedAssessmentId} 
+              onChange={handleAssessmentChange} 
+            />
+          </div>
 
           {editingTopic && (
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-lg">Edit Topic</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <TopicForm 
-                  topic={editingTopic} 
-                  assessmentId={selectedAssessmentId || ''} 
-                  userId={user?.id || ''} 
-                  onClose={handleFormClose} 
-                />
-              </CardContent>
-            </Card>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Edit Topic</h2>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Update topic details and settings</p>
+              </div>
+              <TopicForm 
+                topic={editingTopic} 
+                assessmentId={selectedAssessmentId || ''} 
+                onCancel={handleFormClose}
+                onSuccess={handleFormClose}
+              />
+            </div>
           )}
 
           {selectedAssessmentId && !isLoading && !editingTopic && (
-            <>
-              <Separator className="my-6" />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
               <TopicsList 
                 assessmentId={selectedAssessmentId} 
                 onEdit={handleEditTopic} 
                 refreshTrigger={refreshTopics}
               />
-            </>
+            </div>
           )}
         </div>
       </main>

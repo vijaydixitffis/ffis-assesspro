@@ -6,8 +6,6 @@ import { AssessmentsTable } from "@/components/assessments/AssessmentsTable";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { AssignedAssessment } from "@/types/assessment";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,7 +15,6 @@ export default function MyAssessmentsPage() {
   const { user } = useAuth();
   const [assessments, setAssessments] = useState<AssignedAssessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showDebugInfo, setShowDebugInfo] = useState(false);
   const [completionMap, setCompletionMap] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -118,31 +115,31 @@ export default function MyAssessmentsPage() {
   const stats = getStatusStats();
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-indigo-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <DashboardNav />
       
-      <main className="flex-1 overflow-auto p-6 bg-gray-50/30 dark:bg-gray-900/30">
+      <main className="flex-1 overflow-auto p-6">
         <div className="container mx-auto max-w-7xl animate-in">
           {/* Header Section */}
-          <div className="mb-8">
-            <div className="flex items-center space-x-4 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">My Assessments</h1>
-                <p className="text-gray-600 dark:text-gray-400">
-                  Track your progress and manage assigned assessments
-                </p>
-                <p className="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1">
-                  Future Focus IT Solutions - Driving Business Outcomes
-                </p>
+          <div className="space-y-6">
+            {/* Enhanced Header */}
+            <div className="bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-lg p-6 text-white shadow-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                    <BookOpen className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">My Assessments</h1>
+                    <p className="text-indigo-100 text-sm">Track your progress and manage assigned assessments</p>
+                  </div>
+                </div>
               </div>
             </div>
             
             {/* Statistics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -154,9 +151,9 @@ export default function MyAssessmentsPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
               
-              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -168,9 +165,9 @@ export default function MyAssessmentsPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
               
-              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -182,9 +179,9 @@ export default function MyAssessmentsPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
               
-              <Card className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-0 shadow-lg">
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -196,17 +193,9 @@ export default function MyAssessmentsPage() {
                     </div>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
             </div>
             
-            <div className="flex items-center space-x-2 mb-6">
-              <Switch 
-                id="debug-mode" 
-                checked={showDebugInfo}
-                onCheckedChange={setShowDebugInfo}
-              />
-              <Label htmlFor="debug-mode">Show debug info</Label>
-            </div>
           </div>
           
           {isLoading ? (
@@ -215,19 +204,20 @@ export default function MyAssessmentsPage() {
               <Skeleton className="h-32 w-full" />
             </div>
           ) : assessments.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-12 text-center">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
               <Database className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <p className="text-gray-600 dark:text-gray-400 text-lg">No assessments have been assigned to you yet.</p>
               <p className="text-gray-500 dark:text-gray-500 text-sm mt-2">Contact your administrator to get started.</p>
             </div>
           ) : (
-            <AssessmentsTable 
-              assessments={assessments} 
-              userId={user?.id || ''} 
-              onStatusUpdate={handleStatusUpdate}
-              showDebug={showDebugInfo}
-              completionMap={completionMap}
-            />
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+              <AssessmentsTable 
+                assessments={assessments} 
+                userId={user?.id || ''} 
+                onStatusUpdate={handleStatusUpdate}
+                completionMap={completionMap}
+              />
+            </div>
           )}
         </div>
       </main>

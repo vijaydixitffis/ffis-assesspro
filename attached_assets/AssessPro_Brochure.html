@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AssessPro Brochure</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media print {
+      body { margin: 0; }
+      .page { page-break-after: always; }
+      .no-print { display: none; }
+    }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #fff;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 30mm 20mm 20mm 20mm;
+      margin: auto;
+      box-sizing: border-box;
+      background: #fff;
+      position: relative;
+      box-shadow: 0 0 8px #eee;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .cover {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+    }
+    .logo-placeholder {
+      width: 120px;
+      height: 120px;
+      background: #e0e0e0;
+      border-radius: 50%;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #888;
+    }
+    h1, h2, h3 {
+      color: #1a237e;
+      margin-top: 0.5em;
+      margin-bottom: 0.5em;
+    }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 1.5rem; border-bottom: 2px solid #e3e3e3; padding-bottom: 0.2em; }
+    h3 { font-size: 1.1rem; }
+    .contact {
+      margin-top: 2em;
+      font-size: 1.1rem;
+      color: #333;
+    }
+    .toc {
+      margin-top: 2em;
+      font-size: 1.1rem;
+    }
+    .toc ul {
+      list-style: none;
+      padding: 0;
+    }
+    .toc li {
+      margin-bottom: 0.5em;
+    }
+    .section {
+      margin-bottom: 2em;
+    }
+    .features-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5em;
+      margin-top: 1em;
+    }
+    .feature {
+      flex: 1 1 45%;
+      background: #f5f7fa;
+      border-radius: 8px;
+      padding: 1em;
+      margin-bottom: 1em;
+      min-width: 220px;
+      box-sizing: border-box;
+    }
+    .icon-placeholder {
+      width: 40px;
+      height: 40px;
+      background: #c5cae9;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: #3949ab;
+      margin-right: 0.5em;
+      vertical-align: middle;
+    }
+    .screenshots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      margin-top: 1em;
+    }
+    .screenshot-placeholder {
+      width: 180px;
+      height: 120px;
+      background: #e0e0e0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 1rem;
+      margin-bottom: 0.5em;
+    }
+    .cta {
+      background: #1a237e;
+      color: #fff;
+      padding: 1.5em;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 2em;
+    }
+    .footer {
+      position: absolute;
+      bottom: 20mm;
+      left: 20mm;
+      right: 20mm;
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Combined Title, Why Choose AssessPro, and Contact Page -->
+  <div class="page cover">
+    <div class="logo-placeholder">Logo</div>
+    <h1>AssessPro</h1>
+    <h2>Revolutionize Your Assessment Management</h2>
+    <h2>Why Choose AssessPro?</h2>
+    <div class="section">
+      <ol style="text-align:left; margin-left:1.5em;">
+        <li style="margin-bottom:0.5em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;" title="All-in-One Solution: From creation to analytics, everything you need in one place"><b>All-in-One Solution:</b> From creation to analytics, everything you need in one place</li>
+        <li style="margin-bottom:0.5em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;" title="User-Friendly: Designed for admins, educators, and participants alike"><b>User-Friendly:</b> Designed for admins, educators, and participants alike</li>
+        <li style="margin-bottom:0.5em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;" title="Scalable: Perfect for small teams or large organizations"><b>Scalable:</b> Perfect for small teams or large organizations</li>
+        <li style="margin-bottom:0.5em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%;" title="Support & Training: Backed by Future Focus IT Solutions’ expert support"><b>Support & Training:</b> Backed by Future Focus IT Solutions’ expert support</li>
+      </ol>
+    </div>
+    <h2>Contact & Get Started</h2>
+    <div class="cta" style="margin-top:0;">
+      <p>Transform your assessment process with AssessPro.<br>
+      Contact us for a free demo or to discuss your requirements.</p>
+      <div>🌐 <a href="http://www.futurefocusit.solutions" style="color:#fff;">www.futurefocusit.solutions</a></div>
+      <div>📞 +91 82754 21793</div>
+      <div>✉️ info@futurefocusit.solutions</div>
+    </div>
+    <div class="footer">Empowering Smarter Assessments, Every Step of the Way.</div>
+  </div>
+
+  <!-- What is AssessPro and Key Features (Combined) -->
+  <div class="page">
+    <h2>1. What is AssessPro?</h2>
+    <div class="section">
+      <p><b>AssessPro</b> is a next-generation assessment management platform designed to streamline, automate, and elevate the way organizations conduct, manage, and analyze assessments. Whether you’re an educational institution, a corporate training provider, or a certification body, AssessPro empowers you to deliver seamless, secure, and insightful assessment experiences.</p>
+    </div>
+    <h2>2. Key Features</h2>
+    <div class="features-list">
+      <div class="feature">
+        <span class="icon-placeholder">📊</span>
+        <b>Modern, Intuitive Dashboard</b>
+        <ul>
+          <li>Centralized control for all assessments, topics, users, and results</li>
+          <li>Real-time analytics and performance metrics</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <span class="icon-placeholder">📝</span>
+        <b>Comprehensive Assessment Management</b>
+        <ul>
+          <li>Create & organize assessments with multiple question types</li>
+          <li>Topic & question bank for easy reuse</li>
+          <li>Bulk uploads for questions and topics</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <span class="icon-placeholder">👥</span>
+        <b>Flexible User Management</b>
+        <ul>
+          <li>Admin & client logins with secure, role-based access</li>
+          <li>Easy onboarding and user role assignment</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <span class="icon-placeholder">✅</span>
+        <b>Seamless Assessment Experience</b>
+        <ul>
+          <li>Responsive design for all devices</li>
+          <li>Guided assessment flow and progress tracking</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <span class="icon-placeholder">🔒</span>
+        <b>Advanced Security & Reliability</b>
+        <ul>
+          <li>Secure authentication for admins and clients</li>
+          <li>Data privacy and modern security best practices</li>
+        </ul>
+      </div>
+      <div class="feature">
+        <span class="icon-placeholder">🎨</span>
+        <b>Custom Branding & Integrations</b>
+        <ul>
+          <li>White-label ready: add your logo, colors, and branding</li>
+          <li>Easy integrations with existing systems</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer">AssessPro - What is AssessPro? & Key Features</div>
+  </div>
+
+  <!-- Overview of AssessPro Platform -->
+  <div class="page">
+    <h2>3. Overview of AssessPro Platform</h2>
+    <div class="section">
+      <div class="screenshots">
+        <div>
+          <div class="screenshot-placeholder">Login Page</div>
+          <div style="text-align:center; font-size:0.98rem; margin-bottom:1.5em;">Secure login for Admins and Clients ensures role-based access to the platform.</div>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">Dashboard</div>
+          <div style="text-align:center; font-size:0.98rem; margin-bottom:1.5em;">A modern dashboard provides an overview of assessments, users, and analytics at a glance.</div>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">Assessment Management</div>
+          <div style="text-align:center; font-size:0.98rem; margin-bottom:1.5em;">Easily create, edit, and organize assessments with a user-friendly interface.</div>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">Question Management</div>
+          <div style="text-align:center; font-size:0.98rem; margin-bottom:1.5em;">Add, edit, and categorize questions for flexible assessment creation.</div>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">Assessment Taking</div>
+          <div style="text-align:center; font-size:0.98rem; margin-bottom:1.5em;">Participants experience a clean, distraction-free environment for taking assessments.</div>
+        </div>
+        <div>
+          <div class="screenshot-placeholder">Results & Analytics</div>
+          <div style="text-align:center; font-size:0.98rem; margin-bottom:1.5em;">Visualize performance and export reports for actionable insights.</div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">AssessPro - Overview of AssessPro Platform</div>
+  </div>
+</body>
+</html> 

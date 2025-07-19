@@ -7,39 +7,40 @@ import { AssignedAssessment } from "@/types/assessment";
 interface StartButtonProps {
   assessment: AssignedAssessment;
   userId: string;
-  updatingAssessment: string | null;
-  onStartAssessment: () => void;
-  disabled?: boolean;
-  showDebug?: boolean;
+  onStatusUpdate: (assessmentId: string, newStatus: string) => void;
 }
 
 export const StartButton = ({ 
   assessment, 
-  userId,
-  updatingAssessment, 
-  onStartAssessment,
-  disabled = false,
-  showDebug = false
+  userId, 
+  onStatusUpdate,
 }: StartButtonProps) => {
+  const isStarting = assessment.status === 'STARTING';
+
+  const handleStartAssessment = () => {
+    onStatusUpdate(assessment.id, 'STARTING');
+  };
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col gap-2">
       <Button 
-        size="sm" 
-        onClick={onStartAssessment}
-        disabled={disabled || assessment.status !== 'ASSIGNED' || updatingAssessment === assessment.id}
-        className={updatingAssessment === assessment.id ? "opacity-70 cursor-not-allowed" : ""}
+        onClick={handleStartAssessment}
+        disabled={isStarting}
+        className="w-full"
       >
-        <Play className="mr-1 h-4 w-4" />
-        {updatingAssessment === assessment.id && assessment.status === 'ASSIGNED' ? 'Starting...' : 'Start'}
+        {isStarting ? (
+          <>
+            <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            Starting...
+          </>
+        ) : (
+          <>
+            <Play className="w-4 h-4 mr-2" />
+            Start Assessment
+          </>
+        )}
       </Button>
       
-      {showDebug && (
-        <div className="text-xs text-muted-foreground mt-1">
-          ID: {assessment.id.substring(0, 8)}...
-          <br/>
-          User: {userId.substring(0, 8)}...
-        </div>
-      )}
     </div>
   );
 };

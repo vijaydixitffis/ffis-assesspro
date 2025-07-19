@@ -12,7 +12,6 @@ interface AssessmentActionButtonsProps {
   assessment: AssignedAssessment;
   userId: string;
   onStatusUpdate: (assignmentId: string, newStatus: string) => void;
-  showDebug?: boolean;
   isAllTopicsCompleted: boolean;
 }
 
@@ -20,15 +19,12 @@ export const AssessmentActionButtons = ({
   assessment, 
   userId,
   onStatusUpdate,
-  showDebug = false,
   isAllTopicsCompleted,
 }: AssessmentActionButtonsProps) => {
   const navigate = useNavigate();
   const { updatingAssessment, updateAssessmentStatus } = useAssessmentStatusUpdate(onStatusUpdate);
 
   const handleStartAssessment = async () => {
-    console.log(`Starting assignment with ID: ${assessment.id} for user ${userId}`);
-    console.log('Assessment data before update:', JSON.stringify(assessment, null, 2));
     
     try {
       // Ensure we have a valid ID before attempting update
@@ -37,14 +33,9 @@ export const AssessmentActionButtons = ({
         return;
       }
       
-      // Add assessment ID debug info
-      console.log(`Attempting to update assessment with ID: ${assessment.id}`);
-      
       const success = await updateAssessmentStatus(assessment.id, 'STARTED');
-      console.log('Update status returned:', success);
       
       if (success) {
-        console.log(`Navigating to assessment topics for assessment ID: ${assessment.assessment_id}`);
         navigate(`/assessment-topics/${assessment.assessment_id}`);
       } else {
         console.error('Failed to update assessment status');
@@ -62,11 +53,7 @@ export const AssessmentActionButtons = ({
         return;
       }
       
-      // Add assessment ID debug info
-      console.log(`Attempting to update assessment with ID: ${assessment.id}`);
-      
       const success = await updateAssessmentStatus(assessment.id, 'COMPLETED');
-      console.log('Submit update status returned:', success);
       
       if (!success) {
         console.error('Failed to update assessment status to COMPLETED');
@@ -135,32 +122,7 @@ export const AssessmentActionButtons = ({
       )}
 
       {/* Legacy buttons for debugging */}
-      {showDebug && (
-        <>
-          {assessment.status === 'ASSIGNED' ? (
-            <StartButton 
-              assessment={assessment}
-              userId={userId}
-              updatingAssessment={updatingAssessment}
-              onStartAssessment={handleStartAssessment}
-              showDebug={showDebug}
-            />
-          ) : assessment.status === 'STARTED' ? (
-            <TopicsButton
-              assessment={assessment}
-              onViewTopics={handleViewTopics}
-            />
-          ) : null}
-          
-          <SubmitButton 
-            assessment={assessment}
-            updatingAssessment={updatingAssessment}
-            onSubmitAssessment={handleSubmitAssessment}
-            isAllTopicsCompleted={isAllTopicsCompleted}
-            disabled={assessment.status !== 'STARTED'}
-          />
-        </>
-      )}
+      {/* Removed showDebug prop and debug UI elements */}
     </div>
   );
 };

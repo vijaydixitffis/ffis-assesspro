@@ -6,132 +6,133 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, UserRole, AuthContextType } from './types';
 import { fetchUserProfile, loginUser, signUpUser, logoutUser } from './authUtils';
 
-// Create the context with default undefined value
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [initialized, setInitialized] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  // Check for existing session on mount
   useEffect(() => {
+    let mounted = true;
+    let initializing = true;
+    let unsubscribed = false;
+
+    const safeSetUser = (u: User | null) => {
+      if (mounted) setUser(u);
+    };
+    const safeSetLoading = (l: boolean) => {
+      if (mounted) setIsLoading(l);
+    };
+    const safeSetInitialized = (i: boolean) => {
+      if (mounted) setInitialized(i);
+    };
+
     const checkSession = async () => {
       console.log('AuthProvider: Checking for existing session');
-      setIsLoading(true);
-      
+      safeSetLoading(true);
       try {
-        // Check for an active session
         const { data: { session }, error } = await supabase.auth.getSession();
-        
         if (error) {
           console.error('Session check error:', error);
           throw error;
         }
-        
         if (session) {
           console.log('Active session found, fetching user profile');
           try {
             const userProfile = await fetchUserProfile(session);
             console.log('User profile loaded:', userProfile);
-            
             if (userProfile) {
-              setUser(userProfile);
+              safeSetUser(userProfile);
             } else {
               console.warn('No user profile could be loaded, logging out');
               await supabase.auth.signOut();
-              setUser(null);
+              safeSetUser(null);
             }
           } catch (profileError) {
             console.error('Error loading user profile:', profileError);
             toast.error('Failed to load your profile');
-            // Don't sign out - just leave as loading and let the user retry
+            safeSetUser(null);
           }
         } else {
           console.log('No active session found');
-          setUser(null);
+          safeSetUser(null);
         }
       } catch (error) {
         console.error('Error checking session:', error);
-        setUser(null);
+        safeSetUser(null);
       } finally {
-        console.log('Session check complete, setting isLoading to false');
-        setIsLoading(false);
+        safeSetLoading(false);
+        safeSetInitialized(true);
+        initializing = false;
       }
     };
-    
-    // Listen for auth state changes with improved error handling
+
+    // Auth state change listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!initialized && initializing) {
+          // Ignore auth state changes until initial session check is done
+          return;
+        }
+        if (unsubscribed) return;
         console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
-        
         if (session) {
-          setIsLoading(true); // Set loading state while fetching profile
+          safeSetLoading(true);
           try {
             const userProfile = await fetchUserProfile(session);
             console.log('User profile from auth change:', userProfile);
-            
             if (userProfile) {
-              setUser(userProfile);
-              
-              // Only redirect if event is a sign-in or token-refreshed event
+              safeSetUser(userProfile);
               if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && 
                   window.location.pathname === '/login') {
-                console.log('Redirecting to dashboard after authentication');
-                // Add a small delay to ensure state is updated before navigation
                 setTimeout(() => {
-                  navigate('/dashboard');
+                  if (mounted) navigate('/dashboard');
                 }, 200);
               }
             } else {
               console.warn('No user profile could be loaded on auth change');
-              setUser(null);
+              safeSetUser(null);
             }
           } catch (error) {
             console.error('Error fetching user profile on auth change:', error);
             toast.error('Error loading your profile');
-            setUser(null);
+            safeSetUser(null);
           } finally {
-            setIsLoading(false);
+            safeSetLoading(false);
           }
         } else {
           console.log('No session in auth change event, clearing user');
-          setUser(null);
-          setIsLoading(false);
+          safeSetUser(null);
+          safeSetLoading(false);
         }
       }
     );
-    
-    // Initialize by checking session
+
     checkSession();
-    
-    // Cleanup the subscription on unmount
+
     return () => {
+      mounted = false;
+      unsubscribed = true;
       subscription.unsubscribe();
     };
   }, [navigate]);
 
-  // Login function with improved error handling
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    
     try {
       console.log('Attempting login for:', email);
       const data = await loginUser(email, password);
-      
       if (data.session) {
         console.log('Login successful, fetching user profile');
         try {
           const userProfile = await fetchUserProfile(data.session);
-          
           if (userProfile) {
             console.log('User profile loaded after login:', userProfile);
             setUser(userProfile);
             toast.success('Login successful');
-            
-            // Longer delay before navigation to ensure state is updated
             setTimeout(() => {
-              console.log('Navigating to dashboard after login');
               navigate('/dashboard');
             }, 300);
           } else {
@@ -140,7 +141,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } catch (profileError) {
           console.error('Error loading profile after login:', profileError);
           toast.error('Login successful but failed to load profile');
-          // Still redirect to dashboard, will try to load profile again there
           setTimeout(() => {
             navigate('/dashboard');
           }, 300);
@@ -155,16 +155,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Signup function - Available only for admin users to create new accounts
   const signUp = async (email: string, password: string, name: string, role: UserRole) => {
     setIsLoading(true);
-    
     try {
-      // First check if the current user is an admin
       if (!user || user.role !== 'admin') {
         throw new Error('Only administrators can create new user accounts');
       }
-      
       await signUpUser(email, password, name, role);
       toast.success('User account created successfully!');
       return;
@@ -177,15 +173,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Logout function
   const logout = async () => {
     try {
       await logoutUser();
-      
-      // Clear user data
       setUser(null);
-      
-      // Show success message and redirect to login
       toast.success('Logged out successfully');
       navigate('/login');
     } catch (error) {

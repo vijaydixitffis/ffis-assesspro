@@ -9,6 +9,14 @@ import QuestionsList from '@/components/questions/QuestionsList';
 import { useAuth } from '@/contexts/AuthContext';
 import TopicHeader from './TopicHeader';
 import { QuestionType } from './types';
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from '@/components/ui/dialog';
 
 interface Topic {
   id: string;
@@ -87,27 +95,33 @@ export default function QuestionManagement() {
 
   return (
     <div>
-      <TopicHeader 
-        topic={topic}
-        isAdding={isAdding}
-        editingQuestion={editingQuestion}
-        topicId={selectedTopicId}
-        onAddQuestion={handleAddQuestion}
-      />
-
-      {(isAdding || editingQuestion) && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <QuestionForm
-              question={editingQuestion}
-              initialQuestionType={initialQuestionType}
-              topicId={selectedTopicId || ''}
-              userId={user?.id || ''}
-              onClose={handleCloseQuestionForm}
-            />
-          </CardContent>
-        </Card>
-      )}
+      <Dialog open={isAdding || !!editingQuestion} onOpenChange={(open) => { if (!open) handleCloseQuestionForm(); }}>
+        {!(isAdding || editingQuestion) && (
+          <DialogTrigger asChild>
+            <div>
+              <TopicHeader 
+                topic={topic}
+                isAdding={isAdding}
+                editingQuestion={editingQuestion}
+                topicId={selectedTopicId}
+                onAddQuestion={handleAddQuestion}
+              />
+            </div>
+          </DialogTrigger>
+        )}
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingQuestion ? 'Edit Question' : 'Add New Question'}</DialogTitle>
+          </DialogHeader>
+          <QuestionForm
+            question={editingQuestion}
+            initialQuestionType={initialQuestionType}
+            topicId={selectedTopicId || ''}
+            userId={user?.id || ''}
+            onClose={handleCloseQuestionForm}
+          />
+        </DialogContent>
+      </Dialog>
 
       {selectedTopicId && !isAdding && !editingQuestion && (
         <QuestionsList 

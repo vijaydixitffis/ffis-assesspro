@@ -91,10 +91,6 @@ export default function TakeAssessmentPage() {
     navigate('/my-assessments');
   };
 
-  const handleBackToAssessments = () => {
-    navigate('/my-assessments');
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -119,10 +115,6 @@ export default function TakeAssessmentPage() {
               <p className="text-gray-600 mb-6">
                 {error || 'The assessment you are looking for is not available.'}
               </p>
-              <Button onClick={handleBackToAssessments} className="flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" />
-                Back to My Assessments
-              </Button>
             </CardContent>
           </Card>
         </div>

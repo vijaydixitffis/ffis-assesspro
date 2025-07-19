@@ -11,8 +11,11 @@ const cleanUrl = (url: string) => {
   return url;
 };
 
-const SUPABASE_URL = cleanUrl(import.meta.env.VITE_SUPABASE_URL) || "https://tzdlzlqowxhosudqyuho.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6ZGx6bHFvd3hob3N1ZHF5dWhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3Mjg0MDcsImV4cCI6MjA1NjMwNDQwN30.W4dtmF8xR6wD2KI3YrDNsu_orVUMiIJFL1wo4JSSV0k";
+const SUPABASE_URL = cleanUrl(import.meta.env.VITE_SUPABASE_URL) ;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+console.log('SUPABASE_URL:', SUPABASE_URL);
+console.log('SUPABASE_PUBLISHABLE_KEY:', SUPABASE_PUBLISHABLE_KEY);
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";

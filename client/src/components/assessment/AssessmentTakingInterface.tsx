@@ -8,7 +8,7 @@ import { AssessmentQuestionInterface } from './AssessmentQuestionInterface';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { toast } from 'sonner';
-import { CheckCircle, Award, TrendingUp } from 'lucide-react';
+import { CheckCircle, Award, TrendingUp, BookOpen } from 'lucide-react';
 
 interface Answer {
   id: string;
@@ -357,17 +357,18 @@ export function AssessmentTakingInterface({
     const progress = getTotalProgress();
     
     return (
-      <div className="max-w-4xl mx-auto p-6 text-center">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6">
+        <div className="max-w-4xl mx-auto p-6 text-center">
         <div className="mb-8">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-20 h-20 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
             <Award className="w-10 h-10 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Assessment Completed!</h1>
-          <p className="text-gray-600">Thank you for completing the {assessmentTitle}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Assessment Completed!</h1>
+          <p className="text-gray-600 dark:text-gray-300">Thank you for completing the {assessmentTitle}</p>
         </div>
 
-        <Card className="mb-6">
-          <CardContent className="p-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 mb-6">
+         <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-blue-600 mb-1">
@@ -388,12 +389,11 @@ export function AssessmentTakingInterface({
                 <div className="text-sm text-gray-600">Progress</div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+         </div>
+       </div>
 
-        <Button onClick={onComplete} className="w-full max-w-md">
-          Back to My Assessments
-        </Button>
+        <p className="text-sm text-gray-500">Use the menu on the left to navigate to other sections</p>
+        </div>
       </div>
     );
   }
@@ -418,7 +418,7 @@ export function AssessmentTakingInterface({
     }
     
     return (
-      <div className="min-h-screen bg-gray-50 py-6">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6">
         <div className="container mx-auto px-4">
           <AssessmentQuestionInterface
             topic={currentTopic}
@@ -442,23 +442,26 @@ export function AssessmentTakingInterface({
   const progress = getTotalProgress();
   
   return (
-    <div className="min-h-screen bg-gray-50 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-6">
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{assessmentTitle}</h1>
-          <p className="text-gray-600">Evaluate your capabilities across key domains</p>
+        <div className="text-center mb-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className="w-12 h-12 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+              <BookOpen className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{assessmentTitle}</h1>
+          </div>
+          <p className="text-gray-600 dark:text-gray-300">Evaluate your capabilities across key domains</p>
         </div>
 
         {/* Overall Progress */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              Overall Progress
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 mb-8">
+          <div className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-5 h-5 text-emerald-600" />
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Overall Progress</h2>
+            </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between text-sm">
                 <span>Complete all categories to get your assessment</span>
@@ -472,11 +475,12 @@ export function AssessmentTakingInterface({
                 <span>{progress.completedTopics}/{topics.length} Categories Done</span>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Topic Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {topics.map((topic, index) => {
             const topicProgress = getTopicProgress(topic);
             
@@ -492,10 +496,11 @@ export function AssessmentTakingInterface({
               />
             );
           })}
+          </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 p-6">
           {progress.answeredQuestions > 0 && (
             <Button variant="outline" onClick={() => setCurrentView('questions')}>
               Continue Assessment
