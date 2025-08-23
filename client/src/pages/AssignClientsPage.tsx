@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 
 type User = {
   id: string;
@@ -88,7 +89,7 @@ export default function AssignClientsPage() {
       const { data: clientsData, error: clientsError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, role, is_active')
-        .eq('role', 'CLIENT')
+        .eq('role', 'client')
         .eq('is_active', true)
         .order('last_name');
       
@@ -182,7 +183,8 @@ export default function AssignClientsPage() {
               assessment_id: selectedAssessmentId, 
               user_id: client.id,
               scope: scope,
-              status: 'ASSIGNED'
+              status: 'assigned',
+              assigned_by: user!.id
             }
           ])
           .select('id, status')
@@ -204,17 +206,17 @@ export default function AssignClientsPage() {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'ASSIGNED':
+      case 'assigned':
         return 'secondary';
-      case 'RE-ASSIGNED':
+      case 're-assigned':
         return 'secondary';
-      case 'STARTED':
+      case 'started':
         return 'default';
-      case 'COMPLETED':
-        return 'success';
-      case 'RATED':
+      case 'completed':
+        return 'default';
+      case 'rated':
         return 'outline';
-      case 'CLOSED':
+      case 'closed':
         return 'default';
       default:
         return 'secondary';
@@ -303,10 +305,24 @@ export default function AssignClientsPage() {
                             )}
                           </TableCell>
                           <TableCell className="text-center">
-                            <Switch
-                              checked={!!client.assignment}
-                              onCheckedChange={() => toggleAssignment(client, !!client.assignment)}
-                            />
+                            {client.assignment || (scopeValues[client.id] && scopeValues[client.id].trim()) ? (
+                              <Switch
+                                checked={!!client.assignment}
+                                onCheckedChange={() => toggleAssignment(client, !!client.assignment)}
+                                disabled={isLoading}
+                              />
+                            ) : (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-block cursor-not-allowed opacity-50">
+                                      <Switch checked={false} disabled />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>Enter a scope to enable assignment</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            )}
                           </TableCell>
                         </TableRow>
                       ))}

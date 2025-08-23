@@ -40,6 +40,7 @@ interface QuestionsModalProps {
   onAnswerChange: (questionId: string, answerId?: string, textAnswer?: string) => void;
   onCompleteAssessment: () => void;
   isSubmitting: boolean;
+  onNextTopic: () => void; // <-- Add this line
 }
 
 export function QuestionsModal({
@@ -51,7 +52,8 @@ export function QuestionsModal({
   allAnswers,
   onAnswerChange,
   onCompleteAssessment,
-  isSubmitting
+  isSubmitting,
+  onNextTopic // <-- Add this line
 }: QuestionsModalProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const { user } = useAuth();
@@ -108,6 +110,7 @@ export function QuestionsModal({
             onCompleteAssessment={onCompleteAssessment}
             isLastTopic={isLastTopic}
             isSubmitting={isSubmitting}
+            onNextTopic={onNextTopic} // <-- Pass the prop
           />
         </div>
       </DialogContent>

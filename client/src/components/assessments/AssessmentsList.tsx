@@ -32,6 +32,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
+import { useAuth } from '@/contexts/auth';
 
 interface Assessment {
   id: string;
@@ -47,6 +48,7 @@ interface AssessmentsListProps {
 
 export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -56,7 +58,7 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
   const [scopeValues, setScopeValues] = useState<{ [key: string]: string }>({});
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
 
   useEffect(() => {
     fetchAssessments();
@@ -195,7 +197,8 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
               assessment_id: selectedAssessment.id,
               user_id: client.id,
               scope: scope,
-              status: 'ASSIGNED'
+              status: 'assigned',
+              assigned_by: user!.id
             }
           ])
           .select('id, status')
@@ -214,17 +217,17 @@ export default function AssessmentsList({ onEdit }: AssessmentsListProps) {
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
-      case 'ASSIGNED':
+      case 'assigned':
         return 'secondary';
-      case 'RE-ASSIGNED':
+      case 're-assigned':
         return 'secondary';
-      case 'STARTED':
+      case 'started':
         return 'default';
-      case 'COMPLETED':
-        return 'success';
-      case 'RATED':
+      case 'completed':
+        return 'default';
+      case 'rated':
         return 'outline';
-      case 'CLOSED':
+      case 'closed':
         return 'default';
       default:
         return 'secondary';

@@ -177,6 +177,17 @@ CREATE TRIGGER update_topic_assignments_updated_at BEFORE UPDATE ON topic_assign
 CREATE TRIGGER update_submitted_answers_updated_at BEFORE UPDATE ON submitted_answers
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Create functions for RLS and triggers
+CREATE OR REPLACE FUNCTION is_admin(user_id UUID)
+RETURNS BOOLEAN AS $$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM profiles p
+        WHERE p.id = user_id AND (role = 'admin' OR role = 'ADMIN')
+    );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
 -- Enable Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE assessments ENABLE ROW LEVEL SECURITY;
@@ -188,15 +199,115 @@ ALTER TABLE assessment_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE topic_assignments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE submitted_answers ENABLE ROW LEVEL SECURITY;
 
+
+-- RLS Policies for profiles
+CREATE POLICY "Users can view their own profile" ON profiles
+    FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Admins can view all profiles" ON profiles
+    FOR SELECT USING (is_admin(auth.uid()));
+
+CREATE POLICY "Admins can insert profiles" ON profiles
+    FOR INSERT WITH CHECK (is_admin(auth.uid()));
+
+CREATE POLICY "Admins can update profiles" ON profiles
+    FOR UPDATE USING (is_admin(auth.uid()));
+
+CREATE POLICY "Admins can delete profiles" ON profiles
+    FOR DELETE USING (is_admin(auth.uid()));
+
+-- RLS Policies for assessments
+CREATE POLICY "Admins can manage assessments" ON assessments
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can view assigned assessments" ON assessments
+    FOR SELECT USING (
+        id IN (
+            SELECT assessment_id FROM assessment_assignments aa
+            WHERE aa.user_id = auth.uid()
+        )
+    );
+
+-- RLS Policies for topics
+CREATE POLICY "Admins can manage topics" ON topics
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can view topics of assigned assessments" ON topics
+    FOR SELECT USING (
+        assessment_id IN (
+            SELECT assessment_id FROM assessment_assignments aa
+            WHERE aa.user_id = auth.uid()
+        )
+    );
+
+-- RLS Policies for questions
+CREATE POLICY "Admins can manage questions" ON questions
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can view questions of assigned assessments" ON questions
+    FOR SELECT USING (
+        topic_id IN (
+            SELECT t.id FROM topics t
+            JOIN assessment_assignments aa ON t.assessment_id = aa.assessment_id
+            WHERE aa.user_id = auth.uid()
+        )
+    );
+
+-- RLS Policies for answers
+CREATE POLICY "Admins can manage answers" ON answers
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can view answers of assigned assessments" ON answers
+    FOR SELECT USING (
+        question_id IN (
+            SELECT q.id FROM questions q
+            JOIN topics t ON q.topic_id = t.id
+            JOIN assessment_assignments aa ON t.assessment_id = aa.assessment_id
+            WHERE aa.user_id = auth.uid()
+        )
+    );
+
+-- RLS Policies for assessment_assignments
+CREATE POLICY "Admins can manage assessment assignments" ON assessment_assignments
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can view their own assignments" ON assessment_assignments
+    FOR SELECT USING (user_id = auth.uid());
+
+-- RLS Policies for assessment_submissions
+CREATE POLICY "Admins can manage assessment submissions" ON assessment_submissions
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can manage their own submissions" ON assessment_submissions 
+    FOR ALL USING (user_id = auth.uid());
+
+-- RLS Policies for topic_assignments
+CREATE POLICY "Admins can manage topic assignments" ON topic_assignments
+    FOR ALL USING (is_admin(auth.uid()));
+
+-- RLS Policies for submitted_answers
+CREATE POLICY "Admins can manage submitted answers" ON submitted_answers
+    FOR ALL USING (is_admin(auth.uid()));
+
+CREATE POLICY "Users can manage their own submitted answers" ON submitted_answers
+    FOR ALL USING (
+        submission_id IN (
+            SELECT id FROM assessment_submissions asub
+            WHERE asub.user_id = auth.uid()
+        )
+    );
+
+
+
 -- ===========================================
 -- INSERT ALL EXISTING DATA FROM SUPABASE
 -- ===========================================
 
 
 -- Insert profiles data (4 records)
-INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('6b5b34bd-b616-449b-ba94-c433b3a89d5c', 'Vijay', 'Dixit', 'ADMIN', true, '2025-02-28T09:46:14+00:00', '2025-02-28T09:46:18+00:00');
-INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('73d6ca9f-6cd4-4eb4-a15d-166d21766faf', 'First Test', 'Client', 'CLIENT', true, '2025-02-28T09:47:02.128019+00:00', '2025-03-02T12:24:40.877299+00:00');
-INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('1141658a-2434-48af-8e55-96307bd240fd', 'Second', 'Updated', 'ADMIN', true, '2025-03-01T13:00:35.2709+00:00', '2025-03-02T12:24:24.513848+00:00');
+INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('6b5b34bd-b616-449b-ba94-c433b3a89d5c', 'Vijay', 'D', 'ADMIN', true, '2025-02-28T09:46:14+00:00', '2025-02-28T09:46:18+00:00');
+INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('73d6ca9f-6cd4-4eb4-a15d-166d21766faf', 'FirstTest', 'Client', 'CLIENT', true, '2025-02-28T09:47:02.128019+00:00', '2025-03-02T12:24:40.877299+00:00');
+INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('1141658a-2434-48af-8e55-96307bd240fd', 'SecondAdmin', 'Updated', 'ADMIN', true, '2025-03-01T13:00:35.2709+00:00', '2025-03-02T12:24:24.513848+00:00');
 INSERT INTO profiles (id, first_name, last_name, role, is_active, created_at, updated_at) VALUES ('4bffc056-a348-481b-a49e-f5d191ac203e', 'Second', 'Client', 'CLIENT', true, '2025-03-01T13:00:53.679131+00:00', '2025-03-02T12:24:51.985419+00:00');
 
 -- Insert assessments data (8 records)
@@ -869,16 +980,16 @@ INSERT INTO answers (id, text, is_correct, marks, comment, question_id, created_
 INSERT INTO answers (id, text, is_correct, marks, comment, question_id, created_at, updated_at) VALUES ('54350610-cbc7-498d-a003-18c8f7cd6e68', '4 - Agree', NULL, '4', NULL, 'fe2ca3d9-529f-4951-812f-ebe3013fce04', '2025-07-11T05:54:49.334811+00:00', '2025-07-11T05:54:49.334811+00:00');
 
 -- Insert assessment_assignments data (10 records)
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('d0978eb8-64e6-485f-968b-550308363f7e', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '7c014a03-68f4-44e4-bc08-0098eb274fa4', NULL, '2025-03-05T14:01:30.648935+00:00', NULL, 'ASSIGNED', 'CLASS back office', '2025-03-05T14:01:30.648935+00:00', '2025-03-05T14:01:30.648935+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('94b5d86b-2f28-418c-9914-11a5f7711772', '4bffc056-a348-481b-a49e-f5d191ac203e', '7c014a03-68f4-44e4-bc08-0098eb274fa4', NULL, '2025-03-05T14:01:31.880539+00:00', NULL, 'COMPLETED', 'TradeWeb', '2025-03-05T14:01:31.880539+00:00', '2025-04-27T12:26:42.558253+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('7b5bedba-0635-40ce-90a3-451ad2945519', '4bffc056-a348-481b-a49e-f5d191ac203e', '0697e0f1-b519-4b7d-9146-4b8dbc34afe9', NULL, '2025-03-05T15:39:09.591+00:00', NULL, 'STARTED', 'BjjBrk IT Asses', '2025-03-05T15:39:09.591+00:00', '2025-07-11T09:14:56.098368+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('82fe867c-7d4f-43e0-86d3-f7e6d6e59d09', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '0697e0f1-b519-4b7d-9146-4b8dbc34afe9', NULL, '2025-03-06T10:29:18.850048+00:00', NULL, 'ASSIGNED', 'Business Architecture', '2025-03-06T10:29:18.850048+00:00', '2025-03-06T10:29:18.850048+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('2b85ca06-b8d9-4a08-98b2-b7412fa25149', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '1870e009-f8d3-4541-b715-c012897d631e', NULL, '2025-03-06T16:43:41.53231+00:00', NULL, 'ASSIGNED', 'CLASS', '2025-03-06T16:43:41.53231+00:00', '2025-03-06T16:43:41.53231+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('0239a187-2e2f-45e9-8baf-8b1e8acdf588', '4bffc056-a348-481b-a49e-f5d191ac203e', '1870e009-f8d3-4541-b715-c012897d631e', NULL, '2025-03-06T16:43:42.718625+00:00', NULL, 'ASSIGNED', 'OMNENEST', '2025-03-06T16:43:42.718625+00:00', '2025-03-06T16:43:42.718625+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('fe62f049-7896-46c6-9d36-c0c081b0a365', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', 'f5b59235-248c-490b-9020-7345529a56a3', NULL, '2025-07-11T06:45:57.083209+00:00', NULL, 'ASSIGNED', 'BJJBK', '2025-07-11T06:45:57.083209+00:00', '2025-07-11T06:45:57.083209+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('d50dee15-b778-4645-8bd3-edd8561a3da5', '4bffc056-a348-481b-a49e-f5d191ac203e', 'f5b59235-248c-490b-9020-7345529a56a3', NULL, '2025-07-11T06:46:02.977956+00:00', NULL, 'STARTED', 'BJJBK', '2025-07-11T06:46:02.977956+00:00', '2025-07-11T08:54:55.268059+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('40b3c90b-31c7-4038-902c-36a62020439c', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '771f21c7-79dd-4e3c-ad2a-ecab16983ec2', NULL, '2025-07-11T07:01:50.447445+00:00', NULL, 'ASSIGNED', 'BJJBK', '2025-07-11T07:01:50.447445+00:00', '2025-07-11T07:01:50.447445+00:00');
-INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('3e11022a-6350-4f22-a179-fad880ce91a1', '4bffc056-a348-481b-a49e-f5d191ac203e', '771f21c7-79dd-4e3c-ad2a-ecab16983ec2', NULL, '2025-07-11T07:01:55.712945+00:00', NULL, 'STARTED', 'BJJBK', '2025-07-11T07:01:55.712945+00:00', '2025-07-11T08:54:13.504473+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('d0978eb8-64e6-485f-968b-550308363f7e', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '7c014a03-68f4-44e4-bc08-0098eb274fa4', '1141658a-2434-48af-8e55-96307bd240fd', '2025-03-05T14:01:30.648935+00:00', NULL, 'assigned', 'CLASS back office', '2025-03-05T14:01:30.648935+00:00', '2025-03-05T14:01:30.648935+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('94b5d86b-2f28-418c-9914-11a5f7711772', '4bffc056-a348-481b-a49e-f5d191ac203e', '7c014a03-68f4-44e4-bc08-0098eb274fa4', '1141658a-2434-48af-8e55-96307bd240fd', '2025-03-05T14:01:31.880539+00:00', NULL, 'assigned', 'TradeWeb', '2025-03-05T14:01:31.880539+00:00', '2025-04-27T12:26:42.558253+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('7b5bedba-0635-40ce-90a3-451ad2945519', '4bffc056-a348-481b-a49e-f5d191ac203e', '0697e0f1-b519-4b7d-9146-4b8dbc34afe9', '1141658a-2434-48af-8e55-96307bd240fd', '2025-03-05T15:39:09.591+00:00', NULL, 'assigned', 'BjjBrk IT Asses', '2025-03-05T15:39:09.591+00:00', '2025-07-11T09:14:56.098368+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('82fe867c-7d4f-43e0-86d3-f7e6d6e59d09', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '0697e0f1-b519-4b7d-9146-4b8dbc34afe9', '1141658a-2434-48af-8e55-96307bd240fd', '2025-03-06T10:29:18.850048+00:00', NULL, 'assigned', 'Business Architecture', '2025-03-06T10:29:18.850048+00:00', '2025-03-06T10:29:18.850048+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('2b85ca06-b8d9-4a08-98b2-b7412fa25149', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '1870e009-f8d3-4541-b715-c012897d631e', '1141658a-2434-48af-8e55-96307bd240fd', '2025-03-06T16:43:41.53231+00:00', NULL, 'assigned', 'CLASS', '2025-03-06T16:43:41.53231+00:00', '2025-03-06T16:43:41.53231+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('0239a187-2e2f-45e9-8baf-8b1e8acdf588', '4bffc056-a348-481b-a49e-f5d191ac203e', '1870e009-f8d3-4541-b715-c012897d631e', '1141658a-2434-48af-8e55-96307bd240fd', '2025-03-06T16:43:42.718625+00:00', NULL, 'assigned', 'OMNENEST', '2025-03-06T16:43:42.718625+00:00', '2025-03-06T16:43:42.718625+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('fe62f049-7896-46c6-9d36-c0c081b0a365', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', 'f5b59235-248c-490b-9020-7345529a56a3', '1141658a-2434-48af-8e55-96307bd240fd', '2025-07-11T06:45:57.083209+00:00', NULL, 'assigned', 'BJJBK', '2025-07-11T06:45:57.083209+00:00', '2025-07-11T06:45:57.083209+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('d50dee15-b778-4645-8bd3-edd8561a3da5', '4bffc056-a348-481b-a49e-f5d191ac203e', 'f5b59235-248c-490b-9020-7345529a56a3', '1141658a-2434-48af-8e55-96307bd240fd', '2025-07-11T06:46:02.977956+00:00', NULL, 'assigned', 'BJJBK', '2025-07-11T06:46:02.977956+00:00', '2025-07-11T08:54:55.268059+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('40b3c90b-31c7-4038-902c-36a62020439c', '73d6ca9f-6cd4-4eb4-a15d-166d21766faf', '771f21c7-79dd-4e3c-ad2a-ecab16983ec2', '1141658a-2434-48af-8e55-96307bd240fd', '2025-07-11T07:01:50.447445+00:00', NULL, 'assigned', 'BJJBK', '2025-07-11T07:01:50.447445+00:00', '2025-07-11T07:01:50.447445+00:00');
+INSERT INTO assessment_assignments (id, user_id, assessment_id, assigned_by, assigned_at, due_date, status, scope, created_at, updated_at) VALUES ('3e11022a-6350-4f22-a179-fad880ce91a1', '4bffc056-a348-481b-a49e-f5d191ac203e', '771f21c7-79dd-4e3c-ad2a-ecab16983ec2', '1141658a-2434-48af-8e55-96307bd240fd', '2025-07-11T07:01:55.712945+00:00', NULL, 'assigned', 'BJJBK', '2025-07-11T07:01:55.712945+00:00', '2025-07-11T08:54:13.504473+00:00');
 
 -- Insert assessment_submissions data (3 records)
 INSERT INTO assessment_submissions (id, user_id, assessment_id, assignment_id, submitted_at, status, score, max_score, created_at, updated_at) VALUES ('e9877056-5640-4633-b668-3133b4bd2588', '4bffc056-a348-481b-a49e-f5d191ac203e', '7c014a03-68f4-44e4-bc08-0098eb274fa4', NULL, NULL, NULL, NULL, NULL, '2025-03-15T12:06:46.062498+00:00', '2025-03-15T12:06:46.062498+00:00');
@@ -886,7 +997,7 @@ INSERT INTO assessment_submissions (id, user_id, assessment_id, assignment_id, s
 INSERT INTO assessment_submissions (id, user_id, assessment_id, assignment_id, submitted_at, status, score, max_score, created_at, updated_at) VALUES ('ab4b8354-5e13-4692-af1c-fd1e656433e3', '4bffc056-a348-481b-a49e-f5d191ac203e', '7c014a03-68f4-44e4-bc08-0098eb274fa4', NULL, NULL, NULL, NULL, NULL, '2025-04-27T12:03:25.277398+00:00', '2025-04-27T12:03:25.277398+00:00');
 
 -- Insert topic_assignments data (1 records)
-INSERT INTO topic_assignments (id, submission_id, topic_id, status, score, max_score, started_at, completed_at, created_at, updated_at) VALUES ('a3737d2e-50f2-4595-ba00-1f4aa0223f5a', NULL, '005162ce-e08a-497d-955b-d5cc954fcebd', 'COMPLETED', NULL, NULL, NULL, '2025-04-27T12:03:25.796+00:00', '2025-03-21T02:59:19.432023+00:00', '2025-04-27T12:03:26.045516+00:00');
+INSERT INTO topic_assignments (id, submission_id, topic_id, status, score, max_score, started_at, completed_at, created_at, updated_at) VALUES ('a3737d2e-50f2-4595-ba00-1f4aa0223f5a', 'e9877056-5640-4633-b668-3133b4bd2588', '005162ce-e08a-497d-955b-d5cc954fcebd', 'completed', NULL, NULL, NULL, '2025-04-27T12:03:25.796+00:00', '2025-03-21T02:59:19.432023+00:00', '2025-04-27T12:03:26.045516+00:00');
 
 -- Insert submitted_answers data (6 records)
 INSERT INTO submitted_answers (id, submission_id, question_id, answer_id, text_answer, score, submitted_at, created_at, updated_at) VALUES ('0f51e9ae-abfe-455c-9bd7-2890a84294e8', '33f5e35c-b431-4d10-ba85-474a5709bee9', 'f0a9f391-c50d-405d-8095-96ea10f17b14', NULL, 'Jenkins', NULL, NULL, '2025-03-15T12:07:01.611232+00:00', '2025-03-15T12:07:01.611232+00:00');

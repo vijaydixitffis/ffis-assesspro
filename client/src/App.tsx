@@ -16,11 +16,13 @@ import AssessmentTopicsPage from './pages/AssessmentTopicsPage';
 import TopicQuestionsPage from './pages/TopicQuestionsPage';
 import TakeAssessmentPage from './pages/TakeAssessmentPage';
 import AccessDeniedPage from './pages/AccessDeniedPage';
+import Header from './components/layout/Header';
 
 function App() {
   return (
     <Router>
       <AuthProvider>
+        <Header />
         <Routes>
           <Route path="/" element={<ProtectedRoute requiredRole="client"><Index /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />

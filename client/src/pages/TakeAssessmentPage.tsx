@@ -51,7 +51,6 @@ export default function TakeAssessmentPage() {
           )
         `)
         .eq('id', assignmentId)
-        .eq('user_id', user?.id)
         .single();
 
       if (error) {

@@ -117,33 +117,43 @@ export default function AssessmentTopicsPage() {
         return;
       }
 
-      const topicsData = data || [];
+      // In fetchTopics, filter out topics with missing required fields before setTopics
+      const topicsData = (data || []).filter(
+        (t: any) => t && t.id && t.title && t.description && t.sequence_number !== null && t.sequence_number !== undefined
+      );
       
       // If we have an assignment, fetch topic status for each topic
       if (assignmentData) {
         setAssignmentId(assignmentData.id);
-        
+        // Fetch the user's submission for this assessment
+        const { data: submission, error: submissionError } = await supabase
+          .from('assessment_submissions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('assessment_id', assessmentId)
+          .maybeSingle();
+        if (!submission || submissionError) {
+          console.error('No submission found for user/assessment', submissionError);
+          setTopics(topicsData);
+          return;
+        }
         // For each topic, check if there's a corresponding topic assignment
         const topicsWithStatus = await Promise.all(topicsData.map(async (topic) => {
           const { data: topicAssignmentData, error: topicAssignmentError } = await supabase
             .from('topic_assignments')
             .select('status')
             .eq('topic_id', topic.id)
-            .eq('user_id', user?.id)
-            .eq('assessment_assignment_id', assignmentData.id)
+            .eq('submission_id', submission.id)
             .maybeSingle();
-            
           if (topicAssignmentError) {
             console.error('Error fetching topic assignment:', topicAssignmentError);
             return { ...topic, status: null };
           }
-          
           return { 
             ...topic, 
             status: topicAssignmentData?.status || null 
           };
         }));
-        
         setTopics(topicsWithStatus);
       } else {
         // No assignment, just set topics without status
@@ -190,18 +200,23 @@ export default function AssessmentTopicsPage() {
       }
 
       // Sort questions and answers
+      if (!topicData || !topicData.id || !topicData.title || !topicData.description || topicData.sequence_number === null || topicData.sequence_number === undefined) {
+        toast.error('Invalid topic data received');
+        return;
+      }
       const sortedTopic = {
         ...topicData,
-        questions: topicData.questions
-          .filter(q => q.type !== null)
-          .sort((a, b) => a.sequence_number - b.sequence_number)
+        sequence_number: topicData.sequence_number ?? 0, // ensure number
+        questions: (topicData.questions || [])
+          .filter(q => q.type !== null && q.sequence_number !== null && q.sequence_number !== undefined && q.id && q.question)
           .map(q => ({
             ...q,
-            answers: q.answers.sort((a, b) => parseInt(a.marks || '0') - parseInt(b.marks || '0'))
+            sequence_number: q.sequence_number ?? 0, // ensure number
+            answers: (q.answers || []).sort((a, b) => parseInt((a.marks ?? '0').toString()) - parseInt((b.marks ?? '0').toString()))
           }))
+          .sort((a, b) => a.sequence_number - b.sequence_number)
       };
-
-      setSelectedTopic(sortedTopic);
+      setSelectedTopic(sortedTopic as Topic);
       setIsQuestionsModalOpen(true);
     } catch (error) {
       console.error('Error fetching topic questions:', error);
@@ -225,50 +240,113 @@ export default function AssessmentTopicsPage() {
         return;
       }
 
-      // Create or update submission
+      // Create or update submission (get submissionData)
       const { data: submissionData, error: submissionError } = await supabase
         .from('assessment_submissions')
         .upsert({
           assignment_id: assignmentId,
-          user_id: user?.id,
-          status: 'COMPLETED',
-          completed_at: new Date().toISOString()
-        })
+          assessment_id: assessmentId,
+          user_id: user.id
+        } as any)
         .select('id')
         .single();
-
-      if (submissionError) {
-        console.error('Error creating submission:', submissionError);
-        toast.error('Failed to submit assessment');
+      if (submissionError || !submissionData) {
+        toast.error('Failed to create or fetch submission');
         return;
       }
 
+      // Fetch all topics for the assessment
+      const { data: topicsData, error: topicsError } = await supabase
+        .from('topics')
+        .select('id')
+        .eq('assessment_id', assessmentId);
+      if (topicsError) {
+        toast.error('Failed to fetch topics for scoring');
+        return;
+      }
+      const topicIds = (topicsData || []).map(t => t.id);
+      // Fetch all questions for those topics
+      const { data: questionsData, error: questionsError } = await supabase
+        .from('questions')
+        .select('id, topic_id, answers(id, marks)')
+        .in('topic_id', topicIds);
+      if (questionsError) {
+        toast.error('Failed to fetch questions for scoring');
+        return;
+      }
+      // Build a map for quick lookup
+      const questionMap: Record<string, any> = {};
+      (questionsData || []).forEach(q => {
+        questionMap[q.id] = q;
+      });
+      let totalScore = 0;
+      let maxScore = 0;
       // Save all answers
       for (const [questionId, answer] of Object.entries(allAnswers)) {
+        let answerScore = 10;
+        let questionMax = 10;
+        const question = questionMap[questionId];
+        if (question) {
+          // Find the selected answer's marks
+          if (answer.answerId) {
+            const selected = (question.answers || []).find((a: any) => a.id === answer.answerId);
+            if (selected && selected.marks != null) {
+              answerScore = parseFloat(selected.marks) || 10;
+            }
+          }
+          // Find the max marks for this question
+          if (question.answers && question.answers.length > 0) {
+            questionMax = Math.max(...question.answers.map((a: any) => parseFloat(a.marks) || 10));
+          }
+        }
+        totalScore += answerScore;
+        maxScore += questionMax;
         if (answer.answerId || answer.textAnswer) {
           const { error: answerError } = await supabase
-            .from('assessment_answers')
+            .from('submitted_answers')
             .upsert({
               submission_id: submissionData.id,
               question_id: questionId,
               answer_id: answer.answerId || null,
-              text_answer: answer.textAnswer || null
+              text_answer: answer.textAnswer || null,
+              score: answerScore
             });
-
           if (answerError) {
             console.error('Error saving answer:', answerError);
           }
         }
       }
 
-      // Update assignment status
+      // Update submission with calculated scores and status 'submitted'
+      if (!user?.id || !assessmentId || !assignmentId) {
+        console.error('Missing IDs for submission:', { userId: user?.id, assessmentId, assignmentId });
+        toast.error('Missing required IDs for submission');
+        return;
+      }
+      const { error: updateError } = await supabase
+        .from('assessment_submissions')
+        .update({
+          score: totalScore,
+          max_score: maxScore,
+          status: 'submitted'
+        })
+        .eq('assignment_id', assignmentId)
+        .eq('user_id', user.id)
+        .eq('assessment_id', assessmentId);
+      if (updateError) {
+        console.error('Failed to update assessment submission:', updateError, { userId: user.id, assessmentId, assignmentId });
+        toast.error('Failed to update assessment submission');
+        return;
+      }
+
+      // Update assignment status to 'completed'
       const { error: assignmentError } = await supabase
         .from('assessment_assignments')
-        .update({ status: 'COMPLETED' })
+        .update({ status: 'completed' })
         .eq('id', assignmentId);
-
       if (assignmentError) {
-        console.error('Error updating assignment status:', assignmentError);
+        console.error('Error updating assignment status:', assignmentError, { assignmentId });
+        toast.error('Failed to update assignment status');
       }
 
       toast.success('Assessment completed successfully!');
@@ -279,6 +357,17 @@ export default function AssessmentTopicsPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Add onNextTopic handler
+  const handleNextTopic = async () => {
+    if (!selectedTopic || !selectedTopic.id) return;
+    const currentIndex = topics.findIndex(t => t.id === selectedTopic.id);
+    if (currentIndex === -1 || currentIndex === topics.length - 1) return;
+    const nextTopic = topics[currentIndex + 1];
+    if (!nextTopic || !nextTopic.id) return;
+    // Fetch next topic with questions (reuse handleAnswerQuestions logic)
+    await handleAnswerQuestions(nextTopic.id);
   };
 
   const getStatusBadge = (status: string | null | undefined) => {
@@ -413,12 +502,13 @@ export default function AssessmentTopicsPage() {
         isOpen={isQuestionsModalOpen}
         onClose={() => setIsQuestionsModalOpen(false)}
         topic={selectedTopic}
-        assignmentId={assignmentId || ''}
-        isLastTopic={selectedTopic ? topics.indexOf(selectedTopic) === topics.length - 1 : false}
+        assignmentId={assignmentId ?? ''}
+        isLastTopic={selectedTopic && selectedTopic.id ? topics.findIndex(t => t.id === selectedTopic.id) === topics.length - 1 : false}
         allAnswers={allAnswers}
         onAnswerChange={handleAnswerChange}
         onCompleteAssessment={handleCompleteAssessment}
         isSubmitting={isSubmitting}
+        onNextTopic={handleNextTopic}
       />
     </div>
   );

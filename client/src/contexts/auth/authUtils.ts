@@ -20,6 +20,7 @@ export const fetchUserProfile = async (session: Session): Promise<User | null> =
       .from('profiles')
       .select('first_name, last_name, role, is_active')
       .eq('id', userId)
+      .eq('is_active', true)
       .single();
     
     if (error) {

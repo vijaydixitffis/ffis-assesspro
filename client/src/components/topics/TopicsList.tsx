@@ -44,7 +44,7 @@ export default function TopicsList({ assessmentId, onEdit, refreshTrigger }: Top
   const [topics, setTopics] = useState<Topic[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
   const navigate = useNavigate();
 
   useEffect(() => {

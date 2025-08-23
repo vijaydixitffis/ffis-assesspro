@@ -94,9 +94,7 @@ export default function DashboardPage() {
   });
   
   return (
-    <div className="flex h-screen overflow-hidden bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <DashboardNav />
-      
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <main className="flex-1 overflow-auto p-6">
         <div className="container mx-auto max-w-7xl animate-in">
           <div className="space-y-6">
@@ -116,7 +114,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </div>
-          
           {user.role === 'admin' && <AdminDashboard />}
           {user.role === 'client' && <ClientDashboard />}
           </div>

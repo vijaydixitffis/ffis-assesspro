@@ -31,7 +31,7 @@ export default function UsersList({ onEdit }: UsersListProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(5);
 
   useEffect(() => {
     fetchUsers();
@@ -59,7 +59,7 @@ export default function UsersList({ onEdit }: UsersListProps) {
         id: profile.id,
         // TODO: Run migration to add email field to profiles table
         // Migration script: add_email_to_profiles.sql
-        email: 'admin@assesspro.com', // Temporary: will show actual emails after migration
+        email: 'admin@techsight360.ai', // Temporary: will show actual emails after migration
         name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'Unknown User',
         firstName: profile.first_name || '',
         lastName: profile.last_name || '',

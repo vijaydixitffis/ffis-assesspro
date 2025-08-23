@@ -267,7 +267,7 @@ export function AssessmentTakingInterface({
         .from('assessment_submissions')
         .update({
           status: 'completed',
-          completed_at: new Date().toISOString()
+          submitted_at: new Date().toISOString()
         })
         .eq('id', submissionId);
 

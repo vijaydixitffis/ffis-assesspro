@@ -91,8 +91,7 @@ export default function TopicQuestionsPage() {
         .from('topic_assignments')
         .select('*')
         .eq('topic_id', topicId)
-        .eq('user_id', user.id)
-        .eq('assessment_assignment_id', assignmentData.id)
+        .eq('submission_id', submission.id)
         .maybeSingle();
       
       if (topicAssignmentError) {
@@ -106,9 +105,8 @@ export default function TopicQuestionsPage() {
           .from('topic_assignments')
           .insert({
             topic_id: topicId,
-            user_id: user.id,
-            assessment_assignment_id: assignmentData.id,
-            status: 'ASSIGNED'
+            submission_id: submission.id,
+            status: 'not_started'
           })
           .select()
           .single();
@@ -196,23 +194,40 @@ export default function TopicQuestionsPage() {
     const success = await submitAnswers(questions, selectedAnswers, textAnswers, submission, topic);
     
     if (success && topicAssignment) {
-      // Update topic assignment status to COMPLETED
-      const { error: updateError } = await supabase
+      // Calculate topic score
+      let topicScore = 0;
+      questions.forEach(q => {
+        const answerId = selectedAnswers[q.id];
+        if (answerId) {
+          const answer = (q.answers || []).find(a => a.id === answerId);
+          topicScore += answer && answer.marks != null ? parseFloat(answer.marks) : 10;
+        }
+      });
+      // Upsert topic_assignments with score and completed status
+      const { error: upsertError } = await supabase
         .from('topic_assignments')
-        .update({ 
-          status: 'COMPLETED',
+        .upsert({
+          id: topicAssignment.id,
+          topic_id: topic.id,
+          submission_id: submission.id,
+          status: 'completed',
+          score: topicScore,
           completed_at: new Date().toISOString()
-        })
-        .eq('id', topicAssignment.id);
-      
-      if (updateError) {
-        console.error('Error updating topic assignment status:', updateError);
-        toast.error("Failed to update topic status");
-      } else {
-        toast.success("Topic completed successfully!");
-        // Refresh the topic assignment data
-        retryFetching();
+        });
+      if (upsertError) {
+        console.error('Error upserting topic assignment:', upsertError);
+        toast.error('Failed to update topic assignment');
       }
+      // Update assessment_assignments status to 'in_progress'
+      const { error: assignError } = await supabase
+        .from('assessment_assignments')
+        .update({ status: 'in_progress' })
+        .eq('id', topic.assignment_id);
+      if (assignError) {
+        console.error('Error updating assessment assignment status:', assignError);
+      }
+      toast.success('Topic completed successfully!');
+      retryFetching();
     }
   };
 

@@ -82,8 +82,7 @@ export default function MyAssessmentsPage() {
       const { count: done, error: dErr } = await supabase
         .from('topic_assignments')
         .select('id', { count: 'exact', head: true })
-        .eq('assessment_assignment_id', a.id)
-        .eq('user_id', user?.id)
+        .eq('submission_id', a.id)
         .eq('status', 'COMPLETED');
       map[a.id] = (total || 0) > 0 && done === total;
     }

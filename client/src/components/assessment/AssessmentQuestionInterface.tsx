@@ -42,6 +42,7 @@ interface AssessmentQuestionInterfaceProps {
   onCompleteAssessment: () => void;
   isLastTopic: boolean;
   isSubmitting: boolean;
+  onNextTopic?: () => void; // <-- Add this line
 }
 
 export function AssessmentQuestionInterface({
@@ -55,7 +56,8 @@ export function AssessmentQuestionInterface({
   onBackToTopics,
   onCompleteAssessment,
   isLastTopic,
-  isSubmitting
+  isSubmitting,
+  onNextTopic // <-- Add this line
 }: AssessmentQuestionInterfaceProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [textAnswer, setTextAnswer] = useState<string>('');
@@ -229,8 +231,11 @@ export function AssessmentQuestionInterface({
               ) : (
                 <Button
                   onClick={() => {
-                    console.log('Next Topic button clicked');
-                    onNext();
+                    if (onNextTopic) {
+                      onNextTopic();
+                    } else {
+                      onNext();
+                    }
                   }}
                   className="flex items-center gap-2"
                 >
